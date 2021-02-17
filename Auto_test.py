@@ -125,7 +125,6 @@ for i in paire_list:
     start.clear()
     time.sleep(2)
     start.send_keys(min_date)
-    time.sleep(1)
     test_btn = driver.find_element_by_css_selector(
         "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(7) > button"
     )
@@ -134,7 +133,8 @@ for i in paire_list:
     test_btn.click()
     time.sleep(5)
     check_if_popup()
-
+    
+    # ugly method to detect if there is an error or end page
     for i in range(0, 10000):
         time.sleep(1)
         if len(driver.find_elements_by_css_selector(".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(2) > td:nth-child(3) > app-value:nth-child(1) > span:nth-child(1)")) > 0:
@@ -152,9 +152,14 @@ for i in paire_list:
     driver.find_element_by_css_selector(
         "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
     ).click()
-    time.sleep(3)
     driver.switch_to.window(driver.window_handles[1])
-    time.sleep(20)
+
+    # wait for the advanced bt page to load
+    for i in range(0, 10000):
+        if len(driver.find_elements_by_css_selector(".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(2) > td:nth-child(3) > app-value:nth-child(1) > span:nth-child(1)")) > 0:
+            break
+        time.sleep(1)
+
     advanced_analyse_link = driver.current_url
     result = get_advanced_result()
     print(result)
