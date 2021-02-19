@@ -121,7 +121,7 @@ def get_advanced_result():
     ).text.replace(' %','')
     return result
 
-
+token = input('please enter your token')
 driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
 driver.get(strat)
 input("Login and press a key")
@@ -228,7 +228,7 @@ for i in paire_list:
             driver.switch_to.window(driver.window_handles[0])
             url = "http://backtest.kryll.torkium.com/index.php?controller=Main&action=sendBacktest"
             
-            result['token'] = '1f238c6dd2518d04e4df99ee95381ed7'
+            result['token'] = token
             result['recommended'] = str(recommended).replace(' ','')
             
             print(result)
