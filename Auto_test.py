@@ -1,28 +1,44 @@
 from selenium import webdriver
 import time
 import requests
+from datetime import datetime
+import dateutil.relativedelta
+
+
+def convert_date(date):
+    dto = datetime.strptime(date, '%Y-%m-%d').date()
+    return str(dto.strftime("%m/%d/%Y"))
+
+def get_recently(start,end):
+    start = datetime.strptime(start, "%m/%d/%Y").date()
+    end = datetime.strptime(end, "%m/%d/%Y").date()
+    if (end - start).days < 100:
+        return -1
+    else:
+        start = str(start - dateutil.relativedelta.relativedelta(months=3))
+        return str(start.strftime("%m/%d/%Y"))
 
 def backtest_already_did(pair,period,strat):
     pair = pair.replace(" ", "")
-    url = "http://backtest.kryll.torkium.com/index.php?controller=Main&action=checkBacktest&strat=" + strat +"&pair="+ pair +"&period=" + period
+    url = "http://backtest.kryll.torkium.com/index.php?controller=Api&action=checkBacktest&strat=" + strat +"&pair="+ pair +"&period=" + period
     response = requests.request("GET", url)
-    print(url)
-    print(f'Requete get backtest_already_did, code = {response.status_code}, value = {response.text}')
+    print(f'Requete get backtest_already_did, code = {response.status_code}, value = {response.text}, url= {url} \n\n')
     return response.status_code
 
 def get_backtest_dates(test_pair):
     url = (
-        "http://backtest.kryll.torkium.com/index.php?controller=Main&action=getPeriod&pair="
+        "http://backtest.kryll.torkium.com/index.php?controller=Api&action=getPeriod&pair="
         + test_pair.replace(" ", "")
     )
     response = requests.request("GET", url)
-    print(f'Requete get date, code = {response.status_code}, value = {response.text}')
+    print(url)
+    print(f'Requete get date, code = {response.status_code}, value = {response.text}, url= {url} \n\n')
     if response.status_code == 200:
         return response.json()["data"][test_pair]
     elif response.status_code == 400:
         return []
     else:
-        print(f'get_backtest_dates error, code = {response.status_code}, content = {response.text}')
+        print(f'get_backtest_dates error, code = {response.status_code}, value = {response.text}, url= {url} \n\n')
 
 
 def check_if_popup():
@@ -124,6 +140,7 @@ driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
 driver.get('https://platform.kryll.io/marketplace/' + strat_id)
 input("Login and press a key")
 recommeded_pairs = driver.find_elements_by_css_selector('.table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a')
+strat_version = driver.find_element_by_css_selector('div.badge:nth-child(1)').text.split(' ')[1]
 recommeded_pairs_list = []
 for i in recommeded_pairs:
     recommeded_pairs_list.append(i.text)
@@ -154,22 +171,27 @@ for i in paire_list:
     driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
     time.sleep(5)
     backtest_dates = []
-    min_date = start_input.get_attribute("min")
-    max_date = start_input.get_attribute("max")
+    min_date = convert_date(start_input.get_attribute("min"))
+    max_date = convert_date(start_input.get_attribute("max"))
     backtest_dates = get_backtest_dates(pair)
-    globale = {"periode": "global", "start": min_date, "end": max_date}
-    backtest_dates.append(globale)
+    min_recently = get_recently(start=min_date,end=max_date)
+
+    if min_recently != -1:
+        backtest_dates.append({"period": "recently", "start": min_recently, "end": max_date})
+    backtest_dates.append({"period": "global", "start": min_date, "end": max_date})
     strat_name = driver.find_element_by_css_selector('.toolbar-col').text.strip()
     print(backtest_dates)
     for backtest_date in backtest_dates:
-        backtest_date_period = backtest_date["periode"]
+        backtest_date_period = backtest_date["period"]
         backtest_date_start = backtest_date["start"]
         backtest_date_end = backtest_date["end"]
         print(backtest_date)
         if backtest_already_did(pair=pair,period=backtest_date_period,strat=strat_name) == 200:
             start_input.clear()
+            start_input.clear()
             time.sleep(2)
             start_input.send_keys(backtest_date_start)
+            end_input.clear()
             end_input.clear()
             time.sleep(2)
             end_input.send_keys(backtest_date_end)
@@ -177,11 +199,9 @@ for i in paire_list:
                 "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(7) > button"
             )
             time.sleep(1)
-            check_if_popup()
             test_btn.click()
             time.sleep(5)
             check_if_popup()
-
             # ugly method to detect if there is an error or end page
             for i in range(0, 10000):
                 time.sleep(1)
@@ -200,13 +220,13 @@ for i in paire_list:
             if error:
                 continue
 
+            time.sleep(5)
             check_if_popup()
             driver.find_element_by_css_selector(
                 "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
             ).click()
             time.sleep(5)
             driver.switch_to.window(driver.window_handles[1])
-
             # wait for the advanced bt page to load
             for i in range(0, 10000):
                 if (
@@ -224,12 +244,21 @@ for i in paire_list:
             result = get_advanced_result()
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-            url = "http://backtest.kryll.torkium.com/index.php?controller=Main&action=sendBacktest"
+            url = "http://backtest.kryll.torkium.com/index.php?controller=Api&action=sendBacktest"
             
             result['token'] = token
             result['recommended'] = str(recommended).replace(' ','')
             result['strat_id'] = str(strat_id)
+            result['strat_version'] = str(strat_version)
+            print(backtest_date_period)
+            print(backtest_date_period == 'recently')
+            if backtest_date_period == 'recently':
+                result['period'] = backtest_date_period
+            if backtest_date_period == 'global':
+                result['period'] = backtest_date_period
+            else:
+                result['period'] = ''
             print(result)
             response = requests.request("POST", url, data=result)
 
-            print(f'Requete post, code = {response.status_code}, value = {response.text}')
+            print(f'Requete post, code = {response.status_code}, value = {response.text} \n\n')
