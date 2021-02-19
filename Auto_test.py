@@ -2,11 +2,6 @@ from selenium import webdriver
 import time
 import requests
 
-strat = input(
-    "Link to the strat (ex https://platform.kryll.io/marketplace/5f9f0342dd6ac25bd05cf515)"
-)
-
-
 def backtest_already_did(pair,period,strat):
     pair = pair.replace(" ", "")
     url = "http://backtest.kryll.torkium.com/index.php?controller=Main&action=checkBacktest&strat=" + strat +"&pair="+ pair +"&period=" + period
@@ -121,9 +116,12 @@ def get_advanced_result():
     ).text.replace(' %','')
     return result
 
-token = input('please enter your token')
+token = input('Enter your token')
+strat_id = input(
+    "Enter a strat id (ex 5f9f0342dd6ac25bd05cf515)"
+)
 driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
-driver.get(strat)
+driver.get('https://platform.kryll.io/marketplace/' + strat_id)
 input("Login and press a key")
 recommeded_pairs = driver.find_elements_by_css_selector('.table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a')
 recommeded_pairs_list = []
@@ -230,7 +228,7 @@ for i in paire_list:
             
             result['token'] = token
             result['recommended'] = str(recommended).replace(' ','')
-            
+            result['strat_id'] = str(strat_id)
             print(result)
             response = requests.request("POST", url, data=result)
 
