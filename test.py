@@ -1,10 +1,8 @@
 import requests
 
-def get_backtest_dates(test_pair):
-    url = "http://backtest.kryll.torkium.com/index.php?controller=Main&action=getPeriod&token=lol"
+def backtest_already_did():
+    url = 'http://backtest.kryll.torkium.com/index.php?controller=Main&action=checkBacktest&strat=🐙 OCTO BOT [V2]&pair=AAVEUP/USDT&period=global'
     response = requests.request("GET", url)
-    for pair,periods in response.json()['data'].items():
-        if pair == test_pair:
-            return periods
+    print(response.text)
 
-result = get_backtest_dates('BTC / USDT')
+backtest_already_did()
