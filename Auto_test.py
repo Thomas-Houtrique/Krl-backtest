@@ -4,41 +4,54 @@ import requests
 from datetime import datetime
 import dateutil.relativedelta
 
+def log(log_text):
+    print(datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text)
 
 def convert_date(date):
+    log(f'Function convert date input = {date}')
     dto = datetime.strptime(date, '%Y-%m-%d').date()
-    return str(dto.strftime("%m/%d/%Y"))
+    dto = str(dto.strftime("%m/%d/%Y"))
+    log(f'Function convert date output = {dto}')
+    return dto
 
 def get_recently(start,end):
+    log(f'Function get_recently input (start ={start}, end = {end})')
     start = datetime.strptime(start, "%m/%d/%Y").date()
     end = datetime.strptime(end, "%m/%d/%Y").date()
     if (end - start).days < 100:
+        log(f'Function get_recently output = pair too recent')
         return -1
     else:
-        start = str(start - dateutil.relativedelta.relativedelta(months=3))
-        return str(start.strftime("%m/%d/%Y"))
+        start = end - dateutil.relativedelta.relativedelta(months=3)
+        start = str(start.strftime("%m/%d/%Y"))
+        log(f'Function get_recently output = {start}')
+        return start
 
 def backtest_already_did(pair,period,strat):
+    log(f'Function backtest_already_did input (pair ={pair}, period = {period}, strat= {strat})')
     pair = pair.replace(" ", "")
     url = "http://backtest.kryll.torkium.com/index.php?controller=Api&action=checkBacktest&strat=" + strat +"&pair="+ pair +"&period=" + period
     response = requests.request("GET", url)
-    print(f'Requete get backtest_already_did, code = {response.status_code}, value = {response.text}, url= {url} \n\n')
+    log(f'Requete backtest_already_did, status_code = {response.status_code}, value = {response.text}, url= {url}')
     return response.status_code
 
 def get_backtest_dates(test_pair):
+    log(f'Function get_backtest_dates input (test_pair ={test_pair})')
     url = (
         "http://backtest.kryll.torkium.com/index.php?controller=Api&action=getPeriod&pair="
         + test_pair.replace(" ", "")
     )
     response = requests.request("GET", url)
-    print(url)
-    print(f'Requete get date, code = {response.status_code}, value = {response.text}, url= {url} \n\n')
+    log(f'Requete get_backtest_dates, code = {response.status_code}, value = {response.text}, url= {url}')
     if response.status_code == 200:
-        return response.json()["data"][test_pair]
+        response = response.json()["data"][test_pair]
+        log(f'Function get_recently (condition response.status_code == 200) output = {response})')
+        return response
     elif response.status_code == 400:
+        log(f'Function get_recently (condition response.status_code == 400) output = [])')
         return []
     else:
-        print(f'get_backtest_dates error, code = {response.status_code}, value = {response.text}, url= {url} \n\n')
+        log(f'get_backtest_dates output (condition other) error = (code = {response.status_code}, value = {response.text}, url= {url})')
 
 
 def check_if_popup():
@@ -47,9 +60,9 @@ def check_if_popup():
             "app-dialog-tutorial > div > div > div > button.btn.btn-primary"
         )
         popup.click()
+        log('Closing popup')
     except:
-        print("no popup")
-    return
+        log("no popup")
 
 
 def get_advanced_result():
@@ -132,19 +145,20 @@ def get_advanced_result():
     ).text.replace(' %','')
     return result
 
-token = input('Enter your token')
+token = input('Enter your token :')
 strat_id = input(
-    "Enter a strat id (ex 5f9f0342dd6ac25bd05cf515)"
+    "Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :"
 )
 driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
 driver.get('https://platform.kryll.io/marketplace/' + strat_id)
 input("Login and press a key")
-recommeded_pairs = driver.find_elements_by_css_selector('.table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a')
+recommended_pairs = driver.find_elements_by_css_selector('.table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a')
 strat_version = driver.find_element_by_css_selector('div.badge:nth-child(1)').text.split(' ')[1]
-recommeded_pairs_list = []
-for i in recommeded_pairs:
-    recommeded_pairs_list.append(i.text)
+recommended_pairs_list = []
+for i in recommended_pairs:
+    recommended_pairs_list.append(i.text)
 driver.find_element_by_css_selector("button.d-sm-inline-block").click()
+log('Sleeping for 5 sec')
 time.sleep(5)
 paires_input = driver.find_element_by_css_selector(
     "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(2) > select"
@@ -153,11 +167,14 @@ paire_list = paires_input.find_elements_by_tag_name("option")
 
 
 for i in paire_list:
+    # Get infos
+    strat_name = driver.find_element_by_css_selector('.toolbar-col').text.strip()
     pair = i.text.strip()
     recommended = 0
-    if pair in recommeded_pairs_list:
-        recommeded = 1
+    if pair in recommended_pairs_list:
+        recommended = 1
     error = False
+    log(f'Testing strat = {strat_name}, pair = {pair}, recommended = {recommended}')
 
     # Configure backtesting
     paires_input.send_keys(pair)
@@ -176,35 +193,46 @@ for i in paire_list:
     backtest_dates = get_backtest_dates(pair)
     min_recently = get_recently(start=min_date,end=max_date)
 
+    # if the pair is at least 100 days old we test the 3 last months
     if min_recently != -1:
         backtest_dates.append({"period": "recently", "start": min_recently, "end": max_date})
+
     backtest_dates.append({"period": "global", "start": min_date, "end": max_date})
-    strat_name = driver.find_element_by_css_selector('.toolbar-col').text.strip()
-    print(backtest_dates)
+
+    log(f'backtest dates list = {backtest_dates}')
     for backtest_date in backtest_dates:
         backtest_date_period = backtest_date["period"]
         backtest_date_start = backtest_date["start"]
         backtest_date_end = backtest_date["end"]
-        print(backtest_date)
+        log(f'Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}')
         if backtest_already_did(pair=pair,period=backtest_date_period,strat=strat_name) == 200:
+            log('Sleeping for 2 sec')
+            time.sleep(2)
             start_input.clear()
             start_input.clear()
+            log('Sleeping for 2 sec')
             time.sleep(2)
             start_input.send_keys(backtest_date_start)
             end_input.clear()
             end_input.clear()
+            log('Sleeping for 2 sec')
             time.sleep(2)
             end_input.send_keys(backtest_date_end)
             test_btn = driver.find_element_by_css_selector(
                 "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(7) > button"
             )
+            log('Sleeping for 1 sec')
             time.sleep(1)
             test_btn.click()
+            log('Launching backtest !')
+            log('Sleeping for 5 sec')
             time.sleep(5)
             check_if_popup()
+            log('Waiting for the backtest to finish')
             # ugly method to detect if there is an error or end page
             for i in range(0, 10000):
-                time.sleep(1)
+                time.sleep(10)
+                check_if_popup()
                 if (
                     len(
                         driver.find_elements_by_css_selector(
@@ -213,20 +241,28 @@ for i in paire_list:
                     )
                     > 0
                 ):
+                    log('Backtest finished')
                     break
                 if driver.find_element_by_css_selector(".backtest-button").text == "Test":
+                    # double check because it can cause some pb
+                    if (len(driver.find_elements_by_css_selector(".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(2) > td:nth-child(3) > app-value:nth-child(1) > span:nth-child(1)"))> 0):
+                        break
+                    log('Error during the backtest')
                     error = True
                     break
             if error:
                 continue
-
+            log('Sleeping for 5 sec')
             time.sleep(5)
             check_if_popup()
+            log('Checking analyse page')
             driver.find_element_by_css_selector(
                 "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
             ).click()
+            log('Sleeping for 5 sec')
             time.sleep(5)
             driver.switch_to.window(driver.window_handles[1])
+
             # wait for the advanced bt page to load
             for i in range(0, 10000):
                 if (
@@ -250,15 +286,11 @@ for i in paire_list:
             result['recommended'] = str(recommended).replace(' ','')
             result['strat_id'] = str(strat_id)
             result['strat_version'] = str(strat_version)
-            print(backtest_date_period)
-            print(backtest_date_period == 'recently')
-            if backtest_date_period == 'recently':
-                result['period'] = backtest_date_period
-            if backtest_date_period == 'global':
+            if backtest_date_period == 'recently' or 'global':
                 result['period'] = backtest_date_period
             else:
                 result['period'] = ''
-            print(result)
+            log(f'Sending result to the Database, result = {result}')
             response = requests.request("POST", url, data=result)
 
-            print(f'Requete post, code = {response.status_code}, value = {response.text} \n\n')
+            log(f'Requete post, status_code = {response.status_code}, value = {response.text}')
