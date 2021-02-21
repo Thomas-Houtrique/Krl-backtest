@@ -324,7 +324,10 @@ for i in total_pairs_list:
             driver.find_element_by_css_selector(
                 "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
             ).click()
-            time.sleep(5)
+            for i in range(0, 10000):
+                if len(driver.window_handles) > 1:
+                    break
+                time.sleep(1)
             driver.switch_to.window(driver.window_handles[1])
 
             # wait for the advanced bt page to load
