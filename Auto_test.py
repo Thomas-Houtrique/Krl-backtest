@@ -8,8 +8,8 @@ from selenium.webdriver.support.ui import Select
 
 def log(log_text):
     log = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
-    f = open("log.txt", "a+", encoding="utf-8", newline="")
-    f.write(log)
+    f = open("log.txt", "a+", encoding="utf-8")
+    f.write(log + "\n")
     f.close()
     print(log)
 
@@ -231,7 +231,13 @@ for i in total_pairs_list:
     end_input = driver.find_element_by_css_selector(
         "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(5) > app-form-datepicker > div > input"
     )
-    pairs_input.select_by_value(pair.replace(" / ", "-"))
+    # Check if pair is listed on exchange
+    try:
+        pairs_input.select_by_value(pair.replace(" / ", "-"))
+    except:
+        log(f"Error pair {pair} not listed")
+        continue
+
     time.sleep(5)
     driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
     driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
