@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import Select
 
 def log(log_text):
     log = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
-    f = open('log.txt', 'a+', encoding="utf-8",newline='')
+    f = open("log.txt", "a+", encoding="utf-8", newline="")
     f.write(log)
     f.close()
     print(log)
@@ -90,7 +90,8 @@ def check_if_popup():
         )
         popup.click()
     except:
-        log('no popup')
+        log("no popup")
+
 
 def get_advanced_result():
     result = {}
