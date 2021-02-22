@@ -36,18 +36,20 @@ def get_recently(start, end):
         return start
 
 
-def backtest_already_did(pair, period, strat):
+def backtest_already_did(pair, period, strat, token):
     log(
         f"Function backtest_already_did input (pair ={pair}, period = {period}, strat= {strat})"
     )
     pair = pair.replace(" ", "")
     url = (
-        "http://backtest.kryll.torkium.com/index.php?controller=Api&action=checkBacktest&strat="
+        "https://api.backtest.kryll.torkium.com/index.php?controller=Backtest&action=check&strat="
         + strat
         + "&pair="
         + pair
         + "&period="
         + period
+        + "&token="
+        + token
     )
     response = requests.request("GET", url)
     log(
@@ -56,11 +58,13 @@ def backtest_already_did(pair, period, strat):
     return response.status_code
 
 
-def get_backtest_dates(test_pair):
+def get_backtest_dates(test_pair, token):
     log(f"Function get_backtest_dates input (test_pair ={test_pair})")
     url = (
-        "http://backtest.kryll.torkium.com/index.php?controller=Api&action=getPeriod&pair="
+        "https://api.backtest.kryll.torkium.com/index.php?controller=Pair&action=getPeriod&pair="
         + test_pair.replace(" ", "")
+        + "&token="
+        + token
     )
     response = requests.request("GET", url)
     log(
@@ -253,7 +257,7 @@ for i in total_pairs_list:
             {"period": "recently", "start": min_recently, "end": max_date}
         )
 
-    backtest_dates += get_backtest_dates(pair)
+    backtest_dates += get_backtest_dates(test_pair=pair, token=token)
     log(f"backtest dates list = {backtest_dates}")
     for backtest_date in backtest_dates:
         backtest_date_period = backtest_date["period"]
@@ -264,7 +268,7 @@ for i in total_pairs_list:
         )
         if (
             backtest_already_did(
-                pair=pair, period=backtest_date_period, strat=strat_name
+                pair=pair, period=backtest_date_period, strat=strat_name, token=token
             )
             == 200
         ):
@@ -347,7 +351,7 @@ for i in total_pairs_list:
             result = get_advanced_result()
             driver.close()
             driver.switch_to.window(driver.window_handles[0])
-            url = "http://backtest.kryll.torkium.com/index.php?controller=Api&action=sendBacktest"
+            url = "https://api.backtest.kryll.torkium.com/index.php?controller=Backtest&action=send"
 
             result["token"] = token
             result["recommended"] = str(recommended).replace(" ", "")
