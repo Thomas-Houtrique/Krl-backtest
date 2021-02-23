@@ -2,7 +2,7 @@
 
 ## Installation
 
-Pour le moment **il vous faut absolument google chrome** sur votre machine.\
+Pour le moment **il vous faut absolument Google Chrome ou Firefox** sur votre machine.\
 [Télécharger le repository github](https://github.com/Thomas-Houtrique/Krl-backtest/archive/main.zip) et l'extraire sur votre bureau.
 
 ## Utilisation

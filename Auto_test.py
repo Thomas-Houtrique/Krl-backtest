@@ -4,17 +4,51 @@ import requests
 from datetime import datetime
 import dateutil.relativedelta
 from selenium.webdriver.support.ui import Select
+import platform
+import os
 
 
 def log(log_text):
     log = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
-    f = open("log.txt", "a+", encoding="utf-8")
+    f = open("Kryll_backtest.log", "a+", encoding="utf-8")
     f.write(log + "\n")
     f.close()
     print(log)
 
 
+def detect_browsers(client_os):
+    browsers = []
+    if client_os == "Windows":
+        if os.environ["ProgramFiles"] + "\Mozilla Firefox":
+            log("Firefox detected")
+            browsers.append("Firefox")
+        if os.environ["ProgramFiles"] + "\Google\Chrome\Application":
+            log("Chrome detected")
+            browsers.append("Google Chrome")
+    elif client_os == "Linux":
+        raise Exception("Sorry, linux is not supported yet")
+
+    if len(browsers) > 1:
+        for idx, browser in enumerate(browsers):
+            print(f"{idx}) {browser}")
+        browser_choice = int(
+            input(f"please choice between your browsers (0 to {len(browsers) - 1})")
+        )
+        client_browser = browsers[browser_choice]
+    elif len(browsers) == 1:
+        client_browser = browsers[0]
+    else:
+        raise Exception("Sorry, please install Firefox or Google Chrome")
+
+    if client_browser == "Google Chrome":
+        driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
+    elif client_browser == "Firefox":
+        driver = webdriver.Firefox(executable_path=r"geckodriver.exe")
+    return driver
+
+
 def advanced_configuration(advanced):
+    log(f"Function convert advanced_configuration input = {advanced}")
     user_config = {}
     if advanced == "y":
         user_config["global"] = input("Do you want to test the global period ? (y/n)")
@@ -31,6 +65,7 @@ def advanced_configuration(advanced):
         user_config["recently"] = "y"
         user_config["other"] = "y"
         user_config["every_pairs"] = "y"
+        log(f"Function convert advanced_configuration output = {user_config}")
     return user_config
 
 
@@ -114,7 +149,7 @@ def check_if_popup():
         )
         popup.click()
     except:
-        log("no popup")
+        pass
 
 
 def get_advanced_result():
@@ -210,8 +245,9 @@ token = input("Enter your token :")
 strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
 advanced_user_choice = input("Do you want to configure the script ? (y/n)")
 advanced_config = advanced_configuration(advanced_user_choice)
+client_os = platform.system()
 
-driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
+driver = detect_browsers(client_os=client_os)
 driver.get("https://platform.kryll.io/marketplace/" + strat_id)
 input("Login and press a key")
 recommended_pairs = driver.find_elements_by_css_selector(
