@@ -8,7 +8,10 @@ import platform
 import os
 
 
-def log(log_text, verbose=False):
+def log(
+    log_text,
+    verbose=False,
+):
     log = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
     f = open("Kryll_backtest.log", "a+", encoding="utf-8")
     f.write(log + "\n")
@@ -57,7 +60,6 @@ def detect_browsers(client_os):
 
 
 def advanced_configuration(advanced):
-    log(f"Function convert advanced_configuration input = {advanced}")
     user_config = {}
     if advanced == "y":
         user_config["global"] = yes_no_question(
@@ -80,7 +82,6 @@ def advanced_configuration(advanced):
         user_config["other"] = "y"
         user_config["every_pairs"] = "y"
         user_config["verbose"] = "n"
-        log(f"Function convert advanced_configuration output = {user_config}")
     return user_config
 
 
@@ -176,7 +177,6 @@ def check_if_popup():
         popup.click()
     except:
         pass
-        log("no popup", True)
 
 
 def get_element(element_path):
