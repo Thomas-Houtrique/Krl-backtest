@@ -8,10 +8,7 @@ import platform
 import os
 
 
-def log(
-    log_text,
-    verbose=False,
-):
+def log(log_text, verbose=False):
     log = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
     f = open("Kryll_backtest.log", "a+", encoding="utf-8")
     f.write(log + "\n")
@@ -329,6 +326,11 @@ for i in total_pairs_list:
     # Get infos
     strat_name = get_element_text(".toolbar-col").strip()
     pair = i.text.strip()
+
+    # fix 23/02 remove later
+    if pair == "1INCH / BUSD":
+        continue
+
     recommended = 0
     if i in recommended_pairs_list:
         recommended = 1
