@@ -14,6 +14,26 @@ def log(log_text):
     print(log)
 
 
+def advanced_configuration(advanced):
+    user_config = {}
+    if advanced == "y":
+        user_config["global"] = input("Do you want to test the global period ? (y/n)")
+        user_config["recently"] = input(
+            "Do you want to test the last three months ? (y/n)"
+        )
+        user_config["other"] = input(
+            "Do you want to test the other periods if avaible (bear/bull...) ? (y/n)"
+        )
+        user_config["every_pairs"] = input("do you want to test every pairs ? (y/n)")
+
+    else:
+        user_config["global"] = "y"
+        user_config["recently"] = "y"
+        user_config["other"] = "y"
+        user_config["every_pairs"] = "y"
+    return user_config
+
+
 def convert_date(date):
     log(f"Function convert date input = {date}")
     dto = datetime.strptime(date, "%Y-%m-%d").date()
@@ -188,6 +208,9 @@ def get_advanced_result():
 
 token = input("Enter your token :")
 strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
+advanced_user_choice = input("Do you want to configure the script ? (y/n)")
+advanced_config = advanced_configuration(advanced_user_choice)
+
 driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
 driver.get("https://platform.kryll.io/marketplace/" + strat_id)
 input("Login and press a key")
@@ -220,6 +243,11 @@ for i in total_pairs_list:
     recommended = 0
     if i in recommended_pairs_list:
         recommended = 1
+
+    # check if user want to test every pairs
+    if recommended == 0 and advanced_config["every_pairs"] == "n":
+        continue
+
     error = False
     log(f"Testing strat = {strat_name}, pair = {pair}, recommended = {recommended}")
 
@@ -250,14 +278,16 @@ for i in total_pairs_list:
     min_recently = get_recently(start=min_date, end=max_date)
 
     backtest_dates = []
-    backtest_dates.append({"period": "global", "start": min_date, "end": max_date})
-    # if the pair is at least 100 days old we test the 3 last months
-    if min_recently != -1:
+    # Check if user want to test global
+    if advanced_config["global"] == "y":
+        backtest_dates.append({"period": "global", "start": min_date, "end": max_date})
+    # if the pair is at least 100 days old and user want to test recently we test the 3 last months
+    if min_recently != -1 and advanced_config["recently"] == "y":
         backtest_dates.append(
             {"period": "recently", "start": min_recently, "end": max_date}
         )
-
-    backtest_dates += get_backtest_dates(test_pair=pair, token=token)
+    if advanced_config["other"] == "y":
+        backtest_dates += get_backtest_dates(test_pair=pair, token=token)
     log(f"backtest dates list = {backtest_dates}")
     for backtest_date in backtest_dates:
         backtest_date_period = backtest_date["period"]
