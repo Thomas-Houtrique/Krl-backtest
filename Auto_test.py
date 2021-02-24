@@ -50,7 +50,9 @@ def detect_browsers(client_os):
         raise Exception("Sorry, please install Firefox or Google Chrome")
 
     if client_browser == "Google Chrome":
-        driver = webdriver.Chrome(executable_path=r"chromedriver.exe")
+        options = webdriver.ChromeOptions()
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
     elif client_browser == "Firefox":
         driver = webdriver.Firefox(executable_path=r"geckodriver.exe")
     return driver
