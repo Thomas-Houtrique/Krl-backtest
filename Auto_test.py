@@ -109,7 +109,7 @@ def advanced_configuration(advanced):
         user_advanced_configuration["global"] = "y"
         user_advanced_configuration["recently"] = "y"
         user_advanced_configuration["other"] = "y"
-        user_advanced_configuration["every_pairs"] = "y"
+        user_advanced_configuration["every_pairs"] = "n"
         user_advanced_configuration["verbose"] = "n"
     return user_advanced_configuration
 
@@ -577,9 +577,9 @@ advanced_config = advanced_configuration(advanced_user_choice)
 client_os = platform.system()
 
 client_driver = detect_browsers(client_os_detect_browsers=client_os)
+client_driver.get("https://platform.kryll.io/marketplace/" + strat_id)
+input("Login and press a key")
 while strat_id != "":
-    client_driver.get("https://platform.kryll.io/marketplace/" + strat_id)
-    input("Login and press a key")
     log("Initialisation, please wait...")
     recommended_pairs = get_elements(
         ".table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a"
@@ -685,3 +685,8 @@ while strat_id != "":
     log("==============================================")
     log("Do you want to test an other strat? (empty to quit)")
     strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
+    if strat_id != "":
+        log("Please wait...")
+        client_driver.get("https://platform.kryll.io/marketplace/" + strat_id)
+        # TODO : need to find better solution to wait until page is loaded
+        time.sleep(10)
