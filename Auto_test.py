@@ -455,94 +455,101 @@ advanced_config = advanced_configuration(advanced_user_choice)
 client_os = platform.system()
 
 driver = detect_browsers(client_os=client_os)
-driver.get("https://platform.kryll.io/marketplace/" + strat_id)
-input("Login and press a key")
-log("Initialisation, please wait...")
-recommended_pairs = get_elements(
-    ".table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a"
-)
-strat_version = get_element_text("div.badge:nth-child(1)").split(" ")[1]
-recommended_pairs_list = []
-for i in recommended_pairs:
-    recommended_pairs_list.append(i)
-get_element("button.d-sm-inline-block").click()
-time.sleep(10)
-pairs_input = get_element(
-    "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(2) > select"
-)
-pairs_list = pairs_input.find_elements_by_tag_name("option")
+while strat_id != "" :
+    driver.get("https://platform.kryll.io/marketplace/" + strat_id)
+    input("Login and press a key")
+    log("Initialisation, please wait...")
+    recommended_pairs = get_elements(
+        ".table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a"
+    )
+    strat_version = get_element_text("div.badge:nth-child(1)").split(" ")[1]
+    recommended_pairs_list = []
+    for i in recommended_pairs:
+        recommended_pairs_list.append(i)
+    get_element("button.d-sm-inline-block").click()
+    time.sleep(10)
+    pairs_input = get_element(
+        "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(2) > select"
+    )
+    pairs_list = pairs_input.find_elements_by_tag_name("option")
 
-# Backtest recommended first
-for i in pairs_list:
-    if i in recommended_pairs_list:
-        pairs_list.remove(i)
-total_pairs_list = recommended_pairs_list + pairs_list
-strat_name = get_element_text("app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2").strip()
-log("==============================================")
-log(f"Testing strat : {strat_name}")
-log("==============================================")
-for i in total_pairs_list:
-    # Get infos
-    pair = i.text.strip()
+    # Backtest recommended first
+    for i in pairs_list:
+        if i in recommended_pairs_list:
+            pairs_list.remove(i)
+    total_pairs_list = recommended_pairs_list + pairs_list
+    strat_name = get_element_text("app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2").strip()
+    log("==============================================")
+    log(f"Testing strat : {strat_name}")
+    log("==============================================")
+    for i in total_pairs_list:
+        # Get infos
+        pair = i.text.strip()
 
-    # fix 23/02 remove later
-    if pair == "1INCH / BUSD":
-        continue
+        # fix 23/02 remove later
+        if pair == "1INCH / BUSD":
+            continue
 
-    recommended = 0
-    if i in recommended_pairs_list:
-        recommended = 1
+        recommended = 0
+        if i in recommended_pairs_list:
+            recommended = 1
 
-    # check if user want to test every pairs
-    if recommended == 0 and advanced_config["every_pairs"] == "n":
-        continue
+        # check if user want to test every pairs
+        if recommended == 0 and advanced_config["every_pairs"] == "n":
+            continue
 
-    error = False
-    log(f"** pair = {pair}, recommended = {recommended}")
+        error = False
+        log(f"** pair = {pair}, recommended = {recommended}")
 
-    # Configure backtesting
-    pairs_input = Select(
-        get_element(
-            "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(2) > select"
+        # Configure backtesting
+        pairs_input = Select(
+            get_element(
+                "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(2) > select"
+            )
         )
-    )
-    start_input = get_element(
-        "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(4) > app-form-datepicker > div > input"
-    )
-    end_input = get_element(
-        "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(5) > app-form-datepicker > div > input"
-    )
-    # Check if pair is listed on exchange
-    try:
-        pairs_input.select_by_value(pair.replace(" / ", "-"))
-    except:
-        log(f"/!\ Error recommanded pair {pair} not listed on Binance")
-        continue
-
-    #wait for have a time to get min_date and max_date
-    time.sleep(5)
-    #get min/max dates
-    driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
-    driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
-    min_date = convert_date(start_input.get_attribute("min"))
-    max_date = convert_date(end_input.get_attribute("max"))
-    #get min recently
-    min_recently = get_recently(start=min_date, end=max_date)
-
-    backtest_dates = []
-    # Check if user want to test global
-    if advanced_config["global"] == "y":
-        backtest_dates.append({"period": "global", "start": min_date, "end": max_date})
-    # if the pair is at least 100 days old and user want to test recently we test the 3 last months
-    if min_recently != -1 and advanced_config["recently"] == "y":
-        backtest_dates.append(
-            {"period": "recently", "start": min_recently, "end": max_date}
+        start_input = get_element(
+            "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(4) > app-form-datepicker > div > input"
         )
-    #If we have choose to test all pairs
-    if advanced_config["other"] == "y":
-        backtest_dates += get_backtest_dates(test_pair=pair, token=token)
-    log(f"backtest dates list = {backtest_dates}", True)
-    #run backtests on all dates
-    log("** run backtest for pair " + pair + " for all selected periods")
-    for backtest_date in backtest_dates:
-        run_backtest(strat_name,strat_id,pair,backtest_date)
+        end_input = get_element(
+            "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(5) > app-form-datepicker > div > input"
+        )
+        # Check if pair is listed on exchange
+        try:
+            pairs_input.select_by_value(pair.replace(" / ", "-"))
+        except:
+            log(f"/!\ Error recommanded pair {pair} not listed on Binance")
+            continue
+
+        #wait for have a time to get min_date and max_date
+        time.sleep(5)
+        #get min/max dates
+        driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
+        driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
+        min_date = convert_date(start_input.get_attribute("min"))
+        max_date = convert_date(end_input.get_attribute("max"))
+        #get min recently
+        min_recently = get_recently(start=min_date, end=max_date)
+
+        backtest_dates = []
+        # Check if user want to test global
+        if advanced_config["global"] == "y":
+            backtest_dates.append({"period": "global", "start": min_date, "end": max_date})
+        # if the pair is at least 100 days old and user want to test recently we test the 3 last months
+        if min_recently != -1 and advanced_config["recently"] == "y":
+            backtest_dates.append(
+                {"period": "recently", "start": min_recently, "end": max_date}
+            )
+        #If we have choose to test all pairs
+        if advanced_config["other"] == "y":
+            backtest_dates += get_backtest_dates(test_pair=pair, token=token)
+        log(f"backtest dates list = {backtest_dates}", True)
+        #run backtests on all dates
+        log("** run backtest for pair " + pair + " for all selected periods")
+        for backtest_date in backtest_dates:
+            run_backtest(strat_name,strat_id,pair,backtest_date)
+            
+    log("==============================================")
+    log(f"strat backtested : {strat_name} : Done")
+    log("==============================================")
+    log("Do you want to test an other strat? (empty to quit)")
+    strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
