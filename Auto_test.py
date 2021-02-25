@@ -212,8 +212,72 @@ def split_max_drawdown_informations(element_path):
     max_drawdown_informations["maximum_drawdown_end"] = max_drawdown_dates[1]
     return max_drawdown_informations
 
+def set_input_date(start, end):
+    start_input.clear()
+    start_input.clear()
+    time.sleep(2)
+    start_input.send_keys(start)
+    end_input.clear()
+    end_input.clear()
+    time.sleep(2)
+    end_input.send_keys(end)
 
-def get_advanced_result():
+def check_error_during_backtest():
+    # ugly method to detect if there is an error or end page
+    for i in range(0, 10000):
+        time.sleep(10)
+        check_if_popup()
+        if (
+            len(
+                get_elements(
+                    ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(2) > td:nth-child(3) > app-value:nth-child(1) > span:nth-child(1)"
+                )
+            )
+            > 0
+        ):
+            break
+        if get_element_text(".backtest-button") == "Test":
+            # double check because it can cause some pb
+            if (
+                len(
+                    get_elements(
+                        ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(2) > td:nth-child(3) > app-value:nth-child(1) > span:nth-child(1)"
+                    )
+                )
+                > 0
+            ):
+                break
+            log("Error during the backtest")
+            return True
+            break
+    return False
+#progress bar path : 
+#div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-graph > div > div.backtest-graph-top.backtest-percent
+#if think we can user that to check error during backtest
+
+def wait_for_element(element, duration):
+    for i in range(0, duration):
+        if (
+            len(
+                get_elements(
+                    element
+                )
+            )
+            > 0
+        ):
+            return True
+            break
+        time.sleep(1)
+    return False
+
+def wait_for_windows_handle(duration):
+    for i in range(0, duration):
+        if len(driver.window_handles) > 1:
+            return True
+        time.sleep(1)
+    return False
+
+def get_advanced_result(strat_name, pair, backtest_date_start, backtest_date_end, advanced_analyse_link):
     result = {}
     result["strat"] = strat_name
     result["pair"] = pair
@@ -293,7 +357,86 @@ def get_advanced_result():
     )
     return result
 
+def send_result(token,pair,recommended,strat_id,strat_name,strat_version,hold,backtest_date_period,backtest_date_start, backtest_date_end):
+    advanced_analyse_link = driver.current_url
+    result = get_advanced_result(strat_name, pair, backtest_date_start, backtest_date_end, advanced_analyse_link)
+    driver.close()
+    driver.switch_to.window(driver.window_handles[0])
+    url = "https://api.backtest.kryll.torkium.com/index.php?controller=Backtest&action=send"
 
+    result["token"] = token
+    result["recommended"] = str(recommended).replace(" ", "")
+    result["strat_id"] = str(strat_id)
+    result["strat_version"] = str(strat_version)
+    result["hold"] = str(hold)
+    if backtest_date_period == "recently" or "global":
+        result["period"] = backtest_date_period
+    else:
+        result["period"] = ""
+    log(f"Sending result to the Database, result = {result}", True)
+    response = requests.request("POST", url, data=result)
+
+    log(
+        f"Requete post, status_code = {response.status_code}, value = {response.text}",
+        True,
+    )
+    if response.status_code == 200:
+        return True
+    return False
+
+def run_backtest(strat_name, strat_id, pair, backtest_date):
+    backtest_date_period = backtest_date["period"]
+    backtest_date_start = backtest_date["start"]
+    backtest_date_end = backtest_date["end"]
+    log(
+        f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}"
+    )
+    if not backtest_already_did(
+        pair=pair, period=backtest_date_period, strat=strat_name, token=token
+    ):
+        #set date into input
+        set_input_date(backtest_date_start, backtest_date_end)
+        test_btn = get_element(
+            "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(7) > button"
+        )
+        time.sleep(1)
+        test_btn.click()
+        time.sleep(5)
+        check_if_popup()
+        
+        error = check_error_during_backtest()
+        if error:
+            return False
+        time.sleep(5)
+        check_if_popup()
+        hold = get_element_double(
+            ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(3) > td:nth-child(1) > app-value:nth-child(1) > span:nth-child(1)"
+        )
+        #click on depth analysis button
+        get_element(
+            "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
+        ).click()
+        windows_handle = wait_for_windows_handle(10000)
+        if not windows_handle:
+            log("depth analysis button is break on kryll side, period canceled")
+            return False
+        driver.switch_to.window(driver.window_handles[1])
+
+        # wait for the advanced bt page to load
+        wait_for_element("div > div > div > div.ant-row > div > div > div:nth-child(1) > div:nth-child(1) > div > div.ant-card-body > div > div:nth-child(1) > div:nth-child(2)", 10000)
+
+        send_ok = send_result(token, pair, recommended, strat_id,  strat_name, strat_version, hold, backtest_date_period, backtest_date_start, backtest_date_end)
+        if send_ok:
+            log("Done.")
+            return True
+        else:
+            log("Error during sending the result, period canceled.")
+    return False
+
+
+#----------------------
+#Start of the program
+#----------------------
 token = input("Enter your token :")
 strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
 advanced_user_choice = yes_no_question("Do you want to configure the script ?")
@@ -323,10 +466,12 @@ for i in pairs_list:
     if i in recommended_pairs_list:
         pairs_list.remove(i)
 total_pairs_list = recommended_pairs_list + pairs_list
-
+strat_name = get_element_text("app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2").strip()
+log("==============================================")
+log(f"Testing strat : {strat_name}")
+log("==============================================")
 for i in total_pairs_list:
     # Get infos
-    strat_name = get_element_text(".toolbar-col").strip()
     pair = i.text.strip()
 
     # fix 23/02 remove later
@@ -342,7 +487,7 @@ for i in total_pairs_list:
         continue
 
     error = False
-    log(f"Testing strat = {strat_name}, pair = {pair}, recommended = {recommended}")
+    log(f"** pair = {pair}, recommended = {recommended}")
 
     # Configure backtesting
     pairs_input = Select(
@@ -360,14 +505,17 @@ for i in total_pairs_list:
     try:
         pairs_input.select_by_value(pair.replace(" / ", "-"))
     except:
-        log(f"Error pair {pair} not listed", True)
+        log(f"/!\ Error recommanded pair {pair} not listed on Binance")
         continue
 
+    #wait for have a time to get min_date and max_date
     time.sleep(5)
+    #get min/max dates
     driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
     driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
     min_date = convert_date(start_input.get_attribute("min"))
     max_date = convert_date(end_input.get_attribute("max"))
+    #get min recently
     min_recently = get_recently(start=min_date, end=max_date)
 
     backtest_dates = []
@@ -379,112 +527,11 @@ for i in total_pairs_list:
         backtest_dates.append(
             {"period": "recently", "start": min_recently, "end": max_date}
         )
+    #If we have choose to test all pairs
     if advanced_config["other"] == "y":
         backtest_dates += get_backtest_dates(test_pair=pair, token=token)
     log(f"backtest dates list = {backtest_dates}", True)
+    #run backtests on all dates
+    log("** run backtest for pair " + pair + " for all selected periods")
     for backtest_date in backtest_dates:
-        backtest_date_period = backtest_date["period"]
-        backtest_date_start = backtest_date["start"]
-        backtest_date_end = backtest_date["end"]
-        log(
-            f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}"
-        )
-        if not backtest_already_did(
-            pair=pair, period=backtest_date_period, strat=strat_name, token=token
-        ):
-            time.sleep(2)
-            start_input.clear()
-            start_input.clear()
-            time.sleep(2)
-            start_input.send_keys(backtest_date_start)
-            end_input.clear()
-            end_input.clear()
-            time.sleep(2)
-            end_input.send_keys(backtest_date_end)
-            test_btn = get_element(
-                "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(7) > button"
-            )
-            time.sleep(1)
-            test_btn.click()
-            time.sleep(5)
-            check_if_popup()
-            # ugly method to detect if there is an error or end page
-            for i in range(0, 10000):
-                time.sleep(10)
-                check_if_popup()
-                if (
-                    len(
-                        get_elements(
-                            ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(2) > td:nth-child(3) > app-value:nth-child(1) > span:nth-child(1)"
-                        )
-                    )
-                    > 0
-                ):
-                    break
-                if get_element_text(".backtest-button") == "Test":
-                    # double check because it can cause some pb
-                    if (
-                        len(
-                            get_elements(
-                                ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(2) > td:nth-child(3) > app-value:nth-child(1) > span:nth-child(1)"
-                            )
-                        )
-                        > 0
-                    ):
-                        break
-                    log("Error during the backtest")
-                    error = True
-                    break
-            if error:
-                continue
-            time.sleep(5)
-            check_if_popup()
-            hold = get_element_double(
-                ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(3) > td:nth-child(1) > app-value:nth-child(1) > span:nth-child(1)"
-            )
-            get_element(
-                "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
-            ).click()
-            for i in range(0, 10000):
-                if len(driver.window_handles) > 1:
-                    break
-                time.sleep(1)
-            driver.switch_to.window(driver.window_handles[1])
-
-            # wait for the advanced bt page to load
-            for i in range(0, 10000):
-                if (
-                    len(
-                        get_elements(
-                            "div > div > div > div.ant-row > div > div > div:nth-child(1) > div:nth-child(1) > div > div.ant-card-body > div > div:nth-child(1) > div:nth-child(2)"
-                        )
-                    )
-                    > 0
-                ):
-                    break
-                time.sleep(1)
-
-            advanced_analyse_link = driver.current_url
-            result = get_advanced_result()
-            driver.close()
-            driver.switch_to.window(driver.window_handles[0])
-            url = "https://api.backtest.kryll.torkium.com/index.php?controller=Backtest&action=send"
-
-            result["token"] = token
-            result["recommended"] = str(recommended).replace(" ", "")
-            result["strat_id"] = str(strat_id)
-            result["strat_version"] = str(strat_version)
-            result["hold"] = str(hold)
-            if backtest_date_period == "recently" or "global":
-                result["period"] = backtest_date_period
-            else:
-                result["period"] = ""
-            log(f"Sending result to the Database, result = {result}", True)
-            response = requests.request("POST", url, data=result)
-
-            log(
-                f"Requete post, status_code = {response.status_code}, value = {response.text}",
-                True,
-            )
-            if response.status_code == 200:
-                log("Done.")
+        run_backtest(strat_name,strat_id,pair,backtest_date)
