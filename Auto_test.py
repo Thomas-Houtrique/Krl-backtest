@@ -6,6 +6,12 @@ import dateutil.relativedelta
 from selenium.webdriver.support.ui import Select
 import platform
 import os
+import yaml
+
+def user_config():
+    if os.path.exists('config.yaml'):
+        with open(r'config.yaml') as file:
+            return yaml.load(file, Loader=yaml.FullLoader)
 
 
 def log(log_text, verbose=False):
@@ -436,7 +442,14 @@ def run_backtest(strat_name, strat_id, pair, backtest_date):
 #----------------------
 #Start of the program
 #----------------------
-token = input("Enter your token :")
+config = user_config()
+if config:
+    token = config['token']
+else:
+    token = input("Enter your token :")
+    with open(r'config.yaml', 'w') as file:
+        config_yaml = yaml.dump({"token" : token}, file)
+        
 strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
 advanced_user_choice = yes_no_question("Do you want to configure the script ?")
 advanced_config = advanced_configuration(advanced_user_choice)
