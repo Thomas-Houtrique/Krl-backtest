@@ -266,7 +266,6 @@ def wait_for_element(element, duration):
             > 0
         ):
             return True
-            break
         time.sleep(1)
     return False
 
