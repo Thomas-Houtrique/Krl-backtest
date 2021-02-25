@@ -255,7 +255,6 @@ def check_error_during_backtest():
                 break
             log("Error during the backtest")
             return True
-            break
     return False
 #progress bar path : 
 #div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-graph > div > div.backtest-graph-top.backtest-percent
