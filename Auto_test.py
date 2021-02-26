@@ -46,6 +46,15 @@ def yes_no_question(question):
         response = yes_no_question(question)
     return response
 
+def ask_strat():
+    strat_ids = {}
+    strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
+    while strat_id != "":
+        log("Do you want to test an other strat? (empty to next)")
+        strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
+        if strat_id != "":
+            strat_ids[strat_id] = strat_id
+    return strat_ids
 
 def detect_browsers(client_os_detect_browsers):
     """
@@ -571,16 +580,18 @@ else:
     with open(r"config.yaml", "w") as file:
         config_yaml = yaml.dump({"token": token}, file)
 
-strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
 advanced_user_choice = yes_no_question("Do you want to configure the script ?")
 advanced_config = advanced_configuration(advanced_user_choice)
+strat_ids = ask_strat()
 client_os = platform.system()
 
 client_driver = detect_browsers(client_os_detect_browsers=client_os)
-client_driver.get("https://platform.kryll.io/marketplace/" + strat_id)
+client_driver.get("https://platform.kryll.io/marketplace/")
 input("Login and press a key")
-while strat_id != "":
+for strat_id in strat_ids:
+    client_driver.get("https://platform.kryll.io/marketplace/" + strat_id)
     log("Initialisation, please wait...")
+    time.sleep(10)
     recommended_pairs = get_elements(
         ".table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a"
     )
@@ -683,10 +694,3 @@ while strat_id != "":
     log("==============================================")
     log(f"strat backtested : {strat_name} : Done")
     log("==============================================")
-    log("Do you want to test an other strat? (empty to quit)")
-    strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
-    if strat_id != "":
-        log("Please wait...")
-        client_driver.get("https://platform.kryll.io/marketplace/" + strat_id)
-        # TODO : need to find better solution to wait until page is loaded
-        time.sleep(10)
