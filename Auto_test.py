@@ -355,7 +355,7 @@ for strat_id in strat_ids:
     recommended_pairs_list = []
     for i in recommended_pairs:
         recommended_pairs_list.append(i)
-    tools.get_element("button.d-sm-inline-block").click()
+    tools.get_element(css.BACKTEST_BTN).click()
     time.sleep(10)
     pairs_input = tools.get_element(css.PAIRS_INPUT)
     pairs_list = pairs_input.find_elements_by_tag_name("option")
@@ -419,7 +419,8 @@ for strat_id in strat_ids:
             backtest_dates.append(
                 {"period": "global", "start": MIN_DATE, "end": MAX_DATE}
             )
-        # if the pair is at least 100 days old and user want to test recently we test the 3 last months
+        # if the pair is at least 100 days old and user want to test recently
+        # we test the 3 last months
         if min_recently != -1 and advanced_config["recently"] == "y":
             backtest_dates.append(
                 {"period": "recently", "start": min_recently, "end": MAX_DATE}

@@ -41,5 +41,6 @@ class CssConst:
     # strategy page
     STRAT_NAME = "app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2"
     STRAT_VERSION = "div.badge:nth-child(1)"
+    BACKTEST_BTN = "button.d-sm-inline-block"
     # other
     POPUP = "app-dialog-tutorial > div > div > div > button.btn.btn-primary"

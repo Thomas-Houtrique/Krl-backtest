@@ -1,10 +1,12 @@
 """Module containing utility tools"""
+from custom.errors import ElementNotFound
 from datetime import datetime
 import os
 import time
 import platform
 from selenium import webdriver
 from custom.css_const import CssConst
+from custom.errors import ElementNotFound
 
 
 class UtilityTools:
@@ -22,7 +24,15 @@ class UtilityTools:
         """
         Takes a css class, return selenium element
         """
-        return self.driver.find_element_by_css_selector(element_path)
+        for i in range(0, 10):
+            if len(self.driver.find_elements_by_css_selector(element_path)) > 0:
+                return self.driver.find_element_by_css_selector(element_path)
+            else:
+                self.log(
+                    f"can't find element {element_path} retry {i+1}/10", verbose=True
+                )
+            time.sleep(1)
+        raise ElementNotFound(element_path)
 
     def get_elements(self, elements_path):
         """
@@ -162,9 +172,8 @@ class UtilityTools:
         Check if backtest broke return True if Bt broke and False if not
         """
         # ugly method to detect if there is an error or end page
-        for _ in range(0, 10000):
+        for _ in range(0, 1000):
             time.sleep(10)
-            self.check_if_popup()
             if len(self.get_elements(self.css.ANALYSE_TAB_DEEP_ANALYSE_LINK)) > 0:
                 break
             if self.get_element_text(self.css.BACKTEST_START_BTN) == "Test":
