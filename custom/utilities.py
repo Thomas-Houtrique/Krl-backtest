@@ -14,7 +14,17 @@ class UtilityTools:
         self.user_advanced_configuration = {}
         self.user_advanced_configuration["verbose"] = "y"
 
-    def convert_date(self, date):
+    def convert_date_to_api(self, date):
+        """
+        Takes date format Year-Month-Day, return date format Month/Day/Year
+        """
+        self.log(f"Function convert date input = {date}", True)
+        dto = datetime.strptime(date, "%m/%d/%Y").date()
+        dto = str(dto.strftime("%Y-%m-%d"))
+        self.log(f"Function convert date output = {dto}", True)
+        return dto
+
+    def convert_date_to_html(self, date):
         """
         Takes date format Year-Month-Day, return date format Month/Day/Year
         """
@@ -38,10 +48,10 @@ class UtilityTools:
         """
         Takes if client want advanced config, return user config
         """
-        self.user_advanced_configuration = {}
         if advanced == "y":
             self.user_advanced_configuration["global"] = self.yes_no_question("Do you want to test the global period ?")
             self.user_advanced_configuration["recently"] = self.yes_no_question("Do you want to test the last three months ?")
+            self.user_advanced_configuration["last_year"] = self.yes_no_question("Do you want to test the last year ?")
             self.user_advanced_configuration["other"] = self.yes_no_question("Do you want to test the other periods if avaible (bear/bull...) ?")
             self.user_advanced_configuration["every_pairs"] = self.yes_no_question("do you want to test every pairs ?")
             self.user_advanced_configuration["verbose"] = self.yes_no_question("do you want to show verbose logs ?")
@@ -49,6 +59,7 @@ class UtilityTools:
         else:
             self.user_advanced_configuration["global"] = "y"
             self.user_advanced_configuration["recently"] = "y"
+            self.user_advanced_configuration["last_year"] = "y"
             self.user_advanced_configuration["other"] = "y"
             self.user_advanced_configuration["every_pairs"] = "n"
             self.user_advanced_configuration["verbose"] = "n"

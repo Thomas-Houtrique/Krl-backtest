@@ -11,6 +11,7 @@ import requests
 from selenium.webdriver.support.ui import Select
 from custom.utilities import UtilityTools
 from custom.css_const import CssConst
+from custom.config import Config
 from custom.selenium_utilities import SeleniumUtilities
 
 
@@ -24,24 +25,6 @@ def user_config():
     return -1
 
 
-def get_recently(start, end):
-    """
-    get start backtest date and end date, return -1
-    if period is less than 100 days else return the end date -3 months
-    """
-    tools.log(f"Function get_recently input (start ={start}, end = {end})", True)
-    start = datetime.strptime(start, "%m/%d/%Y").date()
-    end = datetime.strptime(end, "%m/%d/%Y").date()
-    if (end - start).days < 100:
-        tools.log("Function get_recently output = pair too recent", True)
-        return -1
-
-    start = end - dateutil.relativedelta.relativedelta(months=3)
-    start = str(start.strftime("%m/%d/%Y"))
-    tools.log(f"Function get_recently output = {start}", True)
-    return start
-
-
 def backtest_already_did(pair_already_did, period_already_did, strat_already_did, token_already_did):
     """
     Takes the pair,the period,the strat,and client token, return if backtest present in database
@@ -52,7 +35,8 @@ def backtest_already_did(pair_already_did, period_already_did, strat_already_did
     )
     pair_already_did = pair_already_did.replace(" ", "")
     url_backtest_already_did = (
-        "https://api.backtest.kryll.torkium.com/index.php?controller=Backtest&action=check&strat="
+        Config.API_CHECK_BACKTEST_URL
+        +"&strat="
         + strat_already_did
         + "&pair="
         + pair_already_did
@@ -73,12 +57,20 @@ def backtest_already_did(pair_already_did, period_already_did, strat_already_did
     return True
 
 
-def get_backtest_dates(pair_backtest_dates, token_backtest_dates):
+def get_backtest_dates(pair_backtest_dates, token_backtest_dates, advanced_config_backtest_dates, min_date_backtest_dates):
     """
     Takes the pair, and client token, return precise periods if present in database
     """
     tools.log(f"Function get_backtest_dates input (test_pair ={pair_backtest_dates})", True)
-    url = "https://api.backtest.kryll.torkium.com/index.php?controller=Pair&action=getPeriod&pair=" + pair_backtest_dates.replace(" ", "") + "&token=" + token_backtest_dates
+    url = Config.API_GET_PERIOD_URL + "&pair=" + pair_backtest_dates.replace(" ", "") + "&min_date=" + min_date_backtest_dates + "&token=" + token_backtest_dates
+    if advanced_config_backtest_dates["global"]=="y":
+        url+="&global=true"
+    if advanced_config_backtest_dates["recently"]=="y":
+        url+="&recently=true"
+    if advanced_config_backtest_dates["last_year"]=="y":
+        url+="&last_year=true"
+    if advanced_config_backtest_dates["other"]=="y":
+        url+="&other=true"
     response = requests.request("GET", url)
     tools.log(
         f"Requete get_backtest_dates, code = {response.status_code}, value = {response.text}, url= {url}",
@@ -87,13 +79,13 @@ def get_backtest_dates(pair_backtest_dates, token_backtest_dates):
     if response.status_code == 200:
         response = response.json()["data"][pair_backtest_dates.replace(" / ", "/")]
         tools.log(
-            f"Function get_recently (condition response.status_code == 200) output = {response})",
-            True,
+            f"Function get_backtest_dates (condition response.status_code == 200) output = {response})",
+            True, 
         )
         return response
     if response.status_code == 400:
         tools.log(
-            "Function get_recently (condition response.status_code == 400) output = [])",
+            "Function get_backtest_dates (condition response.status_code == 400) output = [])",
             True,
         )
         return []
@@ -196,17 +188,14 @@ def send_result(result_send_result):
     )
     sel_tools.driver.close()
     sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[0])
-    url = "https://api.backtest.kryll.torkium.com/index.php?controller=Backtest&action=send"
+    url = Config.API_SEND_URL
 
     result["token"] = result_send_result["token"]
     result["recommended"] = str(result_send_result["recommended"]).replace(" ", "")
     result["strat_id"] = str(result_send_result["strat_id"])
     result["strat_version"] = str(result_send_result["strat_version"])
     result["hold"] = str(result_send_result["hold"])
-    if result_send_result["backtest_date_period"] == "recently" or "global":
-        result["period"] = result_send_result["backtest_date_period"]
-    else:
-        result["period"] = ""
+    result["period"] = result_send_result["backtest_date_period"]
     tools.log(f"Sending result to the Database, result = {result}", True)
     response = requests.request("POST", url, data=result)
 
@@ -230,8 +219,8 @@ def run_backtest(
     return True if no errors else return False
     """
     backtest_date_period = backtest_date_run_backtest["period"]
-    backtest_date_start = backtest_date_run_backtest["start"]
-    backtest_date_end = backtest_date_run_backtest["end"]
+    backtest_date_start = tools.convert_date_to_html(backtest_date_run_backtest["start"])
+    backtest_date_end = tools.convert_date_to_html(backtest_date_run_backtest["end"])
     tools.log(f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
     if not backtest_already_did(
         pair_already_did=pair_run_backtest,
@@ -274,8 +263,8 @@ def run_backtest(
                 "strat_version": strat_version,
                 "hold": hold,
                 "backtest_date_period": backtest_date_period,
-                "backtest_date_start": backtest_date_start,
-                "backtest_date_end": backtest_date_end,
+                "backtest_date_start": tools.convert_date_to_api(backtest_date_start),
+                "backtest_date_end": tools.convert_date_to_api(backtest_date_end),
             }
         )
         if send_ok:
@@ -363,22 +352,10 @@ for strat_id in strat_ids:
         # get min/max dates
         sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
         sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
-        MIN_DATE = tools.convert_date(start_input.get_attribute("min"))
-        MAX_DATE = tools.convert_date(end_input.get_attribute("max"))
-        # get min recently
-        min_recently = get_recently(start=MIN_DATE, end=MAX_DATE)
+        MIN_DATE = start_input.get_attribute("min")
+        MAX_DATE = end_input.get_attribute("max")
 
-        backtest_dates = []
-        # Check if user want to test global
-        if advanced_config["global"] == "y":
-            backtest_dates.append({"period": "global", "start": MIN_DATE, "end": MAX_DATE})
-        # if the pair is at least 100 days old and user want to test recently
-        # we test the 3 last months
-        if min_recently != -1 and advanced_config["recently"] == "y":
-            backtest_dates.append({"period": "recently", "start": min_recently, "end": MAX_DATE})
-        # If we have choose to test all pairs
-        if advanced_config["other"] == "y":
-            backtest_dates += get_backtest_dates(pair_backtest_dates=pair, token_backtest_dates=token)
+        backtest_dates = get_backtest_dates(pair_backtest_dates=pair, token_backtest_dates=token, advanced_config_backtest_dates=advanced_config, min_date_backtest_dates=MIN_DATE)
         tools.log(f"backtest dates list = {backtest_dates}", True)
         # run backtests on all dates
         tools.log("** run backtest for pair " + pair + " for all selected periods")
