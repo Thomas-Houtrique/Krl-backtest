@@ -103,8 +103,8 @@ def split_max_drawdown_informations(element_path):
     max_drawdown_informations = {}
     max_drawdown_informations["maximum_drawdown"] = sel_tools.get_element_text(element_path).split(" %\n")[0]
     max_drawdown_dates = sel_tools.get_element_text(element_path).split(" %\n")[1].split(" — ")
-    max_drawdown_informations["maximum_drawdown_start"] = max_drawdown_dates[0]
-    max_drawdown_informations["maximum_drawdown_end"] = max_drawdown_dates[1]
+    max_drawdown_informations["maximum_drawdown_start"] = tools.convert_date_to_api(max_drawdown_dates[0])
+    max_drawdown_informations["maximum_drawdown_end"] = tools.convert_date_to_api(max_drawdown_dates[1])
     return max_drawdown_informations
 
 
