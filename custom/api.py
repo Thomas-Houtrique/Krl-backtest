@@ -29,9 +29,9 @@ class Api:
             result_send_result["backtest_date_end"],
             advanced_analyse_link,
         )
-        url = Config.API_SEND_URL
+        url = self.config.API_SEND_URL
 
-        result["token"] = result_send_result["token"]
+        result["token"] = self.token
         result["recommended"] = str(result_send_result["recommended"]).replace(" ", "")
         result["strat_id"] = str(result_send_result["strat_id"])
         result["strat_version"] = str(result_send_result["strat_version"])
@@ -53,7 +53,7 @@ class Api:
         Takes the pair, and client token, return precise periods if present in database
         """
         self.tools.log(f"Function get_backtest_dates input (test_pair ={pair_backtest_dates})", True)
-        url = Config.API_GET_PERIOD_URL + "&pair=" + pair_backtest_dates.replace(" ", "") + "&min_date=" + min_date_backtest_dates + "&token=" + self.token
+        url = self.config.API_GET_PERIOD_URL + "&pair=" + pair_backtest_dates.replace(" ", "") + "&min_date=" + min_date_backtest_dates + "&token=" + self.token
         if self.user_config["global"] == "y":
             url += "&global=true"
         if self.user_config["recently"] == "y":
@@ -95,7 +95,7 @@ class Api:
             True,
         )
         pair_already_did = pair_already_did.replace(" ", "")
-        url_backtest_already_did = Config.API_CHECK_BACKTEST_URL + "&strat=" + strat_already_did + "&pair=" + pair_already_did + "&period=" + period_already_did + "&token=" + self.token
+        url_backtest_already_did = self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat_already_did + "&pair=" + pair_already_did + "&period=" + period_already_did + "&token=" + self.token
         response = requests.request("GET", url_backtest_already_did)
         self.tools.log(
             f"Requete backtest_already_did, status_code = {response.status_code}, value = {response.text}, url= {url_backtest_already_did}",

@@ -2,57 +2,13 @@
 Script automating backtest on kryll.io and sending results to an API
 Made by Thomas with the help of torkium
 """
-import os
 import time
-import yaml
 from selenium.webdriver.support.ui import Select
+from custom.user_config import UserConfig
 from custom.utilities import UtilityTools
 from custom.css_const import CssConst
 from custom.selenium_utilities import SeleniumUtilities
 from custom.api import Api
-
-
-def yes_no_question(question):
-    """
-    Takes a question, return the answer y or n
-    """
-    response = input(question + " (y/n)").lower()
-    while response not in ("y", "n"):
-        print("invalid choice")
-        response = yes_no_question(question)
-    return response
-
-
-def advanced_configuration(advanced):
-    """
-    Takes if client want advanced config, return user config
-    """
-    user_advanced_configuration = {}
-    if advanced == "y":
-        user_advanced_configuration["global"] = yes_no_question("Do you want to test the global period ?")
-        user_advanced_configuration["recently"] = yes_no_question("Do you want to test the last three months ?")
-        user_advanced_configuration["last_year"] = yes_no_question("Do you want to test the last year ?")
-        user_advanced_configuration["other"] = yes_no_question("Do you want to test the other periods if avaible (bear/bull...) ?")
-        user_advanced_configuration["every_pairs"] = yes_no_question("do you want to test every pairs ?")
-        user_advanced_configuration["verbose"] = yes_no_question("do you want to show verbose logs ?")
-    else:
-        user_advanced_configuration["global"] = "y"
-        user_advanced_configuration["recently"] = "y"
-        user_advanced_configuration["last_year"] = "y"
-        user_advanced_configuration["other"] = "y"
-        user_advanced_configuration["every_pairs"] = "n"
-        user_advanced_configuration["verbose"] = "n"
-    return user_advanced_configuration
-
-
-def user_config_file():
-    """
-    Return user config if config file exist, if not return -1
-    """
-    if os.path.exists("config.yaml"):
-        with open(r"config.yaml") as conf_file:
-            return yaml.load(conf_file, Loader=yaml.FullLoader)
-    return []
 
 
 def set_input_date(start, end):
@@ -118,7 +74,6 @@ def run_backtest(
 
         send_ok = api.send_result(
             {
-                "token": token,
                 "pair": pair,
                 "recommended": RECOMMENDED,
                 "strat_id": strat_id_run_backtest,
@@ -142,22 +97,14 @@ def run_backtest(
 # ----------------------
 # Start of the program
 # ----------------------
-advanced_user_choice = yes_no_question(question="Do you want to configure the script ?")
-user_config = advanced_configuration(advanced=advanced_user_choice)
-tools = UtilityTools(user_config)
+
+user = UserConfig()
+tools = UtilityTools(user_config=user.config)
 client_driver = tools.detect_browsers()
-sel_tools = SeleniumUtilities(user_config, driver=client_driver)
+sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
 css = CssConst()
 
-config_file = user_config_file()
-if config_file == -1:
-    token = config_file["token"]
-else:
-    token = input("Enter your token :")
-    with open(r"config.yaml", "w") as file:
-        config_yaml = yaml.dump({"token": token}, file)
-
-api = Api(user_config=user_config, token=token, driver=client_driver)
+api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
 
 strat_ids = tools.ask_strat()
 
@@ -195,7 +142,7 @@ for strat_id in strat_ids:
             RECOMMENDED = 1
 
         # check if user want to test every pairs
-        if RECOMMENDED == 0 and user_config["every_pairs"] == "n":
+        if RECOMMENDED == 0 and user.config["every_pairs"] == "n":
             continue
 
         ERROR = False
