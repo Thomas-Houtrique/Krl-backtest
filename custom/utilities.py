@@ -9,10 +9,9 @@ from custom.css_const import CssConst
 class UtilityTools:
     """Class containing utility tools"""
 
-    def __init__(self):
+    def __init__(self, user_config):
         self.css = CssConst()
-        self.user_advanced_configuration = {}
-        self.user_advanced_configuration["verbose"] = "y"
+        self.user_config = user_config
 
     def convert_date_to_api(self, date):
         """
@@ -34,37 +33,6 @@ class UtilityTools:
         self.log(f"Function convert date output = {dto}", True)
         return dto
 
-    def yes_no_question(self, question):
-        """
-        Takes a question, return the answer y or n
-        """
-        response = input(question + " (y/n)").lower()
-        while response not in ("y", "n"):
-            self.log("invalid choice")
-            response = self.yes_no_question(question)
-        return response
-
-    def advanced_configuration(self, advanced):
-        """
-        Takes if client want advanced config, return user config
-        """
-        if advanced == "y":
-            self.user_advanced_configuration["global"] = self.yes_no_question("Do you want to test the global period ?")
-            self.user_advanced_configuration["recently"] = self.yes_no_question("Do you want to test the last three months ?")
-            self.user_advanced_configuration["last_year"] = self.yes_no_question("Do you want to test the last year ?")
-            self.user_advanced_configuration["other"] = self.yes_no_question("Do you want to test the other periods if avaible (bear/bull...) ?")
-            self.user_advanced_configuration["every_pairs"] = self.yes_no_question("do you want to test every pairs ?")
-            self.user_advanced_configuration["verbose"] = self.yes_no_question("do you want to show verbose logs ?")
-
-        else:
-            self.user_advanced_configuration["global"] = "y"
-            self.user_advanced_configuration["recently"] = "y"
-            self.user_advanced_configuration["last_year"] = "y"
-            self.user_advanced_configuration["other"] = "y"
-            self.user_advanced_configuration["every_pairs"] = "n"
-            self.user_advanced_configuration["verbose"] = "n"
-        return self.user_advanced_configuration
-
     def log(self, log_text, verbose=False):
         """
         Takes a log_text and a verbose boolean, print the log and save it to a log file
@@ -73,7 +41,7 @@ class UtilityTools:
         log_file = open("Kryll_backtest.log", "a+", encoding="utf-8")
         log_file.write(log_formated_string + "\n")
         log_file.close()
-        if (self.user_advanced_configuration["verbose"] == "y" and verbose) or not verbose:
+        if (self.user_config["verbose"] == "y" and verbose) or not verbose:
             print(log_formated_string)
 
     def detect_browsers(self):

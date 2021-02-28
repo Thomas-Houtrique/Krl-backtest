@@ -5,10 +5,11 @@ from custom.css_const import CssConst
 
 
 class SeleniumUtilities:
-    def __init__(self):
+    def __init__(self, user_config, driver):
+        self.user_config = user_config
         self.css = CssConst()
-        self.tools = UtilityTools()
-        self.driver = self.tools.detect_browsers()
+        self.tools = UtilityTools(user_config=self.user_config)
+        self.driver = driver
 
     def get_element(self, element_path):
         """
