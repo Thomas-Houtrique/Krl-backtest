@@ -41,7 +41,7 @@ class CssConst:
     RECOMMEND_PAIRS = ".table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a"
     ANALYSE_TAB_DEEP_ANALYSE_LINK = "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
     ANALYSE_TAB_HOLD = ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(3) > td:nth-child(1) > app-value:nth-child(1) > span:nth-child(1)"
-
+    EXCHANGE = ".control-exchanges"
     # strategy page
     STRAT_NAME = (
         "app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2"

@@ -15,7 +15,7 @@ class Api:
         self.config = Config()
         self.css = CssConst()
 
-    def send_result(self, result_send_result):
+    def send_result(self, send_result):
         """
         Takes a token, a pair, if strat is recommended, a strat id, a strat name, a strat version, the hold value,
         the backtest period, the backtest start date, the backtest end date
@@ -23,20 +23,21 @@ class Api:
         """
         advanced_analyse_link = self.sel_tools.driver.current_url
         result = self.get_advanced_result(
-            result_send_result["strat_name"],
-            result_send_result["pair"],
-            result_send_result["backtest_date_start"],
-            result_send_result["backtest_date_end"],
+            send_result["strat_name"],
+            send_result["pair"],
+            send_result["backtest_date_start"],
+            send_result["backtest_date_end"],
             advanced_analyse_link,
         )
         url = self.config.API_SEND_URL
 
         result["token"] = self.token
-        result["recommended"] = str(result_send_result["recommended"]).replace(" ", "")
-        result["strat_id"] = str(result_send_result["strat_id"])
-        result["strat_version"] = str(result_send_result["strat_version"])
-        result["hold"] = str(result_send_result["hold"])
-        result["period"] = result_send_result["backtest_date_period"]
+        result["recommended"] = str(send_result["recommended"]).replace(" ", "")
+        result["strat_id"] = str(send_result["strat_id"])
+        result["strat_version"] = str(send_result["strat_version"])
+        result["hold"] = str(send_result["hold"])
+        result["exchange"] = str(send_result["exchange"])
+        result["period"] = send_result["backtest_date_period"]
         self.tools.log(f"Sending result to the Database, result = {result}", True)
         response = requests.request("POST", url, data=result)
 

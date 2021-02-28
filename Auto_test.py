@@ -47,6 +47,9 @@ def run_backtest(
         period_already_did=backtest_date_period,
         strat_already_did=strat_name_run_backtest,
     ):
+        exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
+        exchange = exchange_select.first_selected_option.text.strip()
+        tools.log(f"Selected exchange = {exchange}")
         # set date into input
         set_input_date(backtest_date_start, backtest_date_end)
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
@@ -80,6 +83,7 @@ def run_backtest(
                 "strat_name": strat_name_run_backtest,
                 "strat_version": strat_version,
                 "hold": hold,
+                "exchange": exchange,
                 "backtest_date_period": backtest_date_period,
                 "backtest_date_start": tools.convert_date_to_api(backtest_date_start),
                 "backtest_date_end": tools.convert_date_to_api(backtest_date_end),
