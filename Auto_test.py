@@ -139,7 +139,8 @@ for strat_id in strat_ids:
     if user.config["exchanges"] == "y":
         exchange_options = sel_tools.get_element(css.EXCHANGE).find_elements_by_tag_name("option")
     else:
-        exchange_options = []
+        exchange_options = [sel_tools.get_element(css.BINANCE_EXCHANGE)]
+
     strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
     tools.log("==============================================")
     tools.log(f"Testing strat : {strat_name}, version : {strat_version}")

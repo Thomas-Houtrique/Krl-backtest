@@ -43,6 +43,7 @@ class CssConst:
     ANALYSE_TAB_HOLD = ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(3) > td:nth-child(1) > app-value:nth-child(1) > span:nth-child(1)"
     EXCHANGE = ".control-exchanges"
     SERVER_PROBLEM = "#dialog-unique > app-dialog-alert-api > div > div.dialog-body > div > button"
+    BINANCE_EXCHANGE = "#mat-dialog-0 > app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(1) > select > option:nth-child(1)"
     # strategy page
     STRAT_NAME = (
         "app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2"
