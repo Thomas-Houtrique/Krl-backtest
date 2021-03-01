@@ -77,7 +77,7 @@ class UtilityTools:
 
         elif client_os == "Linux":
             self.log("Please make sure to have Firefox installed")
-            driver = webdriver.Firefox(executable_path=r"./geckodriver")
+            driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
             return driver
 
         elif client_os == "Darwin":
