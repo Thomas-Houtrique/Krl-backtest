@@ -106,8 +106,10 @@ def run_backtest(
 user = UserConfig()
 tools = UtilityTools(user_config=user.config)
 css = CssConst()
-
-strat_ids = tools.ask_strat()
+if "strat_ids" in user.config_file:
+    strat_ids = user.config_file["strat_ids"]
+else:
+    strat_ids = tools.ask_strat()
 
 
 client_driver = tools.detect_browsers()
