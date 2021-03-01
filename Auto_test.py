@@ -3,6 +3,7 @@ Script automating backtest on kryll.io and sending results to an API
 Made by Thomas with the help of torkium
 """
 import time
+import random
 from selenium.webdriver.support.ui import Select
 from custom.user_config import UserConfig
 from custom.utilities import UtilityTools
@@ -108,9 +109,9 @@ tools = UtilityTools(user_config=user.config)
 css = CssConst()
 if "strat_ids" in user.config_file:
     strat_ids = user.config_file["strat_ids"]
+    random.shuffle(strat_ids)
 else:
     strat_ids = tools.ask_strat()
-
 
 client_driver = tools.detect_browsers()
 api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
