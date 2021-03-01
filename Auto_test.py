@@ -41,16 +41,15 @@ def run_backtest(
     backtest_date_period = backtest_date_run_backtest["period"]
     backtest_date_start = tools.convert_date_to_html(backtest_date_run_backtest["start"])
     backtest_date_end = tools.convert_date_to_html(backtest_date_run_backtest["end"])
-    exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
     exchange = exchange_select.first_selected_option.text.strip()
     tools.log(f"Selected exchange = {exchange}")
     tools.log(f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
     if not api.backtest_already_did(
-        pair_already_did=pair_run_backtest,
-        period_already_did=backtest_date_period,
-        strat_already_did=strat_name_run_backtest,
-        version_already_did=strat_version,
-        exchange_already_did=exchange,
+        pair=pair_run_backtest,
+        period=backtest_date_period,
+        strat=strat_name_run_backtest,
+        version=strat_version,
+        exchange=exchange,
     ):
         # set date into input
         set_input_date(backtest_date_start, backtest_date_end)
@@ -116,7 +115,7 @@ else:
 client_driver = tools.detect_browsers()
 api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
 sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
-sel_tools.driver.get("https://platform.kryll.io/marketplace/")
+sel_tools.driver.get("https://platform.kryll.io/login")
 input("Login and press a key")
 for strat_id in strat_ids:
     sel_tools.driver.get("https://platform.kryll.io/marketplace/" + strat_id)
@@ -127,61 +126,79 @@ for strat_id in strat_ids:
     recommended_pairs_list = []
     for i in recommended_pairs:
         recommended_pairs_list.append(i)
-    sel_tools.get_element(css.BACKTEST_BTN).click()
-    time.sleep(10)
-    pairs_input = sel_tools.get_element(css.PAIRS_INPUT)
-    pairs_list = pairs_input.find_elements_by_tag_name("option")
+    try:
+        sel_tools.get_element(css.BACKTEST_BTN).click()
+    except Exception:
+        sel_tools.get_element(css.INSTALL_BTN).click()
+        time.sleep(5)
+        sel_tools.get_element(css.BACKTEST_BTN).click()
 
-    # Backtest recommended first
-    for i in pairs_list:
-        if i in recommended_pairs_list:
-            pairs_list.remove(i)
-    total_pairs_list = recommended_pairs_list + pairs_list
+    time.sleep(10)
+    exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
+    if user.config["exchanges"] == "y":
+        exchange_options = sel_tools.get_element(css.EXCHANGE).find_elements_by_tag_name("option")
+    else:
+        exchange_options = []
     strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
     tools.log("==============================================")
     tools.log(f"Testing strat : {strat_name}, version : {strat_version}")
     tools.log("==============================================")
-    for i in total_pairs_list:
-        # Get infos
-        pair = i.text.strip()
+    for exchange in exchange_options:
+        if exchange:
+            exchange_text = exchange.text.strip()
+            tools.log(f"Testing on exchange {exchange_text}")
+            exchange_select.select_by_visible_text(exchange_text)
+            time.sleep(2)
+            sel_tools.check_if_server_problem()
+        pairs_input = sel_tools.get_element(css.PAIRS_INPUT)
+        pairs_list = pairs_input.find_elements_by_tag_name("option")
+        # Backtest recommended first
+        for i in pairs_list:
+            if i in recommended_pairs_list:
+                pairs_list.remove(i)
+        total_pairs_list = recommended_pairs_list + pairs_list
 
-        RECOMMENDED = 0
-        if i in recommended_pairs_list:
-            RECOMMENDED = 1
+        for i in total_pairs_list:
+            # Get infos
+            pair = i.text.strip()
 
-        # check if user want to test every pairs
-        if RECOMMENDED == 0 and user.config["every_pairs"] == "n":
-            continue
+            RECOMMENDED = 0
+            if i in recommended_pairs_list:
+                RECOMMENDED = 1
 
-        ERROR = False
-        tools.log(f"** pair = {pair}, recommended = {RECOMMENDED}")
+            # check if user want to test every pairs
+            if RECOMMENDED == 0 and user.config["every_pairs"] == "n":
+                continue
 
-        # Configure backtesting
-        pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
-        start_input = sel_tools.get_element(css.START_INPUT)
-        end_input = sel_tools.get_element(css.END_INPUT)
-        # Check if pair is listed on exchange
-        try:
-            pairs_input.select_by_value(pair.replace(" / ", "-"))
-        except Exception:
-            tools.log(fr"/!\ Error recommanded pair {pair} not listed on Binance")
-            continue
+            ERROR = False
+            tools.log(f"** pair = {pair}, recommended = {RECOMMENDED}")
 
-        # wait for have a time to get MIN_DATE and MAX_DATE
-        time.sleep(5)
-        # get min/max dates
-        sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
-        sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
-        MIN_DATE = start_input.get_attribute("min")
-        MAX_DATE = end_input.get_attribute("max")
+            # Configure backtesting
+            pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
+            start_input = sel_tools.get_element(css.START_INPUT)
+            end_input = sel_tools.get_element(css.END_INPUT)
+            # Check if pair is listed on exchange
+            try:
+                pairs_input.select_by_value(pair.replace(" / ", "-"))
+            except Exception:
+                tools.log(fr"/!\ Error recommanded pair {pair} not listed on {exchange_text}")
+                continue
 
-        backtest_dates = api.get_backtest_dates(pair_backtest_dates=pair, min_date_backtest_dates=MIN_DATE)
-        tools.log(f"backtest dates list = {backtest_dates}", True)
-        # run backtests on all dates
-        tools.log("** run backtest for pair " + pair + " for all selected periods")
-        for backtest_date in backtest_dates:
-            run_backtest(strat_name, strat_id, pair, backtest_date)
+            # wait for have a time to get MIN_DATE and MAX_DATE
+            time.sleep(5)
+            # get min/max dates
+            sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
+            sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
+            MIN_DATE = start_input.get_attribute("min")
+            MAX_DATE = end_input.get_attribute("max")
 
-    tools.log("==============================================")
-    tools.log(f"strat backtested : {strat_name}, version : {strat_version} : Done")
-    tools.log("==============================================")
+            backtest_dates = api.get_backtest_dates(pair=pair, min_date=MIN_DATE)
+            tools.log(f"backtest dates list = {backtest_dates}", True)
+            # run backtests on all dates
+            tools.log("** run backtest for pair " + pair + " for all selected periods")
+            for backtest_date in backtest_dates:
+                run_backtest(strat_name, strat_id, pair, backtest_date)
+
+        tools.log("==============================================")
+        tools.log(f"strat backtested : {strat_name}, version : {strat_version} : Done")
+        tools.log("==============================================")

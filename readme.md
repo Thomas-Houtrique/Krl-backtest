@@ -12,5 +12,8 @@ Pour le moment **il vous faut absolument Google Chrome ou Firefox** sur votre ma
 - Entrer votre login et votre mot de passe sur la page internet et appuyer sur une touche dans le terminal.\
 *Non le script ne récupère pas votre mot de passe*
 
+
+## Raspberry pi
+- 
 ## License
 [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/)

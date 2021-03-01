@@ -49,12 +49,12 @@ class Api:
             return True
         return False
 
-    def get_backtest_dates(self, pair_backtest_dates, min_date_backtest_dates):
+    def get_backtest_dates(self, pair, min_date):
         """
         Takes the pair, and client token, return precise periods if present in database
         """
-        self.tools.log(f"Function get_backtest_dates input (test_pair ={pair_backtest_dates})", True)
-        url = self.config.API_GET_PERIOD_URL + "&pair=" + pair_backtest_dates.replace(" ", "") + "&min_date=" + min_date_backtest_dates + "&token=" + self.token
+        self.tools.log(f"Function get_backtest_dates input (test_pair ={pair})", True)
+        url = self.config.API_GET_PERIOD_URL + "&pair=" + pair.replace(" ", "") + "&min_date=" + min_date + "&token=" + self.token
         if self.user_config["global"] == "y":
             url += "&global=true"
         if self.user_config["recently"] == "y":
@@ -69,7 +69,7 @@ class Api:
             True,
         )
         if response.status_code == 200:
-            response = response.json()["data"][pair_backtest_dates.replace(" / ", "/")]
+            response = response.json()["data"][pair.replace(" / ", "/")]
             self.tools.log(
                 f"Function get_backtest_dates (condition response.status_code == 200) output = {response})",
                 True,
@@ -87,16 +87,18 @@ class Api:
         )
         return -1
 
-    def backtest_already_did(self, pair_already_did, period_already_did, strat_already_did, version_already_did, exchange_already_did):
+    def backtest_already_did(self, pair, period, strat, version, exchange):
         """
         Takes the pair,the period,the strat,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"Function backtest_already_did input (pair ={pair_already_did}, period = {period_already_did}, exchange = {exchange_already_did}, strat= {strat_already_did}, version= {version_already_did})",
+            f"Function backtest_already_did input (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version})",
             True,
         )
-        pair_already_did = pair_already_did.replace(" ", "")
-        url_backtest_already_did = self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat_already_did + "&version=" + version_already_did + "&pair=" + pair_already_did + "&period=" + period_already_did + "&exchange=" + exchange_already_did + "&token=" + self.token
+        pair = pair.replace(" ", "")
+        url_backtest_already_did = (
+            self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat + "&version=" + version + "&pair=" + pair + "&period=" + period + "&exchange=" + exchange + "&token=" + self.token
+        )
         response = requests.request("GET", url_backtest_already_did)
         self.tools.log(
             f"Requete backtest_already_did, status_code = {response.status_code}, value = {response.text}, url= {url_backtest_already_did}",
@@ -110,22 +112,22 @@ class Api:
 
     def get_advanced_result(
         self,
-        strat_name_advanced_result,
-        pair_advanced_result,
-        backtest_date_start_advanced_result,
-        backtest_date_end_advanced_result,
-        advanced_analyse_link_advanced_result,
+        strat_name,
+        pair,
+        backtest_date_start,
+        backtest_date_end,
+        advanced_analyse_link,
     ):
         """
         Takes a strat name, a pair, a backtest start date, a backtest end date and the analyse link
         return dict of results
         """
         result = {}
-        result["strat"] = strat_name_advanced_result
-        result["pair"] = pair_advanced_result
-        result["start"] = backtest_date_start_advanced_result.replace("-", "/")
-        result["end"] = backtest_date_end_advanced_result.replace("-", "/")
-        result["link"] = advanced_analyse_link_advanced_result.split("=")[1]
+        result["strat"] = strat_name
+        result["pair"] = pair
+        result["start"] = backtest_date_start.replace("-", "/")
+        result["end"] = backtest_date_end.replace("-", "/")
+        result["link"] = advanced_analyse_link.split("=")[1]
         result["duration"] = self.sel_tools.get_element_days(self.css.ADVANCED_ANALYSE_DURATION)
         result["volatility"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_VOLATILITY)
         result["trade"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_TRADE)

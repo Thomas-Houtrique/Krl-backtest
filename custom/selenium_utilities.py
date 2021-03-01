@@ -98,3 +98,13 @@ class SeleniumUtilities:
             popup.click()
         except Exception:
             pass
+
+    def check_if_server_problem(self):
+        """
+        Check if tutorial popup is present on the screen
+        """
+        try:
+            server_problem = self.get_element(self.css.SERVER_PROBLEM)
+            server_problem.click()
+        except Exception:
+            pass

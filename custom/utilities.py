@@ -57,26 +57,33 @@ class UtilityTools:
             if os.environ["ProgramFiles"] + r"\Google\Chrome\Application":
                 self.log("Chrome detected")
                 browsers.append("Google Chrome")
+            if len(browsers) > 1:
+                for idx, browser in enumerate(browsers):
+                    print(f"{idx}) {browser}")
+                browser_choice = int(input(f"please choice between your browsers (0 to {len(browsers) - 1})"))
+                client_browser = browsers[browser_choice]
+            elif len(browsers) == 1:
+                client_browser = browsers[0]
+            else:
+                raise Exception("Sorry, please install Firefox or Google Chrome")
+
+            if client_browser == "Google Chrome":
+                options = webdriver.ChromeOptions()
+                options.add_experimental_option("excludeSwitches", ["enable-logging"])
+                driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
+            elif client_browser == "Firefox":
+                driver = webdriver.Firefox(executable_path=r"geckodriver.exe")
+            return driver
+
         elif client_os == "Linux":
-            raise Exception("Sorry, linux is not supported yet")
+            self.log("Please make sure to have Firefox installed")
+            driver = webdriver.Firefox(executable_path=r"./geckodriver")
+            return driver
 
-        if len(browsers) > 1:
-            for idx, browser in enumerate(browsers):
-                print(f"{idx}) {browser}")
-            browser_choice = int(input(f"please choice between your browsers (0 to {len(browsers) - 1})"))
-            client_browser = browsers[browser_choice]
-        elif len(browsers) == 1:
-            client_browser = browsers[0]
-        else:
-            raise Exception("Sorry, please install Firefox or Google Chrome")
-
-        if client_browser == "Google Chrome":
-            options = webdriver.ChromeOptions()
-            options.add_experimental_option("excludeSwitches", ["enable-logging"])
-            driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
-        elif client_browser == "Firefox":
-            driver = webdriver.Firefox(executable_path=r"geckodriver.exe")
-        return driver
+        elif client_os == "Darwin":
+            self.log("Please make sure to have Firefox installed")
+            driver = webdriver.Firefox(executable_path=r"./geckodriver")
+            return driver
 
     def ask_strat(self):
         """
