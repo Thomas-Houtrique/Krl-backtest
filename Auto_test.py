@@ -49,6 +49,7 @@ def run_backtest(
         pair_already_did=pair_run_backtest,
         period_already_did=backtest_date_period,
         strat_already_did=strat_name_run_backtest,
+        version_already_did=strat_version,
         exchange_already_did=exchange,
     ):
         # set date into input
@@ -138,7 +139,7 @@ for strat_id in strat_ids:
     total_pairs_list = recommended_pairs_list + pairs_list
     strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
     tools.log("==============================================")
-    tools.log(f"Testing strat : {strat_name}")
+    tools.log(f"Testing strat : {strat_name}, version : {strat_version}")
     tools.log("==============================================")
     for i in total_pairs_list:
         # Get infos
@@ -182,5 +183,5 @@ for strat_id in strat_ids:
             run_backtest(strat_name, strat_id, pair, backtest_date)
 
     tools.log("==============================================")
-    tools.log(f"strat backtested : {strat_name} : Done")
+    tools.log(f"strat backtested : {strat_name}, version : {strat_version} : Done")
     tools.log("==============================================")

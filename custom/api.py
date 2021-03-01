@@ -87,16 +87,16 @@ class Api:
         )
         return -1
 
-    def backtest_already_did(self, pair_already_did, period_already_did, strat_already_did, exchange_already_did):
+    def backtest_already_did(self, pair_already_did, period_already_did, strat_already_did, version_already_did, exchange_already_did):
         """
         Takes the pair,the period,the strat,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"Function backtest_already_did input (pair ={pair_already_did}, period = {period_already_did}, exchange = {exchange_already_did}, strat= {strat_already_did})",
+            f"Function backtest_already_did input (pair ={pair_already_did}, period = {period_already_did}, exchange = {exchange_already_did}, strat= {strat_already_did}, version= {version_already_did})",
             True,
         )
         pair_already_did = pair_already_did.replace(" ", "")
-        url_backtest_already_did = self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat_already_did + "&pair=" + pair_already_did + "&period=" + period_already_did + "&exchange=" + exchange_already_did + "&token=" + self.token
+        url_backtest_already_did = self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat_already_did + "&version=" + version_already_did + "&pair=" + pair_already_did + "&period=" + period_already_did + "&exchange=" + exchange_already_did + "&token=" + self.token
         response = requests.request("GET", url_backtest_already_did)
         self.tools.log(
             f"Requete backtest_already_did, status_code = {response.status_code}, value = {response.text}, url= {url_backtest_already_did}",
