@@ -41,15 +41,16 @@ def run_backtest(
     backtest_date_period = backtest_date_run_backtest["period"]
     backtest_date_start = tools.convert_date_to_html(backtest_date_run_backtest["start"])
     backtest_date_end = tools.convert_date_to_html(backtest_date_run_backtest["end"])
+    exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
+    exchange = exchange_select.first_selected_option.text.strip()
+    tools.log(f"Selected exchange = {exchange}")
     tools.log(f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
     if not api.backtest_already_did(
         pair_already_did=pair_run_backtest,
         period_already_did=backtest_date_period,
         strat_already_did=strat_name_run_backtest,
+        exchange_already_did=exchange,
     ):
-        exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
-        exchange = exchange_select.first_selected_option.text.strip()
-        tools.log(f"Selected exchange = {exchange}")
         # set date into input
         set_input_date(backtest_date_start, backtest_date_end)
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
@@ -104,14 +105,14 @@ def run_backtest(
 
 user = UserConfig()
 tools = UtilityTools(user_config=user.config)
-client_driver = tools.detect_browsers()
-sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
 css = CssConst()
-
-api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
 
 strat_ids = tools.ask_strat()
 
+
+client_driver = tools.detect_browsers()
+api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
+sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/marketplace/")
 input("Login and press a key")
 for strat_id in strat_ids:
