@@ -11,7 +11,7 @@
 - Entrer l'id de la stratégie que vous voulez backtester
 - Entrer votre login et votre mot de passe sur la page internet et appuyer sur une touche dans le terminal.\
 
-## Linux / Raspberry pi
+## Mac OSX
 **il vous faut absolument Firefox** sur votre machine.\
 - Ouvir un terminal et coller ceci :
 ```bash
