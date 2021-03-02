@@ -36,5 +36,17 @@ sudo python3 auto_test.py
 - Entrer le token que @Torkium vous a donné
 - Entrer l'id de la stratégie que vous voulez backtester
 - Entrer votre login et votre mot de passe sur la page internet et appuyer sur une touche dans le terminal.\
+
+# Config File
+```yaml
+token: token
+strat_ids:
+- 5d65371ad9d67b9dbe83xxx
+- 5d65371ad9d67b9dbe83xxx
+
+email: xxx@xx.com
+password: solarwinds123
+```
+
 ## License
 [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/)

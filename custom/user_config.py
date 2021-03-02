@@ -11,10 +11,7 @@ class UserConfig:
 
     def __auto_login(self):
         if "email" and "password" in self.config_file:
-            login = {
-                "email" : self.config_file["email"],
-                "password" : self.config_file['password']
-            }
+            login = {"email": self.config_file["email"], "password": self.config_file["password"]}
             return login
 
     def yes_no_question(self, question):

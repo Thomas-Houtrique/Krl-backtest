@@ -51,7 +51,7 @@ class CssConst:
     STRAT_VERSION = "div.badge:nth-child(1)"
     BACKTEST_BTN = "button.d-sm-inline-block"
     INSTALL_BTN = ".right > button:nth-child(1)"
-    #login page
+    # login page
     EMAIL_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(4) > input"
     PASSWORD_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div.form-group.form-required.mb-0 > input"
     LOG_IN_BTN = ".body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(8) > button"
