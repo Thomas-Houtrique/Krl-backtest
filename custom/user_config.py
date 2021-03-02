@@ -7,6 +7,15 @@ class UserConfig:
         self.advanced_user_choice = self.yes_no_question(question="Do you want to configure the script ?")
         self.config = self.__advanced_configuration(advanced=self.advanced_user_choice)
         self.config_file = self.__config_file()
+        self.login = self.__auto_login()
+
+    def __auto_login(self):
+        if "email" and "password" in self.config_file:
+            login = {
+                "email" : self.config_file["email"],
+                "password" : self.config_file['password']
+            }
+            return login
 
     def yes_no_question(self, question):
         """

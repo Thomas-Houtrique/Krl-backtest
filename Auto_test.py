@@ -117,7 +117,13 @@ client_driver = tools.detect_browsers()
 api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
 sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
-input("Login and press a key")
+if user.login:
+    sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login['email'])
+    sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login['password'])
+    time.sleep(2)
+    client_driver.find_element_by_xpath("//*[contains(text(), 'Log in')]").click()
+else:
+    input("Login and press a key")
 for strat_id in strat_ids:
     sel_tools.driver.get("https://platform.kryll.io/marketplace/" + strat_id)
     tools.log("Initialisation, please wait...")

@@ -76,7 +76,7 @@ class UtilityTools:
             return driver
 
         elif client_os == "Linux":
-            self.log("Please make sure to have Firefox installed")
+            self.log("Please make sure to have Chromium installed")
             driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
             return driver
 
