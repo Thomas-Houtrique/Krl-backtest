@@ -15,11 +15,8 @@ class SeleniumUtilities:
         """
         Takes a css class, return selenium element
         """
-        for i in range(0, 10):
-            if len(self.driver.find_elements_by_css_selector(element_path)) > 0:
-                return self.driver.find_element_by_css_selector(element_path)
-            self.tools.log(f"can't find element {element_path} retry {i+1}/10", verbose=True)
-            time.sleep(1)
+        if self.wait_for_element(element_path, 10):
+            return self.driver.find_element_by_css_selector(element_path)
         raise ElementNotFound(element_path)
 
     def get_elements(self, elements_path):
@@ -69,13 +66,22 @@ class SeleniumUtilities:
                 return True
         return False
 
+        """
+        Check if an element existe in DOM. return True or False
+        """
+    def check_if_element_exist(self, element):
+        if len(self.get_elements(element)) > 0:
+            return True
+        return False
+
     def wait_for_element(self, element, duration):
         """
         Takes a selenium element and a duration, return True if element detected and False if not
         """
-        for _ in range(0, duration):
-            if len(self.get_elements(element)) > 0:
+        for i in range(0, duration):
+            if self.check_if_element_exist(element):
                 return True
+            self.tools.log(f"can't find element {element} retry {i+1}/10", verbose=True)
             time.sleep(1)
         return False
 
