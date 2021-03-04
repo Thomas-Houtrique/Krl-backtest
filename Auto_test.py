@@ -16,8 +16,9 @@ def set_input_date(start, end):
     """
     Takes a start date, end date and set them in inputs
     """
-    start_input = sel_tools.get_element(css.START_INPUT)
-    end_input = sel_tools.get_element(css.END_INPUT)
+    dates_inputs = sel_tools.get_elements(css.DATES_INPUTS)
+    start_input = dates_inputs[0]
+    end_input = dates_inputs[1]
     start_input.clear()
     time.sleep(2)
     start_input.send_keys(start)
@@ -165,8 +166,9 @@ def run():
 
                 # Configure backtesting
                 pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
-                start_input = sel_tools.get_element(css.START_INPUT)
-                end_input = sel_tools.get_element(css.END_INPUT)
+                dates_inputs = sel_tools.get_elements(css.DATES_INPUTS)
+                start_input = dates_inputs[0]
+                end_input = dates_inputs[1]
                 # Check if pair is listed on exchange
                 try:
                     pairs_input.select_by_value(pair.replace(" / ", "-"))
