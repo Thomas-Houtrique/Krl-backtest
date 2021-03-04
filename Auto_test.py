@@ -160,6 +160,7 @@ for strat_id in strat_ids:
             sel_tools.check_if_server_problem()
         pairs_input = sel_tools.get_element(css.PAIRS_INPUT)
         pairs_list = pairs_input.find_elements_by_tag_name("option")
+        random.shuffle(pairs_list)
         # Backtest recommended first
         for i in pairs_list:
             if i in recommended_pairs_list:

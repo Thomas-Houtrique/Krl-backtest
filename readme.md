@@ -38,6 +38,7 @@ sudo python3 auto_test.py
 - Entrer votre login et votre mot de passe sur la page internet et appuyer sur une touche dans le terminal.\
 
 # Config File
+**L'auto login ne fonctionne que sur Firefox**
 ```yaml
 token: token
 strat_ids:
