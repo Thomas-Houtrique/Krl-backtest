@@ -141,6 +141,7 @@ def run():
                 sel_tools.check_if_server_problem()
             pairs_input = sel_tools.get_element(css.PAIRS_INPUT)
             pairs_list = pairs_input.find_elements_by_tag_name("option")
+            random.shuffle(pairs_list)
             # Backtest recommended first
             for i in pairs_list:
                 if i in recommended_pairs_list:
@@ -217,7 +218,6 @@ if user.login:
     client_driver.find_element_by_xpath("//*[contains(text(), 'Log in')]").click()
 else:
     input("Login and press a key")
-
 while True:
     try:
         random.shuffle(strat_ids)
