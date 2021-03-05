@@ -114,3 +114,20 @@ class SeleniumUtilities:
             server_problem.click()
         except Exception:
             pass
+
+
+    def close_unused_tabs(self):
+        """
+        Close unused tabs and let just the first tab
+        """
+        tabs = self.driver.window_handles
+        for tab in tabs:
+            if tabs[0] != tab:                
+                self.driver.switch_to_window(tab)
+                self.driver.close()
+    
+    def refresh(self):
+        """
+        Refresh current tab
+        """
+        self.driver.refresh()
