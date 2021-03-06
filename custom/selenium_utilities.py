@@ -131,3 +131,4 @@ class SeleniumUtilities:
         Refresh current tab
         """
         self.driver.refresh()
+        time.sleep(10)
