@@ -41,7 +41,6 @@ def run_backtest(
     backtest_date_run_backtest,
     exchange_select_run_backtest
 ):
-    sel_tools.close_unused_tabs()
     """
     Takes a strat name, a strat id, a pair, and a backtest date
     return True if no errors else return False
@@ -226,7 +225,10 @@ if user.login:
     input("Login and press a key")
 else:
     input("Login and press a key")
-while True:
+
+count_quick_fail = 0
+while count_quick_fail<3:
+    start = time.time()
     try:
         random.shuffle(strat_ids)
         run()
@@ -235,3 +237,11 @@ while True:
         tools.log("Exception occured : " + str(e))
         tools.log("Retry...")
         tools.log("==============================================")
+    end = time.time()
+    elapsed = end - start
+    if elapsed < 30:
+        count_quick_fail = count_quick_fail + 1
+        tools.log("Quick fail : " +  str(count_quick_fail) + "/3")
+    else:
+        count_quick_fail = 0
+
