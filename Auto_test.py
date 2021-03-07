@@ -112,6 +112,8 @@ def run_backtest(
     return False
 
 def run():
+    #If more 1 tab open, closed useless tabs
+    sel_tools.close_unused_tabs()
     for strat_id in strat_ids:
         sel_tools.driver.get("https://platform.kryll.io/marketplace/" + strat_id)
         tools.log("Initialisation, please wait...")
@@ -225,7 +227,6 @@ if user.login:
     input("Login and press a key")
 else:
     input("Login and press a key")
-
 count_quick_fail = 0
 while count_quick_fail<3:
     start = time.time()
