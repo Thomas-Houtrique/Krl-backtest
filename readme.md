@@ -47,6 +47,7 @@ strat_ids:
 
 email: xxx@xx.com
 password: solarwinds123
+update_strat: y
 ```
 
 ## License
