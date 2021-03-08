@@ -129,10 +129,10 @@ class SeleniumUtilities:
         count_tabs = self.count_tabs_opened()
         if count_tabs > 1:  # Will execute if more than 1 tabs found.
             for i in range(count_tabs - 1, 0, -1):
-                driver.switch_to.window(driver.window_handles[i])  # will close the last tab first.
-                driver.close()
+                self.driver.switch_to.window(self.driver.window_handles[i])  # will close the last tab first.
+                self.driver.close()
                 self.tools.log("Closed Tab No. ", i)
-            driver.switch_to.window(driver.window_handles[0])  # Switching the driver focus to First tab.
+            self.driver.switch_to.window(self.driver.window_handles[0])  # Switching the driver focus to First tab.
         else:
             self.tools.log("Found only Single tab.")
 
