@@ -32,15 +32,7 @@ def set_input_date(start, end):
 # if think we can user that to check error during backtest
 
 
-def run_backtest(
-    strat_name_run_backtest,
-    strat_id_run_backtest,
-    strat_version_run_backtest,
-    pair_run_backtest,
-    recommanded_run_backtest,
-    backtest_date_run_backtest,
-    exchange_select_run_backtest
-):
+def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_run_backtest, pair_run_backtest, recommanded_run_backtest, backtest_date_run_backtest, exchange_select_run_backtest):
     """
     Takes a strat name, a strat id, a pair, and a backtest date
     return True if no errors else return False
@@ -74,29 +66,35 @@ def run_backtest(
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
         # click on depth analysis button
         sel_tools.get_element(css.ANALYSE_TAB_DEEP_ANALYSE_LINK).click()
-        windows_handle = sel_tools.wait_for_windows_handle(100)
+        windows_handle = sel_tools.wait_for_windows_handle(120)
         if not windows_handle:
             tools.log("depth analysis button is break on kryll side, period canceled")
             return False
         sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[1])
-
+        time.sleep(10)
         # wait for the advanced bt page to load
-        sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 10000)
-
-        send_ok = api.send_result(
-            {
-                "pair": pair_run_backtest,
-                "recommended": recommanded_run_backtest,
-                "strat_id": strat_id_run_backtest,
-                "strat_name": strat_name_run_backtest,
-                "strat_version": strat_version_run_backtest,
-                "hold": hold,
-                "exchange": exchange,
-                "backtest_date_period": backtest_date_period,
-                "backtest_date_start": tools.convert_date_to_api(backtest_date_start),
-                "backtest_date_end": tools.convert_date_to_api(backtest_date_end),
-            }
-        )
+        depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
+        if not depth_analysis_page_loaded:
+            tools.log("depth analysis tab seems to don't load, refresh and retry...")
+            # retry
+            sel_tools.refresh()
+            depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
+        send_ok = False
+        if depth_analysis_page_loaded:
+            send_ok = api.send_result(
+                {
+                    "pair": pair_run_backtest,
+                    "recommended": recommanded_run_backtest,
+                    "strat_id": strat_id_run_backtest,
+                    "strat_name": strat_name_run_backtest,
+                    "strat_version": strat_version_run_backtest,
+                    "hold": hold,
+                    "exchange": exchange,
+                    "backtest_date_period": backtest_date_period,
+                    "backtest_date_start": tools.convert_date_to_api(backtest_date_start),
+                    "backtest_date_end": tools.convert_date_to_api(backtest_date_end),
+                }
+            )
         sel_tools.driver.close()
         sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[0])
         if send_ok:
@@ -105,7 +103,10 @@ def run_backtest(
         tools.log("Error during sending the result, period canceled.")
     return False
 
+
 def run():
+    # If more 1 tab open, closed useless tabs
+    sel_tools.close_unused_tabs()
     for strat_id in strat_ids:
         sel_tools.driver.get("https://platform.kryll.io/marketplace/" + strat_id)
         tools.log("Initialisation, please wait...")
@@ -196,8 +197,6 @@ def run():
             tools.log("==============================================")
 
 
-
-
 # ----------------------
 # Start of the program
 # ----------------------
@@ -217,14 +216,16 @@ else:
     input("Login and press a key")
 if "strat_ids" in user.config_file:
     if "update_strat" in user.config_file:
-        if user.config_file['update_strat'] == 'y':
+        if user.config_file["update_strat"] == "y":
             sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
             time.sleep(5)
-            ids = sel_tools.get_elements("div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)")
+            ids = sel_tools.get_elements(
+                "div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)"
+            )
             strat_ids = []
             for strat_id in ids:
-                strat_ids.append(strat_id.get_attribute('href').split('/')[4])
-            user.write_config(key='strat_ids',value=strat_ids)
+                strat_ids.append(strat_id.get_attribute("href").split("/")[4])
+            user.write_config(key="strat_ids", value=strat_ids)
         else:
             strat_ids = user.config_file["strat_ids"]
     else:
@@ -232,7 +233,9 @@ if "strat_ids" in user.config_file:
 else:
     strat_ids = tools.ask_strat()
 
-while True:
+count_quick_fail = 0
+while count_quick_fail < 3:
+    start = time.time()
     try:
         random.shuffle(strat_ids)
         run()
@@ -241,3 +244,10 @@ while True:
         tools.log("Exception occured : " + str(e))
         tools.log("Retry...")
         tools.log("==============================================")
+    end = time.time()
+    elapsed = end - start
+    if elapsed < 30:
+        count_quick_fail = count_quick_fail + 1
+        tools.log("Quick fail : " + str(count_quick_fail) + "/3")
+    else:
+        count_quick_fail = 0

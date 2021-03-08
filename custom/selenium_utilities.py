@@ -69,6 +69,7 @@ class SeleniumUtilities:
         """
         Check if an element existe in DOM. return True or False
         """
+
     def check_if_element_exist(self, element):
         if len(self.get_elements(element)) > 0:
             return True
@@ -115,19 +116,29 @@ class SeleniumUtilities:
         except Exception:
             pass
 
+    def count_tabs_opened(self):
+        """
+        Count how many tabs are opened
+        """
+        return len(self.driver.window_handles)
 
     def close_unused_tabs(self):
         """
         Close unused tabs and let just the first tab
         """
-        tabs = self.driver.window_handles
-        for tab in tabs:
-            if tabs[0] != tab:                
-                self.driver.switch_to_window(tab)
-                self.driver.close()
-    
+        count_tabs = self.count_tabs_opened()
+        if count_tabs > 1:  # Will execute if more than 1 tabs found.
+            for i in range(count_tabs - 1, 0, -1):
+                driver.switch_to.window(driver.window_handles[i])  # will close the last tab first.
+                driver.close()
+                self.tools.log("Closed Tab No. ", i)
+            driver.switch_to.window(driver.window_handles[0])  # Switching the driver focus to First tab.
+        else:
+            self.tools.log("Found only Single tab.")
+
     def refresh(self):
         """
         Refresh current tab
         """
         self.driver.refresh()
+        time.sleep(10)

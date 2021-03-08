@@ -9,12 +9,12 @@ class UserConfig:
         self.config_file = self.__config_file()
         self.login = self.__auto_login()
 
-    def write_config(self, key,value):
+    def write_config(self, key, value):
         with open(r"config.yaml", "r") as conf_file:
             new_conf_file = yaml.load(conf_file)
             new_conf_file[key] = value
         with open(r"config.yaml", "w") as conf_file:
-            yaml.dump(new_conf_file,conf_file)
+            yaml.dump(new_conf_file, conf_file)
 
     def __auto_login(self):
         if "email" and "password" in self.config_file:
@@ -64,5 +64,5 @@ class UserConfig:
                 return config_file
         else:
             token = input("Enter your token :")
-            config_file = self.write_config(key='token',value=token)
+            config_file = self.write_config(key="token", value=token)
             return config_file
