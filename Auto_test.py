@@ -204,10 +204,6 @@ def run():
 user = UserConfig()
 tools = UtilityTools(user_config=user.config)
 css = CssConst()
-if "strat_ids" in user.config_file:
-    strat_ids = user.config_file["strat_ids"]
-else:
-    strat_ids = tools.ask_strat()
 
 client_driver = tools.detect_browsers()
 api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
@@ -219,6 +215,23 @@ if user.login:
     input("Login and press a key")
 else:
     input("Login and press a key")
+if "strat_ids" in user.config_file:
+    if "update_strat" in user.config_file:
+        if user.config_file['update_strat'] == 'y':
+            sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
+            time.sleep(5)
+            ids = sel_tools.get_elements("div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)")
+            strat_ids = []
+            for strat_id in ids:
+                strat_ids.append(strat_id.get_attribute('href').split('/')[4])
+            user.write_config(key='strat_ids',value=strat_ids)
+        else:
+            strat_ids = user.config_file["strat_ids"]
+    else:
+        strat_ids = user.config_file["strat_ids"]
+else:
+    strat_ids = tools.ask_strat()
+
 while True:
     try:
         random.shuffle(strat_ids)
