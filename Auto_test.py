@@ -37,6 +37,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
     Takes a strat name, a strat id, a pair, and a backtest date
     return True if no errors else return False
     """
+    tools.log(f"{backtest_date_run_backtest}")
     backtest_date_period = backtest_date_run_backtest["period"]
     backtest_date_start = tools.convert_date_to_html(backtest_date_run_backtest["start"])
     backtest_date_end = tools.convert_date_to_html(backtest_date_run_backtest["end"])
@@ -70,31 +71,37 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         if not windows_handle:
             tools.log("depth analysis button is break on kryll side, period canceled")
             return False
-        sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[1])
-        time.sleep(10)
-        # wait for the advanced bt page to load
-        depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
-        if not depth_analysis_page_loaded:
-            tools.log("depth analysis tab seems to don't load, refresh and retry...")
-            # retry
-            sel_tools.refresh()
-            depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
         send_ok = False
-        if depth_analysis_page_loaded:
-            send_ok = api.send_result(
-                {
-                    "pair": pair_run_backtest,
-                    "recommended": recommanded_run_backtest,
-                    "strat_id": strat_id_run_backtest,
-                    "strat_name": strat_name_run_backtest,
-                    "strat_version": strat_version_run_backtest,
-                    "hold": hold,
-                    "exchange": exchange,
-                    "backtest_date_period": backtest_date_period,
-                    "backtest_date_start": tools.convert_date_to_api(backtest_date_start),
-                    "backtest_date_end": tools.convert_date_to_api(backtest_date_end),
-                }
-            )
+        try :
+            sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[1])
+            time.sleep(10)
+            # wait for the advanced bt page to load
+            depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
+            if not depth_analysis_page_loaded:
+                tools.log("depth analysis tab seems to don't load, refresh and retry...")
+                # retry
+                sel_tools.refresh()
+                depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
+            if depth_analysis_page_loaded:
+                send_ok = api.send_result(
+                    {
+                        "pair": pair_run_backtest,
+                        "recommended": recommanded_run_backtest,
+                        "strat_id": strat_id_run_backtest,
+                        "strat_name": strat_name_run_backtest,
+                        "strat_version": strat_version_run_backtest,
+                        "hold": hold,
+                        "exchange": exchange,
+                        "backtest_date_period": backtest_date_period,
+                        "backtest_date_start": tools.convert_date_to_api(backtest_date_start),
+                        "backtest_date_end": tools.convert_date_to_api(backtest_date_end),
+                    }
+                )
+        
+        except Exception as e:
+            tools.log("==============================================")
+            tools.log("Sending backtest : Exception occured : " + str(e))
+            tools.log("==============================================")
         sel_tools.driver.close()
         sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[0])
         if send_ok:
@@ -185,7 +192,7 @@ def run():
                 MIN_DATE = start_input.get_attribute("min")
                 MAX_DATE = end_input.get_attribute("max")
 
-                backtest_dates = api.get_backtest_dates(pair=pair, min_date=MIN_DATE)
+                backtest_dates = api.get_backtest_dates(min_date=MIN_DATE)
                 tools.log(f"backtest dates list = {backtest_dates}", True)
                 # run backtests on all dates
                 tools.log("** run backtest for pair " + pair + " for all selected periods")
@@ -217,8 +224,9 @@ else:
 if "strat_ids" in user.config_file:
     if "update_strat" in user.config_file:
         if user.config_file["update_strat"] == "y":
+            tools.log("Strat update in progress...")
             sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
-            time.sleep(5)
+            time.sleep(15)
             ids = sel_tools.get_elements(
                 "div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)"
             )
@@ -226,6 +234,7 @@ if "strat_ids" in user.config_file:
             for strat_id in ids:
                 strat_ids.append(strat_id.get_attribute("href").split("/")[4])
             user.write_config(key="strat_ids", value=strat_ids)
+            tools.log("Done!")
         else:
             strat_ids = user.config_file["strat_ids"]
     else:

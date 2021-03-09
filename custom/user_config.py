@@ -38,17 +38,13 @@ class UserConfig:
         user_advanced_configuration = {}
         if advanced == "y":
             user_advanced_configuration["global"] = self.yes_no_question("Do you want to test the global period ?")
-            user_advanced_configuration["recently"] = self.yes_no_question("Do you want to test the last three months ?")
-            user_advanced_configuration["last_year"] = self.yes_no_question("Do you want to test the last year ?")
-            user_advanced_configuration["other"] = self.yes_no_question("Do you want to test the other periods if avaible (bear/bull...) ?")
+            user_advanced_configuration["last_three_months"] = self.yes_no_question("Do you want to test the last three months ?")
             user_advanced_configuration["every_pairs"] = self.yes_no_question("do you want to test every pairs ?")
             user_advanced_configuration["exchanges"] = self.yes_no_question("do you want to test every exchanges ?")
             user_advanced_configuration["verbose"] = self.yes_no_question("do you want to show verbose logs ?")
         else:
             user_advanced_configuration["global"] = "y"
-            user_advanced_configuration["recently"] = "y"
-            user_advanced_configuration["last_year"] = "y"
-            user_advanced_configuration["other"] = "y"
+            user_advanced_configuration["last_three_months"] = "y"
             user_advanced_configuration["every_pairs"] = "n"
             user_advanced_configuration["exchanges"] = "n"
             user_advanced_configuration["verbose"] = "n"

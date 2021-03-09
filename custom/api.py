@@ -49,27 +49,23 @@ class Api:
             return True
         return False
 
-    def get_backtest_dates(self, pair, min_date):
+    def get_backtest_dates(self, min_date):
         """
         Takes the pair, and client token, return precise periods if present in database
         """
-        self.tools.log(f"Function get_backtest_dates input (test_pair ={pair})", True)
-        url = self.config.API_GET_PERIOD_URL + "&pair=" + pair.replace(" ", "") + "&min_date=" + min_date + "&token=" + self.token
+        self.tools.log(f"Function get_backtest_dates input )", True)
+        url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&token=" + self.token
         if self.user_config["global"] == "y":
             url += "&global=true"
-        if self.user_config["recently"] == "y":
-            url += "&recently=true"
-        if self.user_config["last_year"] == "y":
-            url += "&last_year=true"
-        if self.user_config["other"] == "y":
-            url += "&other=true"
+        if self.user_config["last_three_months"] == "y":
+            url += "&last_three_months=true"
         response = requests.request("GET", url)
         self.tools.log(
             f"Requete get_backtest_dates, code = {response.status_code}, value = {response.text}, url= {url}",
             True,
         )
         if response.status_code == 200:
-            response = response.json()["data"][pair.replace(" / ", "/")]
+            response = response.json()["data"]
             self.tools.log(
                 f"Function get_backtest_dates (condition response.status_code == 200) output = {response})",
                 True,
