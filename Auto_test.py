@@ -72,7 +72,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
             tools.log("depth analysis button is break on kryll side, period canceled")
             return False
         send_ok = False
-        try :
+        try:
             sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[1])
             time.sleep(10)
             # wait for the advanced bt page to load
@@ -97,7 +97,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
                         "backtest_date_end": tools.convert_date_to_api(backtest_date_end),
                     }
                 )
-        
+
         except Exception as e:
             tools.log("==============================================")
             tools.log("Sending backtest : Exception occured : " + str(e))
