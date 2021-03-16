@@ -1,6 +1,7 @@
 token: your_token
+update_strat: y
 strat_ids:
-- 5cd021a7a2b4ea1b142a01a7
+- 5cd021a7a2b4ea1b142a01a7c
 - 5ea5eba876621921e1ab037f
 - 5dc70e5fb9a8334b7d9b4716
 - 5c58b255812598100207aaaf
