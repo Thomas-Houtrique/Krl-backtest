@@ -37,14 +37,10 @@ class UserConfig:
         """
         user_advanced_configuration = {}
         if advanced == "y":
-            user_advanced_configuration["global"] = self.yes_no_question("Do you want to test the global period ?")
-            user_advanced_configuration["last_three_months"] = self.yes_no_question("Do you want to test the last three months ?")
             user_advanced_configuration["every_pairs"] = self.yes_no_question("do you want to test every pairs ?")
             user_advanced_configuration["exchanges"] = self.yes_no_question("do you want to test every exchanges ?")
             user_advanced_configuration["verbose"] = self.yes_no_question("do you want to show verbose logs ?")
         else:
-            user_advanced_configuration["global"] = "y"
-            user_advanced_configuration["last_three_months"] = "y"
             user_advanced_configuration["every_pairs"] = "n"
             user_advanced_configuration["exchanges"] = "n"
             user_advanced_configuration["verbose"] = "n"
@@ -57,8 +53,11 @@ class UserConfig:
         if os.path.exists("config.yaml"):
             with open(r"config.yaml") as conf_file:
                 config_file = yaml.load(conf_file, Loader=yaml.FullLoader)
-                return config_file
         else:
             token = input("Enter your token :")
-            config_file = self.write_config(key="token", value=token)
-            return config_file
+            with open(r"config.yaml", "w+") as conf_file:
+                yaml.dump({'token' : token}, conf_file)
+            with open(r"config.yaml") as conf_file:
+                config_file = yaml.load(conf_file, Loader=yaml.FullLoader)
+                
+        return config_file
