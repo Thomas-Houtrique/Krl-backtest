@@ -21,10 +21,8 @@ def set_input_date(start, end):
     start_input = dates_inputs[0]
     end_input = dates_inputs[1]
     start_input.clear()
-    time.sleep(2)
     start_input.send_keys(start)
     end_input.clear()
-    time.sleep(2)
     end_input.send_keys(end)
 
 
@@ -51,10 +49,10 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
         sel_tools.click_on_element(test_btn)
 
+        sel_tools.check_if_popup()
         error = sel_tools.check_error_during_backtest()
         if error:
             return False
-        time.sleep(5)
         sel_tools.check_if_popup()
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
         # click on depth analysis button
@@ -66,7 +64,6 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         send_ok = False
         try:
             sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[1])
-            time.sleep(10)
             # wait for the advanced bt page to load
             depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
             if not depth_analysis_page_loaded:

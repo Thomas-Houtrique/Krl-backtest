@@ -41,21 +41,21 @@ class SeleniumUtilities:
         """
         Takes a css class, return str with "+" replaced by void
         """
-        element = self.get_element(element_path, duration)
+        element = self.get_element_text(element_path, duration)
         return element.replace("+", "")
 
     def get_element_percent(self, element_path, duration=10):
         """
         Takes a css class, return str with " %" replaced by void
         """
-        element = self.get_element(element_path, duration)
+        element = self.get_element_text(element_path, duration)
         return element.replace(" %", "")
 
     def get_element_days(self, element_path, duration=10):
         """
         Takes a css class, return str with " days" replaced by void
         """
-        element = self.get_element(element_path, duration)
+        element = self.get_element_text(element_path, duration)
         return element.replace(" days", "")
 
     def check_error_during_backtest(self):
