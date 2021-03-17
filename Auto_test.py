@@ -248,14 +248,14 @@ else:
 count_quick_fail = 0
 while count_quick_fail < 3:
     start = time.time()
-    #try:
-    random.shuffle(strat_ids)
-    run()
-    #except Exception as e:
-    #    tools.log("==============================================")
-    #    tools.log("Exception occured : " + str(e))
-    #    tools.log("Retry...")
-    #    tools.log("==============================================")
+    try:
+        random.shuffle(strat_ids)
+        run()
+    except Exception as e:
+        tools.log("==============================================")
+        tools.log("Exception occured : " + str(e))
+        tools.log("Retry...")
+        tools.log("==============================================")
     end = time.time()
     elapsed = end - start
     if elapsed < 30:
