@@ -48,10 +48,8 @@ class Api:
         """
         self.tools.log(f"Function get_backtest_dates input )", True)
         url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&token=" + self.token
-        if self.user_config["global"] == "y":
-            url += "&global=true"
-        if self.user_config["last_three_months"] == "y":
-            url += "&last_three_months=true"
+        url += "&global=true"
+        url += "&last_three_months=true"
         response = requests.request("GET", url)
         self.tools.log(
             f"Requete get_backtest_dates, code = {response.status_code}, value = {response.text}, url= {url}", True,
