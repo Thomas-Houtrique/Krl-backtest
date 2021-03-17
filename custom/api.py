@@ -22,13 +22,7 @@ class Api:
         return True if request worked else return False
         """
         advanced_analyse_link = self.sel_tools.driver.current_url
-        result = self.get_advanced_result(
-            send_result["strat_name"],
-            send_result["pair"],
-            send_result["backtest_date_start"],
-            send_result["backtest_date_end"],
-            advanced_analyse_link,
-        )
+        result = self.get_advanced_result(send_result["strat_name"], send_result["pair"], send_result["backtest_date_start"], send_result["backtest_date_end"], advanced_analyse_link,)
         url = self.config.API_SEND_URL
 
         result["token"] = self.token
@@ -42,8 +36,7 @@ class Api:
         response = requests.request("POST", url, data=result)
 
         self.tools.log(
-            f"Requete post, status_code = {response.status_code}, value = {response.text}",
-            True,
+            f"Requete post, status_code = {response.status_code}, value = {response.text}", True,
         )
         if response.status_code == 200:
             return True
@@ -61,25 +54,21 @@ class Api:
             url += "&last_three_months=true"
         response = requests.request("GET", url)
         self.tools.log(
-            f"Requete get_backtest_dates, code = {response.status_code}, value = {response.text}, url= {url}",
-            True,
+            f"Requete get_backtest_dates, code = {response.status_code}, value = {response.text}, url= {url}", True,
         )
         if response.status_code == 200:
             response = response.json()["data"]
             self.tools.log(
-                f"Function get_backtest_dates (condition response.status_code == 200) output = {response})",
-                True,
+                f"Function get_backtest_dates (condition response.status_code == 200) output = {response})", True,
             )
             return response
         if response.status_code == 400:
             self.tools.log(
-                "Function get_backtest_dates (condition response.status_code == 400) output = [])",
-                True,
+                "Function get_backtest_dates (condition response.status_code == 400) output = [])", True,
             )
             return []
         self.tools.log(
-            f"get_backtest_dates output (condition other) error = (code = {response.status_code}, value = {response.text}, url= {url})",
-            True,
+            f"get_backtest_dates output (condition other) error = (code = {response.status_code}, value = {response.text}, url= {url})", True,
         )
         return -1
 
@@ -88,8 +77,7 @@ class Api:
         Takes the pair,the period,the strat,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"Function backtest_already_did input (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version})",
-            True,
+            f"Function backtest_already_did input (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version})", True,
         )
         pair = pair.replace(" ", "")
         url_backtest_already_did = (
@@ -97,8 +85,7 @@ class Api:
         )
         response = requests.request("GET", url_backtest_already_did)
         self.tools.log(
-            f"Requete backtest_already_did, status_code = {response.status_code}, value = {response.text}, url= {url_backtest_already_did}",
-            True,
+            f"Requete backtest_already_did, status_code = {response.status_code}, value = {response.text}, url= {url_backtest_already_did}", True,
         )
         if response.status_code == 200:
             self.tools.log("Please Wait...")
@@ -107,12 +94,7 @@ class Api:
         return True
 
     def get_advanced_result(
-        self,
-        strat_name,
-        pair,
-        backtest_date_start,
-        backtest_date_end,
-        advanced_analyse_link,
+        self, strat_name, pair, backtest_date_start, backtest_date_end, advanced_analyse_link,
     ):
         """
         Takes a strat name, a pair, a backtest start date, a backtest end date and the analyse link

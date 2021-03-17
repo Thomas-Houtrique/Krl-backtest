@@ -56,8 +56,8 @@ class UserConfig:
         else:
             token = input("Enter your token :")
             with open(r"config.yaml", "w+") as conf_file:
-                yaml.dump({'token' : token}, conf_file)
+                yaml.dump({"token": token}, conf_file)
             with open(r"config.yaml") as conf_file:
                 config_file = yaml.load(conf_file, Loader=yaml.FullLoader)
-                
+
         return config_file

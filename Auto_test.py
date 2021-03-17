@@ -44,13 +44,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
     exchange = exchange_select_run_backtest.first_selected_option.text.strip()
     tools.log(f"Selected exchange = {exchange}")
     tools.log(f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
-    if not api.backtest_already_did(
-        pair=pair_run_backtest,
-        period=backtest_date_period,
-        strat=strat_name_run_backtest,
-        version=strat_version_run_backtest,
-        exchange=exchange,
-    ):
+    if not api.backtest_already_did(pair=pair_run_backtest, period=backtest_date_period, strat=strat_name_run_backtest, version=strat_version_run_backtest, exchange=exchange,):
         # set date into input
         set_input_date(backtest_date_start, backtest_date_end)
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
