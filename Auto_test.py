@@ -132,7 +132,7 @@ def run():
         strat_version = sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1]
         exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
         time.sleep(4)
-            
+
         if "exchanges" in user.config_file:
             exchange_options = sel_tools.get_element(css.EXCHANGE).find_elements_by_tag_name("option")
             user_exchanges = user.config_file["exchanges"]
