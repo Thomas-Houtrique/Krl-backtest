@@ -130,18 +130,24 @@ def run():
         tools.log("Initialisation, please wait...")
         sel_tools.click_on_element(backtest_btn)
         # To wait full load of exchange select
-        binance_exchange = sel_tools.get_element(css.BINANCE_EXCHANGE)
         exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
-        time.sleep(2)
-        if user.config["exchanges"] == "y":
+        time.sleep(4)
+            
+        if "exchanges" in user.config_file:
             exchange_options = sel_tools.get_element(css.EXCHANGE).find_elements_by_tag_name("option")
+            user_exchanges = user.config_file["exchanges"]
+            final_exchanges = []
+            for exchange in exchange_options:
+                if exchange.text in user_exchanges:
+                    final_exchanges.append(exchange)
         else:
-            exchange_options = [sel_tools.get_element(css.BINANCE_EXCHANGE)]
-        for exchange in exchange_options:
+            final_exchanges = [sel_tools.get_element(css.BINANCE_EXCHANGE)]
+
+        for exchange in final_exchanges:
+            exchange = exchange.text
             if exchange:
-                exchange_text = exchange.text
-                tools.log(f"Testing on exchange {exchange_text}")
-                exchange_select.select_by_visible_text(exchange_text)
+                tools.log(f"Testing on exchange {exchange}")
+                exchange_select.select_by_visible_text(exchange)
                 time.sleep(2)
                 sel_tools.check_if_server_problem()
             pairs_input = sel_tools.get_element(css.PAIRS_INPUT)
@@ -187,7 +193,7 @@ def run():
                 try:
                     pairs_input.select_by_value(pair.replace(" / ", "-"))
                 except Exception:
-                    tools.log(fr"/!\ Error recommanded pair {pair} not listed on {exchange_text}")
+                    tools.log(fr"/!\ Error recommanded pair {pair} not listed on {exchange}")
                     continue
 
                 # get min/max dates
@@ -241,6 +247,7 @@ if "strat_ids" in user.config_file:
         strat_ids = user.config_file["strat_ids"]
 else:
     strat_ids = tools.ask_strat()
+
 
 count_quick_fail = 0
 while count_quick_fail < 3:
