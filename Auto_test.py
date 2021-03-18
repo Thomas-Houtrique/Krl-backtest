@@ -108,7 +108,7 @@ def run():
         recommended_pairs = sel_tools.get_elements(css.RECOMMEND_PAIRS)
         strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
         tools.log("==============================================")
-        tools.log(f"Testing strat : {strat_name}, version : {strat_version}")
+        tools.log(f"Testing strat : {strat_name}")
         tools.log("==============================================")
         recommended_pairs_list = []
         for i in recommended_pairs:
