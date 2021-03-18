@@ -72,7 +72,7 @@ class SeleniumUtilities:
                     analyse_tab = self.get_elements(self.css.ANALYSE_TAB_DEEP_ANALYSE_LINK)
                     if analyse_tab:
                         return False
-                    #If btn test is active, but analyse tab no, we have an error
+                    # If btn test is active, but analyse tab no, we have an error
                     self.tools.log("Error during the backtest")
                     return True
             except:
@@ -123,7 +123,6 @@ class SeleniumUtilities:
                 return True
             time.sleep(1)
         return False
-
 
     def check_if_popup(self):
         """

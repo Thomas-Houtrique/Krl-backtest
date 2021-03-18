@@ -114,7 +114,7 @@ def run():
         recommended_pairs_list = []
         for i in recommended_pairs:
             recommended_pairs_list.append(i)
-        #try to install the strat
+        # try to install the strat
         try:
             tools.log("Checking if strat is installed...")
             backtest_btn = sel_tools.get_element(css.BACKTEST_BTN)
@@ -125,7 +125,7 @@ def run():
             tools.log("Done")
             backtest_btn = sel_tools.get_element(css.BACKTEST_BTN)
 
-        #click on backtest btn
+        # click on backtest btn
         tools.log("Strat can be backtested...")
         tools.log("Initialisation, please wait...")
         sel_tools.click_on_element(backtest_btn)
@@ -174,7 +174,7 @@ def run():
                 start_input = dates_inputs[0]
                 end_input = dates_inputs[1]
                 # prepare date fields
-                
+
                 sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
                 sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
                 selected_pair = pairs_input.first_selected_option
@@ -182,7 +182,7 @@ def run():
                 if selected_pair_value != pair.replace(" / ", "-"):
                     sel_tools.driver.execute_script('arguments[0].setAttribute("min","")', start_input)
                     sel_tools.driver.execute_script('arguments[0].setAttribute("max","")', end_input)
-                
+
                 # Check if pair is listed on exchange
                 try:
                     pairs_input.select_by_value(pair.replace(" / ", "-"))
