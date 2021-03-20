@@ -60,3 +60,5 @@ class CssConst:
     USER_DROPDOWN = "body > app-root > div > app-dashboard-page > div > app-header > header > div.header-bottom > a.header-user"
     # other
     POPUP = "app-dialog-tutorial > div > div > div > button.btn.btn-primary"
+    #last line logs selector
+    LOGS_LAST_LINE = "app-logs > table > tbody > tr:last-child"

@@ -65,7 +65,7 @@ class SeleniumUtilities:
         # ugly method to detect if there is an error or end page
         for _ in range(0, 1000):
             time.sleep(10)
-            try:
+            try :
                 backtest_start_btn = self.get_element_text(self.css.BACKTEST_START_BTN)
                 if backtest_start_btn and backtest_start_btn == "Test":
                     # Check if analysis tab is open
@@ -74,9 +74,18 @@ class SeleniumUtilities:
                         return False
                     # If btn test is active, but analyse tab no, we have an error
                     self.tools.log("Error during the backtest")
+                    try :
+                        self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
+                    except :
+                        pass
                     return True
-            except:
+            except :
                 break
+        self.tools.log("Error during the backtest")
+        try :
+            self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
+        except :
+            pass
         return True
 
         """

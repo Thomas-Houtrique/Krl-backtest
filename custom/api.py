@@ -23,23 +23,24 @@ class Api:
         """
         advanced_analyse_link = self.sel_tools.driver.current_url
         result = self.get_advanced_result(send_result["strat_name"], send_result["pair"], send_result["backtest_date_start"], send_result["backtest_date_end"], advanced_analyse_link,)
-        url = self.config.API_SEND_URL
+        if result:
+            url = self.config.API_SEND_URL
 
-        result["token"] = self.token
-        result["recommended"] = str(send_result["recommended"]).replace(" ", "")
-        result["strat_id"] = str(send_result["strat_id"])
-        result["strat_version"] = str(send_result["strat_version"])
-        result["hold"] = str(send_result["hold"])
-        result["exchange"] = str(send_result["exchange"])
-        result["period"] = send_result["backtest_date_period"]
-        self.tools.log(f"Sending result to the Database, result = {result}", True)
-        response = requests.request("POST", url, data=result)
+            result["token"] = self.token
+            result["recommended"] = str(send_result["recommended"]).replace(" ", "")
+            result["strat_id"] = str(send_result["strat_id"])
+            result["strat_version"] = str(send_result["strat_version"])
+            result["hold"] = str(send_result["hold"])
+            result["exchange"] = str(send_result["exchange"])
+            result["period"] = send_result["backtest_date_period"]
+            self.tools.log(f"Sending result to the Database, result = {result}", True)
+            response = requests.request("POST", url, data=result)
 
-        self.tools.log(
-            f"Requete post, status_code = {response.status_code}, value = {response.text}", True,
-        )
-        if response.status_code == 200:
-            return True
+            self.tools.log(
+                f"Requete post, status_code = {response.status_code}, value = {response.text}", True,
+            )
+            if response.status_code == 200:
+                return True
         return False
 
     def get_backtest_dates(self, min_date):
@@ -99,39 +100,47 @@ class Api:
         return dict of results
         """
         result = {}
-        result["strat"] = strat_name
-        result["pair"] = pair
-        result["start"] = backtest_date_start.replace("-", "/")
-        result["end"] = backtest_date_end.replace("-", "/")
-        result["link"] = advanced_analyse_link.split("=")[1]
-        result["duration"] = self.sel_tools.get_element_days(self.css.ADVANCED_ANALYSE_DURATION)
-        result["volatility"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_VOLATILITY)
-        result["trade"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_TRADE)
-        result["start_wallet"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_START_WALLET)
-        result["stop_wallet"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_END_WALLET)
-        result["gain"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_GAIN)
-        result["relative_gain"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_RELATIVE_GAIN)
-        result["winning_periods"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_WINNING_PERIOD).split(" ")[0]
-        result["losing_periods"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_LOSING_PERIOD).split(" ")[0]
-        result["average_win"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_WIN)
-        result["average_loss"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_LOSS)
-        result["wallet_average_investment"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_WALLET_AVERAGE_INVESTMENT)
-        result["wallet_maximum_investment"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_WALLET_MAXIMUM_INVESTMENT)
-        result["win_loss_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_WIN_LOSS_RATIO).replace("/", ":")
-        result["risk_reward_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_RISK_REWARD_RATIO)
-        result["expected_return"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_EXPECTED_RETURN)
-        result["sharpe_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_SHARPE_RATIO)
-        result["sortino_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_SORTINO_RATIO)
-        result["risk_of_drawdown"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_RISK_OF_DRAWDOWN)
-        if result["risk_of_drawdown"] == "<0.01":
-            result["risk_of_drawdown"] = 0
+        try :
+            result["trade"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_TRADE)
+            result["strat"] = strat_name
+            result["pair"] = pair
+            result["start"] = backtest_date_start.replace("-", "/")
+            result["end"] = backtest_date_end.replace("-", "/")
+            result["link"] = advanced_analyse_link.split("=")[1]
+            result["duration"] = self.sel_tools.get_element_days(self.css.ADVANCED_ANALYSE_DURATION)
+            result["volatility"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_VOLATILITY)
+            result["start_wallet"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_START_WALLET)
+            result["stop_wallet"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_END_WALLET)
+            result["gain"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_GAIN)
+            result["relative_gain"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_RELATIVE_GAIN)
+            result["winning_periods"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_WINNING_PERIOD).split(" ")[0]
+            result["losing_periods"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_LOSING_PERIOD).split(" ")[0]
+            result["average_win"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_WIN)
+            result["average_loss"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_LOSS)
+            result["wallet_average_investment"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_WALLET_AVERAGE_INVESTMENT)
+            result["wallet_maximum_investment"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_WALLET_MAXIMUM_INVESTMENT)
+            result["win_loss_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_WIN_LOSS_RATIO).replace("/", ":")
+            result["risk_reward_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_RISK_REWARD_RATIO)
+            result["expected_return"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_EXPECTED_RETURN)
+            result["sharpe_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_SHARPE_RATIO)
+            result["sortino_ratio"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_SORTINO_RATIO)
+            result["risk_of_drawdown"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_RISK_OF_DRAWDOWN)
+            if result["risk_of_drawdown"] == "<0.01":
+                result["risk_of_drawdown"] = 0
 
-        max_drawdown_informations = self.__split_max_drawdown_informations(self.css.ADVANCED_ANALYSE_MAX_DRAWDOWN_INFORMATIONS)
-        result["maximum_drawdown"] = max_drawdown_informations["maximum_drawdown"]
-        result["maximum_drawdown_start"] = max_drawdown_informations["maximum_drawdown_start"]
-        result["maximum_drawdown_end"] = max_drawdown_informations["maximum_drawdown_end"]
-        result["average_drawdown"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_DRAWDOWN)
-        return result
+            max_drawdown_informations = self.__split_max_drawdown_informations(self.css.ADVANCED_ANALYSE_MAX_DRAWDOWN_INFORMATIONS)
+            result["maximum_drawdown"] = max_drawdown_informations["maximum_drawdown"]
+            result["maximum_drawdown_start"] = max_drawdown_informations["maximum_drawdown_start"]
+            result["maximum_drawdown_end"] = max_drawdown_informations["maximum_drawdown_end"]
+            result["average_drawdown"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_DRAWDOWN)
+            self.tools.log(f"results : {result}")
+            return result
+        except Exception as e:
+            self.tools.log("==============================================")
+            self.tools.log("invalid deep analysis.")
+            self.tools.log(f"results : {result}")
+            self.tools.log("==============================================")
+        return False
 
     def __split_max_drawdown_informations(self, element_path):
         """
