@@ -129,7 +129,7 @@ def run():
         strat_version = sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1]
         strat_name = sel_tools.get_element_text(css.STRAT_NAME_BACKTEST).strip()
         tools.log("==============================================")
-        tools.log(f"Testing strat : {strat_name}, vversion : {strat_version}")
+        tools.log(f"Testing strat : {strat_name}, version : {strat_version}")
         tools.log("==============================================")
         exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
         time.sleep(4)

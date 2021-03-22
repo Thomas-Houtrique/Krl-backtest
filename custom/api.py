@@ -105,8 +105,8 @@ class Api:
             result["trade"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_TRADE)
             result["strat"] = strat_name
             result["pair"] = pair
-            result["start"] = backtest_date_start.replace("-", "/")
-            result["end"] = backtest_date_end.replace("-", "/")
+            result["start"] = backtest_date_start
+            result["end"] = backtest_date_end
             result["link"] = advanced_analyse_link.split("=")[1]
             result["duration"] = self.sel_tools.get_element_days(self.css.ADVANCED_ANALYSE_DURATION)
             result["volatility"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_VOLATILITY)
@@ -150,11 +150,8 @@ class Api:
             self.tools.log(f"results : {result}")
             return result
         except Exception as e:
-            screenshot_name = "deep_analysis_faile_" + str(advanced_analyse_link) + ".png"
-            self.sel_tools.save_screenshot(screenshot_name)
             self.tools.log("==============================================")
             self.tools.log("invalid deep analysis.")
-            self.tools.log("You can see the screenshot on this file : " + screenshot_name)
             self.tools.log(f"results : {result}")
             self.tools.log("==============================================")
         return False
