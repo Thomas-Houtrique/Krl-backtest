@@ -139,7 +139,7 @@ class Api:
             advanced_analyse_dates = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_DATES)
             end_date = advanced_analyse_dates.split(' — ')[1]
             end_date_kryll_side = datetime.datetime(int(end_date.split('-')[2]), int(end_date.split('-')[0]), int(end_date.split('-')[1]))
-            api_date_end = datetime.datetime(int(result["end"].split('-')[0]), int(result["end"].split('-')[1]), int(result["end"].split('-')[2]))
+            api_date_end = datetime.datetime(int(backtest_date_end.split('-')[0]), int(backtest_date_end.split('-')[1]), int(backtest_date_end.split('-')[2]))
             if end_date_kryll_side < api_date_end:
                 self.tools.log("==============================================")
                 self.tools.log("invalid deep analysis.")

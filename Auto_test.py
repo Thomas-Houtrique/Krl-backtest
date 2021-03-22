@@ -12,7 +12,6 @@ from custom.selenium_utilities import SeleniumUtilities
 from selenium.common.exceptions import NoSuchElementException
 from custom.api import Api
 
-
 def set_input_date(start, end):
     """
     Takes a start date, end date and set them in inputs
