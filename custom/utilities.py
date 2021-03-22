@@ -73,6 +73,8 @@ class UtilityTools:
                 if headless == 'y':
                     options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
+                if headless == 'y':
+                    driver.set_window_size(1920, 1080)
             elif client_browser == "Firefox":
                 driver = webdriver.Firefox(executable_path=r"geckodriver.exe")
             return driver
