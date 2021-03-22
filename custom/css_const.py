@@ -49,6 +49,7 @@ class CssConst:
     STRAT_NAME = (
         "app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2"
     )
+    STRAT_NAME_BACKTEST = "div.backtest-container-header.toolbar > h2"
     STRAT_VERSION = ".backtest-container-published-left > app-strategy-published-meta:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > div:nth-child(1)"
     BACKTEST_BTN = "button.d-sm-inline-block"
     INSTALL_BTN = ".right > button:nth-child(1)"

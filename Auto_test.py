@@ -107,9 +107,7 @@ def run():
         sel_tools.driver.get("https://platform.kryll.io/marketplace/" + strat_id)
         recommended_pairs = sel_tools.get_elements(css.RECOMMEND_PAIRS)
         strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
-        tools.log("==============================================")
-        tools.log(f"Testing strat : {strat_name}")
-        tools.log("==============================================")
+        tools.log(f"Checking strat : {strat_name}")
         recommended_pairs_list = []
         for i in recommended_pairs:
             recommended_pairs_list.append(i)
@@ -130,6 +128,10 @@ def run():
         sel_tools.click_on_element(backtest_btn)
         # To wait full load of exchange select
         strat_version = sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1]
+        strat_name = sel_tools.get_element_text(css.STRAT_NAME_BACKTEST).strip()
+        tools.log("==============================================")
+        tools.log(f"Testing strat : {strat_name}, vversion : {strat_version}")
+        tools.log("==============================================")
         exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
         time.sleep(4)
 
