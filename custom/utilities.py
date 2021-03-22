@@ -44,7 +44,7 @@ class UtilityTools:
         if (self.user_config["verbose"] == "y" and verbose) or not verbose:
             print(log_formated_string)
 
-    def detect_browsers(self):
+    def detect_browsers(self, headless='n'):
         """
         Takes the client os, return the correct driver according to client browsers
         """
@@ -70,6 +70,8 @@ class UtilityTools:
             if client_browser == "Google Chrome":
                 options = webdriver.ChromeOptions()
                 options.add_experimental_option("excludeSwitches", ["enable-logging"])
+                if headless == 'y':
+                    options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
             elif client_browser == "Firefox":
                 driver = webdriver.Firefox(executable_path=r"geckodriver.exe")

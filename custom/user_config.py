@@ -57,5 +57,6 @@ class UserConfig:
                 yaml.dump({"token": token}, conf_file)
             with open(r"config.yaml") as conf_file:
                 config_file = yaml.load(conf_file, Loader=yaml.FullLoader)
-
+        if not "headless" in config_file:
+            config_file["headless"] = "n"
         return config_file

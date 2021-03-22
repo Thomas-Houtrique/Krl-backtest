@@ -133,12 +133,12 @@ class SeleniumUtilities:
             time.sleep(1)
         return False
 
-    def check_if_popup(self):
+    def check_if_popup(self, duration=10):
         """
         Check if tutorial popup is present on the screen
         """
         try:
-            popup = self.get_element(self.css.POPUP)
+            popup = self.get_element(self.css.POPUP, duration)
             popup.click()
         except Exception:
             pass
@@ -181,5 +181,18 @@ class SeleniumUtilities:
         time.sleep(10)
 
     def click_on_element(self, element):
-        self.check_if_popup()
-        element.click()
+        """
+        Click on element
+        """
+        try:
+            element.click()
+        except Exception:
+            self.check_if_popup(10)
+            element.click()
+
+    def save_screenshot(self,filename):
+        """
+        Save a screenshot of page
+        """
+        self.driver.set_window_size(1920, 1080)      #the trick
+        self.driver.save_screenshot(filename)

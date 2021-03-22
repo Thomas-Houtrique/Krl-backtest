@@ -1,5 +1,10 @@
 # replace your_token by your token
 token: your_token
+# For autologin and don't show browser, you can set up your login and password here after remove # before these two parameters
+#email: your_email
+#password: your_password
+# Set to "y" if you activate autologin and want to hide browser
+headless: n
 # list of exchange to backtest
 Exchanges:
 - Binance

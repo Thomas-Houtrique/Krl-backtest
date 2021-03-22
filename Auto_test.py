@@ -221,7 +221,7 @@ user = UserConfig()
 tools = UtilityTools(user_config=user.config)
 css = CssConst()
 
-client_driver = tools.detect_browsers()
+client_driver = tools.detect_browsers(user.config_file["headless"])
 api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
 sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
@@ -229,6 +229,7 @@ tools.log("Login...")
 if user.login:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
+    sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
 if "strat_ids" in user.config_file:
     if "update_strat" in user.config_file:
@@ -252,14 +253,19 @@ else:
 
 
 count_quick_fail = 0
+execution_id = 0
 while count_quick_fail < 3:
+    execution_id = execution_id + 1
     start = time.time()
     try:
         random.shuffle(strat_ids)
         run()
     except Exception as e:
+        screenshot_name = "screen_fail_" + str(execution_id) + ".png"
+        sel_tools.save_screenshot(screenshot_name)
         tools.log("==============================================")
-        tools.log("Exception occured : " + str(e))
+        tools.log("Exception occured on execution " + str(execution_id) + " : " + str(e))
+        tools.log("You can see the screenshot on this file : " + screenshot_name)
         tools.log("Retry...")
         tools.log("==============================================")
     end = time.time()

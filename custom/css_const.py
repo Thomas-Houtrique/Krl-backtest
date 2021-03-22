@@ -5,6 +5,7 @@ class CssConst:
     """"Class containing all css classes"""
 
     # html_results const
+    ADVANCED_ANALYSE_DATES = "#root > div > div > div > div.big-container > div > div > div.ant-card-head > div > div > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(2)"
     ADVANCED_ANALYSE_DURATION = "#root > div > div > div > div.big-container > div > div > div.ant-card-body > div > div:nth-child(1) > div:nth-child(1) > div:nth-child(2)"
     ADVANCED_ANALYSE_VOLATILITY = "#root > div > div > div > div.big-container > div > div > div.ant-card-body > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(2)"
     ADVANCED_ANALYSE_TRADE = "#root > div > div > div > div.ant-row > div > div > div:nth-child(1) > div:nth-child(1) > div > div.ant-card-body > div > div:nth-child(1) > div:nth-child(2)"
@@ -56,7 +57,7 @@ class CssConst:
     # login page
     EMAIL_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(4) > input"
     PASSWORD_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div.form-group.form-required.mb-0 > input"
-    LOG_IN_BTN = ".body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(8) > button"
+    LOG_IN_BTN = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(8) > button"
     # root page
     USER_DROPDOWN = "body > app-root > div > app-dashboard-page > div > app-header > header > div.header-bottom > a.header-user"
     # other

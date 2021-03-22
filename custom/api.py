@@ -3,6 +3,7 @@ from custom.selenium_utilities import SeleniumUtilities
 from custom.utilities import UtilityTools
 from custom.config import Config
 from custom.css_const import CssConst
+import datetime
 
 
 class Api:
@@ -133,6 +134,19 @@ class Api:
             result["maximum_drawdown_start"] = max_drawdown_informations["maximum_drawdown_start"]
             result["maximum_drawdown_end"] = max_drawdown_informations["maximum_drawdown_end"]
             result["average_drawdown"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_DRAWDOWN)
+
+            # check if date_end on analysis is the same as date end backtested
+            advanced_analyse_dates = self.sel_tools.get_element_text(css.DATES)
+            end_date = advanced_analyse_dates.split(' — ')[1]
+            end_date_kryll_side = datetime.datetime(int(end_date.split('-')[2]), int(end_date.split('-')[0]), int(end_date.split('-')[1]))
+            api_date_end = datetime.datetime(int(result["end"].split('-')[0]), int(result["end"].split('-')[1]), int(result["end"].split('-')[2]))
+            if end_date_kryll_side < api_date_end:
+                self.tools.log("==============================================")
+                self.tools.log("invalid deep analysis.")
+                self.tools.log("Backtest seems to be interrupt by other backtest on the same time")
+                self.tools.log(f"results : {result}")
+                self.tools.log("==============================================")
+                return False
             self.tools.log(f"results : {result}")
             return result
         except Exception as e:
