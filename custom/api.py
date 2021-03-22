@@ -136,7 +136,7 @@ class Api:
             result["average_drawdown"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_AVERAGE_DRAWDOWN)
 
             # check if date_end on analysis is the same as date end backtested
-            advanced_analyse_dates = self.sel_tools.get_element_text(css.DATES)
+            advanced_analyse_dates = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_DATES)
             end_date = advanced_analyse_dates.split(' — ')[1]
             end_date_kryll_side = datetime.datetime(int(end_date.split('-')[2]), int(end_date.split('-')[0]), int(end_date.split('-')[1]))
             api_date_end = datetime.datetime(int(result["end"].split('-')[0]), int(result["end"].split('-')[1]), int(result["end"].split('-')[2]))
@@ -150,8 +150,11 @@ class Api:
             self.tools.log(f"results : {result}")
             return result
         except Exception as e:
+            screenshot_name = "deep_analysis_faile_" + str(advanced_analyse_link) + ".png"
+            self.sel_tools.save_screenshot(screenshot_name)
             self.tools.log("==============================================")
             self.tools.log("invalid deep analysis.")
+            self.tools.log("You can see the screenshot on this file : " + screenshot_name)
             self.tools.log(f"results : {result}")
             self.tools.log("==============================================")
         return False
