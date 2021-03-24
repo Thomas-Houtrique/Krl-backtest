@@ -70,6 +70,8 @@ class UtilityTools:
             if client_browser == "Google Chrome":
                 options = webdriver.ChromeOptions()
                 options.add_experimental_option("excludeSwitches", ["enable-logging"])
+                options.add_argument('--no-sandbox')
+                options.add_argument('--disable-dev-shm-usage')
                 if headless == 'y':
                     options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)

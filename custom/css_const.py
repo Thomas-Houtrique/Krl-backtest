@@ -57,6 +57,7 @@ class CssConst:
     # login page
     EMAIL_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(4) > input"
     PASSWORD_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div.form-group.form-required.mb-0 > input"
+    TWO_FA_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div.form-group.mb-2 > input"
     LOG_IN_BTN = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(8) > button"
     # root page
     USER_DROPDOWN = "body > app-root > div > app-dashboard-page > div > app-header > header > div.header-bottom > a.header-user"

@@ -63,7 +63,7 @@ class SeleniumUtilities:
         Check if backtest broke return True if Bt broke and False if not
         """
         # ugly method to detect if there is an error or end page
-        for _ in range(0, 1000):
+        for _ in range(0, 10000):
             time.sleep(10)
             try :
                 backtest_start_btn = self.get_element_text(self.css.BACKTEST_START_BTN)

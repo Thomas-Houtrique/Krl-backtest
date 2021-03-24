@@ -228,6 +228,8 @@ tools.log("Login...")
 if user.login:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
+    twofa = input("2FA :").lower()
+    sel_tools.get_element(css.TWO_FA_INPUT).send_keys(twofa)
     sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
 if "strat_ids" in user.config_file:
