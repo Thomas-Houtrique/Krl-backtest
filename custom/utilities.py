@@ -72,6 +72,7 @@ class UtilityTools:
                 options.add_experimental_option("excludeSwitches", ["enable-logging"])
                 options.add_argument('--no-sandbox')
                 options.add_argument('--disable-dev-shm-usage')
+                options.add_argument("--mute-audio")
                 if headless == 'y':
                     options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
