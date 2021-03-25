@@ -159,12 +159,12 @@ def run():
                 if i in recommended_pairs_list:
                     pairs_list.remove(i)
             total_pairs_list = recommended_pairs_list + pairs_list
-
             for i in total_pairs_list:
                 # Get infos
                 pair = i.text.strip()
                 if user.config_file['accu']:
                     if not pair.split(' / ')[1] in user.config_file['accu']:
+                        tools.log(f'Pair {pair} skipped')
                         continue
                     
                 RECOMMENDED = 0
