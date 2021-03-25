@@ -11,6 +11,9 @@ Exchanges:
 # set to y if you want to auto update strat list
 update_strat: y
 # strat to test. Automatically updated if update_strat is set to y
+accu:
+- USDT
+- BTC
 strat_ids:
 - 5cd021a7a2b4ea1b142a01a7c
 - 5ea5eba876621921e1ab037f
