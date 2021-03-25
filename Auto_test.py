@@ -163,7 +163,10 @@ def run():
             for i in total_pairs_list:
                 # Get infos
                 pair = i.text.strip()
-
+                if user.config_file['accu']:
+                    if not pair.split(' / ')[1] in user.config_file['accu']:
+                        continue
+                    
                 RECOMMENDED = 0
                 if i in recommended_pairs_list:
                     RECOMMENDED = 1
