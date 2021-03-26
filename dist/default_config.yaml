@@ -14,10 +14,10 @@ update_strat: y
 #accu:
 #- USDT
 #- BTC
-# if you want to test only specifics paires (recommended will be test )
-#accu:
-#- USDT
-#- BTC
+# if you want to test only specifics pairs (recommended will be test )
+#pair:
+#- BTC/USDT
+#- ETH/BTC
 # strat to test. Automatically updated if update_strat is set to y
 strat_ids:
 - 5cd021a7a2b4ea1b142a01a7c
