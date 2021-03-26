@@ -42,7 +42,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
     exchange = exchange_select_run_backtest.first_selected_option.text.strip()
     tools.log(f"Selected exchange = {exchange}")
     tools.log(f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
-    if not api.backtest_already_did(pair=pair_run_backtest, period=backtest_date_period, strat=strat_name_run_backtest, version=strat_version_run_backtest, exchange=exchange,):
+    if not api.backtest_has_failed(pair=pair_run_backtest, period=backtest_date_period, strat=strat_name_run_backtest, version=strat_version_run_backtest, exchange=exchange, start_date=backtest_date_run_backtest["start"], end_date=backtest_date_run_backtest["end"],) and not api.backtest_already_did(pair=pair_run_backtest, period=backtest_date_period, strat=strat_name_run_backtest, version=strat_version_run_backtest, exchange=exchange,):
         # set date into input
         set_input_date(backtest_date_start, backtest_date_end)
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
@@ -51,7 +51,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         sel_tools.check_if_popup()
         error = sel_tools.check_error_during_backtest()
         if error:
-            return False
+            raise Exception("Error during backtest")
         sel_tools.check_if_popup()
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
         # click on depth analysis button
@@ -59,7 +59,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         windows_handle = sel_tools.wait_for_windows_handle(120)
         if not windows_handle:
             tools.log("depth analysis button is break on kryll side, period canceled")
-            return False
+            raise Exception("depth analysis button is break on kryll side, period canceled")
         send_ok = False
         try:
             sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[1])
@@ -96,6 +96,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
             tools.log("Done.")
             return True
         tools.log("Error during sending the result, period canceled.")
+        raise Exception("Error during backtest")
     return False
 
 
@@ -104,7 +105,11 @@ def run():
     sel_tools.close_unused_tabs()
     for strat_id in strat_ids:
         sel_tools.driver.get("https://platform.kryll.io/marketplace/" + strat_id)
-        recommended_pairs = sel_tools.get_elements(css.RECOMMEND_PAIRS)
+        try:
+            recommended_pairs = sel_tools.get_elements(css.RECOMMEND_PAIRS)
+        except Exception:
+            tools.log(f"No recommanded pair")
+            recommended_pairs = {}
         strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
         tools.log(f"Checking strat : {strat_name}")
         recommended_pairs_list = []
@@ -162,17 +167,25 @@ def run():
             for i in total_pairs_list:
                 # Get infos
                 pair = i.text.strip()
-                if user.config_file['accu']:
-                    if not pair.split(' / ')[1] in user.config_file['accu']:
-                        tools.log(f'Pair {pair} skipped')
-                        continue
                     
                 RECOMMENDED = 0
+                FORCE_PAIR = 0
                 if i in recommended_pairs_list:
                     RECOMMENDED = 1
 
+                if 'pair' in user.config_file:
+                    if RECOMMENDED == 0 and not pair.replace(" / ", "/") in user.config_file['pair']:
+                        tools.log(f'Pair {pair} skipped', True)
+                        continue
+                    else:
+                        FORCE_PAIR = 1
+                if 'accu' in user.config_file:
+                    if RECOMMENDED == 0 and not pair.split(' / ')[1] in user.config_file['accu']:
+                        tools.log(f'Pair {pair} skipped', True)
+                        continue
+
                 # check if user want to test every pairs
-                if RECOMMENDED == 0 and user.config["every_pairs"] == "n":
+                if FORCE_PAIR == 0 and RECOMMENDED == 0 and user.config["every_pairs"] == "n":
                     continue
 
                 ERROR = False
@@ -209,7 +222,20 @@ def run():
                 # run backtests on all dates
                 tools.log("** run backtest for pair " + pair + " for all selected periods")
                 for backtest_date in backtest_dates:
-                    run_backtest(strat_name, strat_id, strat_version, pair, RECOMMENDED, backtest_date, exchange_select)
+                    try:
+                        run_backtest(strat_name, strat_id, strat_version, pair, RECOMMENDED, backtest_date, exchange_select)
+                    except:
+                        log = ""
+                        try :
+                            log = self.get_element_text(self.css.LOGS_LAST_LINE)
+                            tools.log(log)
+                        except :
+                            pass
+                        screenshot_name = "backtest_fail_" + str(strat_id) + "_" + str(pair.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date['period']) + ".png"
+                        sel_tools.save_screenshot(screenshot_name)
+                        api.backtest_add_failed(pair=pair, period=backtest_date["period"], strat=strat_name, version=strat_version, exchange=exchange, start_date=backtest_date["start"], end_date=backtest_date["end"],)
+                        tools.log("Backtest Failed.")
+                        tools.log("You can see the screenshot on this file : " + screenshot_name)
 
             tools.log("==============================================")
             tools.log(f"strat backtested : {strat_name}, version : {strat_version} : Done")

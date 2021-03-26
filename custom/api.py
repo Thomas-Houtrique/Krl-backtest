@@ -93,6 +93,54 @@ class Api:
         self.tools.log("Already tested, next")
         return True
 
+    def backtest_has_failed(self, pair, period, strat, version, exchange, start_date, end_date):
+        """
+        Takes the pair,the period,the strat,and client token, return if backtest has already failed
+        """
+        self.tools.log(
+            f"Function backtest_has_failed input (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat= {strat}, strat_version= {version})", True,
+        )
+        pair = pair.replace(" ", "")
+        url_backtest_has_failed = (
+            self.config.API_BACKTEST_HAS_FAILED_URL + "&strat=" + strat + "&strat_version=" + version + "&pair=" + pair + "&period=" + period + "&exchange=" + exchange + "&start_date=" + start_date + "&end_date=" + end_date + "&token=" + self.token
+        )
+        response = requests.request("GET", url_backtest_has_failed)
+        self.tools.log(
+            f"Requete backtest_has_failed, status_code = {response.status_code}, value = {response.text}, url= {url_backtest_has_failed}", True,
+        )
+        if response.status_code == 200:
+            self.tools.log("Already failed, next")
+            return True
+        return False
+
+    def backtest_add_failed(self, pair, period, strat, version, exchange, start_date, end_date):
+        """
+        Takes the pair,the period,the strat,and client token,
+        increase fail for this backtest in database
+        return True if request success, false if failed
+        """
+        self.tools.log(
+            f"Function backtest_add_failed input (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat= {strat}, strat_version= {version})", True,
+        )
+        pair = pair.replace(" ", "")
+        
+        post_data = {}
+        post_data["strat"] = strat
+        post_data["strat_version"] = version
+        post_data["pair"] = pair
+        post_data["period"] = period
+        post_data["exchange"] = exchange
+        post_data["start_date"] = start_date
+        post_data["end_date"] = end_date
+        post_data["token"] = self.token
+        response = requests.request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
+        self.tools.log(
+            f"Requete backtest_add_failed, status_code = {response.status_code}, value = {response.text}, url= {self.config.API_BACKTEST_ADD_FAILED_URL}", True,
+        )
+        if response.status_code == 200:
+            return True
+        return False
+
     def get_advanced_result(
         self, strat_name, pair, backtest_date_start, backtest_date_end, advanced_analyse_link,
     ):
