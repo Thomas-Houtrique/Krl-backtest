@@ -6,7 +6,7 @@ token: your_token
 # Set to "y" if you activate autologin and want to hide browser
 headless: n
 # list of exchange to backtest
-Exchanges:
+exchanges:
 - Binance
 # set to y if you want to auto update strat list
 update_strat: y
