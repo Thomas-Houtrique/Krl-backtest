@@ -177,7 +177,7 @@ def run():
                     if RECOMMENDED == 0 and not pair.replace(" / ", "/") in user.config_file['pair']:
                         tools.log(f'Pair {pair} skipped', True)
                         continue
-                    else:
+                    if pair.replace(" / ", "/") in user.config_file['pair']:
                         FORCE_PAIR = 1
                 if 'accu' in user.config_file:
                     if RECOMMENDED == 0 and not pair.split(' / ')[1] in user.config_file['accu']:
@@ -187,7 +187,9 @@ def run():
                 # check if user want to test every pairs
                 if FORCE_PAIR == 0 and RECOMMENDED == 0 and user.config["every_pairs"] == "n":
                     continue
-
+                if RECOMMENDED == 1:
+                    if 'skip_recommended_pair' in user.config_file and user.config_file['skip_recommended_pair'] == "y" and FORCE_PAIR == 0:
+                        continue
                 ERROR = False
                 tools.log(f"** pair = {pair}, recommended = {RECOMMENDED}")
 
