@@ -9,8 +9,8 @@ from custom.user_config import UserConfig
 from custom.utilities import UtilityTools
 from custom.css_const import CssConst
 from custom.selenium_utilities import SeleniumUtilities
-from selenium.common.exceptions import NoSuchElementException
 from custom.api import Api
+
 
 def set_input_date(start, end):
     """
@@ -42,7 +42,21 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
     exchange = exchange_select_run_backtest.first_selected_option.text.strip()
     tools.log(f"Selected exchange = {exchange}")
     tools.log(f"Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
-    if not api.backtest_has_failed(pair=pair_run_backtest, period=backtest_date_period, strat=strat_name_run_backtest, version=strat_version_run_backtest, exchange=exchange, start_date=backtest_date_run_backtest["start"], end_date=backtest_date_run_backtest["end"],) and not api.backtest_already_did(pair=pair_run_backtest, period=backtest_date_period, strat=strat_name_run_backtest, version=strat_version_run_backtest, exchange=exchange,):
+    if not api.backtest_has_failed(
+        pair=pair_run_backtest,
+        period=backtest_date_period,
+        strat=strat_name_run_backtest,
+        version=strat_version_run_backtest,
+        exchange=exchange,
+        start_date=backtest_date_run_backtest["start"],
+        end_date=backtest_date_run_backtest["end"],
+    ) and not api.backtest_already_did(
+        pair=pair_run_backtest,
+        period=backtest_date_period,
+        strat=strat_name_run_backtest,
+        version=strat_version_run_backtest,
+        exchange=exchange,
+    ):
         # set date into input
         set_input_date(backtest_date_start, backtest_date_end)
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
@@ -86,9 +100,9 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
                     }
                 )
 
-        except Exception as e:
+        except Exception as error:
             tools.log("==============================================")
-            tools.log("Sending backtest : Exception occured : " + str(e))
+            tools.log("Sending backtest : Exception occured : " + str(error))
             tools.log("==============================================")
         sel_tools.driver.close()
         sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[0])
@@ -108,7 +122,7 @@ def run():
         try:
             recommended_pairs = sel_tools.get_elements(css.RECOMMEND_PAIRS)
         except Exception:
-            tools.log(f"No recommanded pair")
+            tools.log("No recommanded pair")
             recommended_pairs = {}
         strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
         tools.log(f"Checking strat : {strat_name}")
@@ -167,31 +181,29 @@ def run():
             for i in total_pairs_list:
                 # Get infos
                 pair = i.text.strip()
-                    
-                RECOMMENDED = 0
-                FORCE_PAIR = 0
+                recommended = 0
+                force_pair = 0
                 if i in recommended_pairs_list:
-                    RECOMMENDED = 1
+                    recommended = 1
 
-                if 'pair' in user.config_file:
-                    if RECOMMENDED == 0 and not pair.replace(" / ", "/") in user.config_file['pair']:
-                        tools.log(f'Pair {pair} skipped', True)
+                if "pair" in user.config_file:
+                    if recommended == 0 and not pair.replace(" / ", "/") in user.config_file["pair"]:
+                        tools.log(f"Pair {pair} skipped", True)
                         continue
-                    if pair.replace(" / ", "/") in user.config_file['pair']:
-                        FORCE_PAIR = 1
-                if 'accu' in user.config_file:
-                    if RECOMMENDED == 0 and not pair.split(' / ')[1] in user.config_file['accu']:
-                        tools.log(f'Pair {pair} skipped', True)
+                    if pair.replace(" / ", "/") in user.config_file["pair"]:
+                        force_pair = 1
+                if "accu" in user.config_file:
+                    if recommended == 0 and not pair.split(" / ")[1] in user.config_file["accu"]:
+                        tools.log(f"Pair {pair} skipped", True)
                         continue
 
                 # check if user want to test every pairs
-                if FORCE_PAIR == 0 and RECOMMENDED == 0 and user.config["every_pairs"] == "n":
+                if force_pair == 0 and recommended == 0 and user.config["every_pairs"] == "n":
                     continue
-                if RECOMMENDED == 1:
-                    if 'skip_recommended_pair' in user.config_file and user.config_file['skip_recommended_pair'] == "y" and FORCE_PAIR == 0:
+                if recommended == 1:
+                    if "skip_recommended_pair" in user.config_file and user.config_file["skip_recommended_pair"] == "y" and force_pair == 0:
                         continue
-                ERROR = False
-                tools.log(f"** pair = {pair}, recommended = {RECOMMENDED}")
+                tools.log(f"** pair = {pair}, recommended = {recommended}")
 
                 # Configure backtesting
                 pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
@@ -216,26 +228,33 @@ def run():
                     continue
 
                 # get min/max dates
-                MIN_DATE = sel_tools.wait_for_attribute_value(start_input, "min")
-                MAX_DATE = sel_tools.wait_for_attribute_value(end_input, "max")
+                min_date = sel_tools.wait_for_attribute_value(start_input, "min")
 
-                backtest_dates = api.get_backtest_dates(min_date=MIN_DATE)
+                backtest_dates = api.get_backtest_dates(min_date=min_date)
                 tools.log(f"backtest dates list = {backtest_dates}", True)
                 # run backtests on all dates
                 tools.log("** run backtest for pair " + pair + " for all selected periods")
                 for backtest_date in backtest_dates:
                     try:
-                        run_backtest(strat_name, strat_id, strat_version, pair, RECOMMENDED, backtest_date, exchange_select)
+                        run_backtest(strat_name, strat_id, strat_version, pair, recommended, backtest_date, exchange_select)
                     except:
                         log = ""
-                        try :
-                            log = self.get_element_text(self.css.LOGS_LAST_LINE)
+                        try:
+                            log = sel_tools.get_element_text(css.LOGS_LAST_LINE)
                             tools.log(log)
-                        except :
+                        except:
                             pass
-                        screenshot_name = "backtest_fail_" + str(strat_id) + "_" + str(pair.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date['period']) + ".png"
+                        screenshot_name = "backtest_fail_" + str(strat_id) + "_" + str(pair.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date["period"]) + ".png"
                         sel_tools.save_screenshot(screenshot_name)
-                        api.backtest_add_failed(pair=pair, period=backtest_date["period"], strat=strat_name, version=strat_version, exchange=exchange, start_date=backtest_date["start"], end_date=backtest_date["end"],)
+                        api.backtest_add_failed(
+                            pair=pair,
+                            period=backtest_date["period"],
+                            strat=strat_name,
+                            version=strat_version,
+                            exchange=exchange,
+                            start_date=backtest_date["start"],
+                            end_date=backtest_date["end"],
+                        )
                         tools.log("Backtest Failed.")
                         tools.log("You can see the screenshot on this file : " + screenshot_name)
 
@@ -284,26 +303,26 @@ else:
     strat_ids = tools.ask_strat()
 
 
-count_quick_fail = 0
-execution_id = 0
-while count_quick_fail < 3:
-    execution_id = execution_id + 1
+COUNT_QUICK_FAIL = 0
+EXECUTION_ID = 0
+while COUNT_QUICK_FAIL < 3:
+    EXECUTION_ID = EXECUTION_ID + 1
     start = time.time()
     try:
         random.shuffle(strat_ids)
         run()
-    except Exception as e:
-        screenshot_name = "screen_fail_" + str(execution_id) + ".png"
-        sel_tools.save_screenshot(screenshot_name)
+    except Exception as error:
+        SCREENSHOT_NAME = "screen_fail_" + str(EXECUTION_ID) + ".png"
+        sel_tools.save_screenshot(SCREENSHOT_NAME)
         tools.log("==============================================")
-        tools.log("Exception occured on execution " + str(execution_id) + " : " + str(e))
-        tools.log("You can see the screenshot on this file : " + screenshot_name)
+        tools.log("Exception occured on execution " + str(EXECUTION_ID) + " : " + str(error))
+        tools.log("You can see the screenshot on this file : " + SCREENSHOT_NAME)
         tools.log("Retry...")
         tools.log("==============================================")
     end = time.time()
     elapsed = end - start
     if elapsed < 30:
-        count_quick_fail = count_quick_fail + 1
-        tools.log("Quick fail : " + str(count_quick_fail) + "/3")
+        COUNT_QUICK_FAIL = COUNT_QUICK_FAIL + 1
+        tools.log("Quick fail : " + str(COUNT_QUICK_FAIL) + "/3")
     else:
-        count_quick_fail = 0
+        COUNT_QUICK_FAIL = 0

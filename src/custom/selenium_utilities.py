@@ -1,7 +1,7 @@
 import time
+from selenium.common.exceptions import NoSuchElementException
 from custom.utilities import UtilityTools
 from custom.errors import ElementNotFound
-from selenium.common.exceptions import NoSuchElementException
 from custom.css_const import CssConst
 
 
@@ -65,7 +65,7 @@ class SeleniumUtilities:
         # ugly method to detect if there is an error or end page
         for _ in range(0, 10000):
             time.sleep(10)
-            try :
+            try:
                 backtest_start_btn = self.get_element_text(self.css.BACKTEST_START_BTN)
                 if backtest_start_btn and backtest_start_btn == "Test":
                     # Check if analysis tab is open
@@ -74,23 +74,23 @@ class SeleniumUtilities:
                         return False
                     # If btn test is active, but analyse tab no, we have an error
                     self.tools.log("Error during the backtest")
-                    try :
+                    try:
                         self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
-                    except :
+                    except Exception:
                         pass
                     return True
-            except :
+            except Exception:
                 break
         self.tools.log("Error during the backtest")
-        try :
+        try:
             self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
-        except :
+        except Exception:
             pass
         return True
 
-        """
-        Check if an element existe in DOM. return True or False
-        """
+    """
+    Check if an element existe in DOM. return True or False
+    """
 
     def check_if_element_exist(self, element_path, multiple=False):
         try:
@@ -116,7 +116,7 @@ class SeleniumUtilities:
         """
         Takes a selenium element and a duration, return attribute value when attribute value is not empty
         """
-        for i in range(0, duration):
+        for _ in range(0, duration):
             attribute_value = element.get_attribute(attribute)
             if attribute_value != "":
                 return attribute_value
@@ -190,9 +190,9 @@ class SeleniumUtilities:
             self.check_if_popup(10)
             element.click()
 
-    def save_screenshot(self,filename):
+    def save_screenshot(self, filename):
         """
         Save a screenshot of page
         """
-        self.driver.set_window_size(1920, 1080)      #the trick
+        self.driver.set_window_size(1920, 1080)  # the trick
         self.driver.save_screenshot(filename)
