@@ -254,6 +254,7 @@ def run():
                             exchange=exchange,
                             start_date=backtest_date["start"],
                             end_date=backtest_date["end"],
+                            log=log,
                         )
                         tools.log("Backtest Failed.")
                         tools.log("You can see the screenshot on this file : " + screenshot_name)

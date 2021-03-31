@@ -144,7 +144,7 @@ class Api:
             return True
         return False
 
-    def backtest_add_failed(self, pair, period, strat, version, exchange, start_date, end_date):
+    def backtest_add_failed(self, pair, period, strat, version, exchange, start_date, end_date, log):
         """
         Takes the pair,the period,the strat,and client token,
         increase fail for this backtest in database
@@ -164,6 +164,7 @@ class Api:
         post_data["start_date"] = start_date
         post_data["end_date"] = end_date
         post_data["token"] = self.token
+        post_data["log"] = log
         response = requests.request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
         self.tools.log(
             f"Requete backtest_add_failed, status_code = {response.status_code}, value = {response.text}, url= {self.config.API_BACKTEST_ADD_FAILED_URL}",
