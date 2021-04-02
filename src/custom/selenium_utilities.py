@@ -123,6 +123,12 @@ class SeleniumUtilities:
             time.sleep(1)
         return ""
 
+    def wait_for_pair_loaded(self, previous_balance_button, duration=10):
+        for _ in range(0, duration):
+            if self.get_element_text(self.css.BALANCE_BUTTON, 1) != previous_balance_button:
+                return True
+        return False
+
     def wait_for_windows_handle(self, duration):
         """
         Takes a duration, return True if more than 1 window else return False

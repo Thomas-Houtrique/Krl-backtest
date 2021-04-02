@@ -1,25 +1,25 @@
 # replace your_token by your token
 token: your_token
-#""" For autologin and don't show browser, remove # on this line, and set up your login and password
+#""" [SETUP_AUTOLOGIN] For autologin and don't show browser, remove # on this line, and set up your login and password
 """
 email: your_email
 password: your_password
 # """
 # Set to "y" if you activate autologin and want to hide browser
 headless: n
-#""" If you want to test specific exchanges, remove # on this line, and list exchanges
+#""" [SETUP_EXCHANGE] If you want to test specific exchanges, remove # on this line, and list exchanges
 """
 exchanges:
 - Binance
 - KuCoin
 # """
-#""" if you want to test only specifics accu,  remove # on this line, and list accu that you want to test
+#""" [SETUP_ACCU] if you want to test only specifics accu,  remove # on this line, and list accu that you want to test
 """
 accu:
 - USDT
 - BTC
 # """
-#""" if you want to test only specifics pairs, remove # on this line, and list pairs that you want to test (recommended will be test )
+#""" [SETUP_PAIR] if you want to test only specifics pairs, remove # on this line, and list pairs that you want to test (recommended will be test )
 """
 pair:
 - BTC/USDT

@@ -13,20 +13,24 @@ Normalement vous avez reçu un token, il est personnel, ne le partagez pas, ça 
 - Répondez aux différentes questions
 - Un navigateur va s'ouvrir sur la page de login, identifiez vous.
 - Ensuite laissez tranquillement tourner le script.
+- /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
 
 ## Mac OSX
 **il vous faut absolument Firefox** sur votre machine.\
+- Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
 ```bash
 python3 -m pip install requests pyyaml selenium
 sudo python3 chemin/vers/auto_test.py
 ```
-- Entrer le token que @Torkium vous a donné
-- Entrer l'id de la stratégie que vous voulez backtester
-- Entrer votre login et votre mot de passe sur la page internet et appuyer sur une touche dans le terminal.\
+- Répondez aux différentes questions
+- Un navigateur va s'ouvrir sur la page de login, identifiez vous.
+- Ensuite laissez tranquillement tourner le script.
+- /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
 
 ## Linux / Raspberry pi
 **il vous faut absolument Chromium** sur votre machine.\
+- Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
 ```bash
 sudo apt update
@@ -36,30 +40,90 @@ python3 -m pip install requests pyyaml selenium
 sudo apt-get install chromium-chromedriver
 sudo python3 auto_test.py
 ```
-- Entrer le token que @Torkium vous a donné
-- Entrer l'id de la stratégie que vous voulez backtester
-- Entrer votre login et votre mot de passe sur la page internet et appuyer sur une touche dans le terminal.\
+- Répondez aux différentes questions
+- Un navigateur va s'ouvrir sur la page de login, identifiez vous.
+- Ensuite laissez tranquillement tourner le script.
+- /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
 
 # Config File
 
 Par défaut il va automatiquement à l'exécution aller récupérer toutes les strats de la marketplace, les backtester dans un ordre aléatoire, sur les paires recommandées uniquement, sur différentes périodes.
 
-Si vous voulez tester des strats en particulier.
+Si vous voulez tester des strats en particulier :
 - Mettez le paramètre update_strat à la valeur "n"
-- Dans strat_ids il faut mettre uniquement les identifiants de strat que vous voulez tester.
-
-Si vous voulez tester toutes les paires même les non recommandées, répondez "y" à la première question au lancement du script et suivez les instructions
+- Dans strat_ids il faut mettre uniquement les identifiants de strat que vous voulez tester
+Exemple : 
 ```yaml
-token: token
+update_strat: n
 strat_ids:
 - 5d65371ad9d67b9dbe83xxx
 - 5d65371ad9d67b9dbe83xxx
-
-email: xxx@xx.com
-password: solarwinds123
-update_strat: y
 ```
-**L'auto login ne fonctionne que sur Firefox**
+L'identiiant de la strat se trouve dans l'url de la strat sur la page de la strat.
+
+Si vous voulez tester des paires en particulier :
+-Remplissez/ajoutez la section "pair" dans le fichier de configuration
+-Listez les paires que vous voulez tester
+Exemple :
+```yaml
+pair:
+- BTC/USDT
+- ETH/BTC
+```
+Les paires recommandées seront testées dans tous les cas en + des paires listées
+
+Si vous voulez tester des accumulations en particulier :
+-Remplissez/ajoutez la section "pair" dans le fichier de configuration
+-Listez les paires que vous voulez tester
+Exemple :
+```yaml
+accu:
+- USDT
+- BTC
+```
+Les paires recommandées seront testées dans tous les cas en + des accumulations listées
+
+Si vous voulez tester toutes les paires même les non recommandées, répondez "y" à la première question au lancement du script et suivez les instructions
+
+Exemple complet de fichier de config
+```yaml
+# replace your_token by your token
+token: your_token
+#""" [SETUP_AUTOLOGIN] For autologin and don't show browser, remove # on this line, and set up your login and password
+"""
+email: your_email
+password: your_password
+# """
+# Set to "y" if you activate autologin and want to hide browser
+headless: n
+#""" [SETUP_EXCHANGE] If you want to test specific exchanges, remove # on this line, and list exchanges
+"""
+exchanges:
+- Binance
+- KuCoin
+# """
+#""" [SETUP_ACCU] if you want to test only specifics accu,  remove # on this line, and list accu that you want to test
+"""
+accu:
+- USDT
+- BTC
+# """
+#""" [SETUP_PAIR] if you want to test only specifics pairs, remove # on this line, and list pairs that you want to test (recommended will be test )
+"""
+pair:
+- BTC/USDT
+- ETH/BTC
+# """
+# set to y if you want to auto update strat list
+update_strat: y
+# strat to test. Automatically updated if update_strat is set to y
+strat_ids:
+- 5cd021a7a2b4ea1b142a01a7c
+- 5ea5eba876621921e1ab037f
+- 5dc70e5fb9a8334b7d9b4716
+- 5c58b255812598100207aaaf
+- 5e4915c0567b48b089605ee1
+```
 
 
 ## License

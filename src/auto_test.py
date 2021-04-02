@@ -216,13 +216,11 @@ def run():
                 sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
                 selected_pair = pairs_input.first_selected_option
                 selected_pair_value = selected_pair.get_attribute("value")
-                if selected_pair_value != pair.replace(" / ", "-"):
-                    sel_tools.driver.execute_script('arguments[0].setAttribute("min","")', start_input)
-                    sel_tools.driver.execute_script('arguments[0].setAttribute("max","")', end_input)
-
                 # Check if pair is listed on exchange
                 try:
+                    previous_balance_button = sel_tools.get_element_text(sel_tools.css.BALANCE_BUTTON, 10)
                     pairs_input.select_by_value(pair.replace(" / ", "-"))
+                    sel_tools.wait_for_pair_loaded(previous_balance_button)
                 except Exception:
                     tools.log(fr"/!\ Error recommanded pair {pair} not listed on {exchange}")
                     continue
