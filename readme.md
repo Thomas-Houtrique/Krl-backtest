@@ -89,31 +89,8 @@ Exemple complet de fichier de config
 ```yaml
 # replace your_token by your token
 token: your_token
-#""" [SETUP_AUTOLOGIN] For autologin and don't show browser, remove # on this line, and set up your login and password
-"""
-email: your_email
-password: your_password
-# """
 # Set to "y" if you activate autologin and want to hide browser
 headless: n
-#""" [SETUP_EXCHANGE] If you want to test specific exchanges, remove # on this line, and list exchanges
-"""
-exchanges:
-- Binance
-- KuCoin
-# """
-#""" [SETUP_ACCU] if you want to test only specifics accu,  remove # on this line, and list accu that you want to test
-"""
-accu:
-- USDT
-- BTC
-# """
-#""" [SETUP_PAIR] if you want to test only specifics pairs, remove # on this line, and list pairs that you want to test (recommended will be test )
-"""
-pair:
-- BTC/USDT
-- ETH/BTC
-# """
 # set to y if you want to auto update strat list
 update_strat: y
 # strat to test. Automatically updated if update_strat is set to y
@@ -123,6 +100,7 @@ strat_ids:
 - 5dc70e5fb9a8334b7d9b4716
 - 5c58b255812598100207aaaf
 - 5e4915c0567b48b089605ee1
+- 5c4f25a24ca41aa0d326f956
 ```
 
 
