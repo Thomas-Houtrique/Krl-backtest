@@ -1,0 +1,14 @@
+# replace your_token by your token
+token: your_token
+# Set to "y" if you activate autologin and want to hide browser
+headless: n
+# set to y if you want to auto update strat list
+update_strat: y
+# strat to test. Automatically updated if update_strat is set to y
+strat_ids:
+- 5cd021a7a2b4ea1b142a01a7c
+- 5ea5eba876621921e1ab037f
+- 5dc70e5fb9a8334b7d9b4716
+- 5c58b255812598100207aaaf
+- 5e4915c0567b48b089605ee1
+- 5c4f25a24ca41aa0d326f956
