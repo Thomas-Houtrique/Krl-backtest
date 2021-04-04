@@ -1,13 +1,13 @@
-# Kryll auto backtest
+# BackPlusScript
 
 ## Installation
 
-[Télécharger le repository github](https://github.com/Thomas-Houtrique/Krl-backtest/archive/main.zip) et l'extraire sur votre bureau.
+[Télécharger le repository github](https://github.com/Thomas-Houtrique/BackPlusScript/archive/main.zip) et l'extraire sur votre bureau.
 
 Normalement vous avez reçu un token, il est personnel, ne le partagez pas, ça permet au script de communiquer avec le site pour envoyer les backtests.
 
 ## Windows
-**il vous faut absolument Google Chrome ou Firefox** sur votre machine.\
+**il vous faut absolument Google Chrome ou Firefox** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire dist, remplacez your_token par votre token 
 - Exécutez dist/auto_test.exe
 - Répondez aux différentes questions
@@ -16,7 +16,7 @@ Normalement vous avez reçu un token, il est personnel, ne le partagez pas, ça 
 - /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
 
 ## Mac OSX
-**il vous faut absolument Firefox** sur votre machine.\
+**il vous faut absolument Firefox** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
 ```bash
@@ -29,7 +29,7 @@ sudo python3 chemin/vers/auto_test.py
 - /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
 
 ## Linux / Raspberry pi
-**il vous faut absolument Chromium** sur votre machine.\
+**il vous faut absolument Chromium** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
 ```bash
@@ -59,7 +59,7 @@ strat_ids:
 - 5d65371ad9d67b9dbe83xxx
 - 5d65371ad9d67b9dbe83xxx
 ```
-L'identiiant de la strat se trouve dans l'url de la strat sur la page de la strat.
+L'identifiant de la strat se trouve dans l'url de la strat sur la page de la strat.
 
 Si vous voulez tester des paires en particulier :
 -Remplissez/ajoutez la section "pair" dans le fichier de configuration
