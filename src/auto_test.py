@@ -273,8 +273,6 @@ if user.login:
     sel_tools.get_element(css.TWO_FA_INPUT).send_keys(twofa)
     sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
-if "strat_ids" in user.config_file:
-    strat_ids = user.config_file["strat_ids"]
 if "update_strat" in user.config_file and user.config_file["update_strat"] == "y":
     tools.log("[RUN][MAIN][INFO] : Strat update in progress...")
     sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
@@ -286,7 +284,10 @@ if "update_strat" in user.config_file and user.config_file["update_strat"] == "y
         strat_ids.append(strat_id.get_attribute("href").split("/")[4])
     tools.log("[RUN][MAIN][INFO] : Done!")
 else:
-    strat_ids = tools.ask_strat()
+    if "strat_ids" in user.config_file:
+        strat_ids = user.config_file["strat_ids"]
+    else:
+        strat_ids = tools.ask_strat()
 
 
 COUNT_QUICK_FAIL = 0
