@@ -48,6 +48,9 @@ class CssConst:
     BINANCE_EXCHANGE = ".control-exchanges > option[value=binance]"
     GRAPH_TOP = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-graph > div > div.backtest-graph-top"
     BALANCE_BUTTON = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline div div.scope-balance-button"
+    STARTING_AMOUNT_ONE = "#starting-amount-one"
+    STARTING_AMOUNT_TWO = "#starting-amount-two"
+    PROGRESS_PERCENT = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-graph > div > div.backtest-graph-top.backtest-percent > div > div.col3"
     # strategy page
     STRAT_NAME = (
         "app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2"

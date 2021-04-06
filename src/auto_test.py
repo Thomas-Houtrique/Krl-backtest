@@ -228,29 +228,72 @@ def run():
                 # run backtests on all dates
                 tools.log("[INFO][RUN][run] : run backtest for pair " + pair + " for all selected periods")
                 for backtest_date in backtest_dates:
-                    try:
-                        run_backtest(strat_name, strat_id, strat_version, pair, recommended, backtest_date, exchange_select)
-                    except:
-                        log = ""
+                    backtest_done = False
+                    backtest_failed = False
+                    backtest_failed_screenshot = True
+                    retry_order_skipped = 0
+                    while backtest_done != True and backtest_failed != True:
                         try:
-                            log = sel_tools.get_element_text(css.LOGS_LAST_LINE)
-                            tools.log(log)
+                            run_backtest(strat_name, strat_id, strat_version, pair, recommended, backtest_date, exchange_select)
+                            backtest_done = True
                         except:
-                            pass
-                        screenshot_name = "backtest_fail_" + str(strat_id) + "_" + str(pair.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date["period"]) + ".png"
-                        sel_tools.save_screenshot(screenshot_name)
-                        api.backtest_add_failed(
-                            pair=pair,
-                            period=backtest_date["period"],
-                            strat=strat_name,
-                            version=strat_version,
-                            exchange=exchange,
-                            start_date=backtest_date["start"],
-                            end_date=backtest_date["end"],
-                            log=log,
-                        )
-                        tools.log("[ERROR][RUN][run] : Backtest Failed.")
-                        tools.log("[ERROR][RUN][run] : You can see the screenshot on this file : " + screenshot_name)
+                            log = ""
+                            try:
+                                log = sel_tools.get_element_text(css.LOGS_LAST_LINE)
+                                if retry_order_skipped<=3 and ("order too small" in log or "Too many orders skipped" in log):
+                                    backtest_failed_screenshot = False
+                                    retry_order_skipped = retry_order_skipped + 1
+                                    if retry_order_skipped >3:
+                                        backtest_failed = True
+                                        tools.log(log)
+                                    else:
+                                        sel_tools.click_on_element(sel_tools.get_element(sel_tools.css.BALANCE_BUTTON, 2))
+                                        multiplicator = 5*retry_order_skipped
+                                        try:
+                                            amount_one_input = sel_tools.get_element(sel_tools.css.STARTING_AMOUNT_ONE)
+                                            amount_one = amount_one_input.get_attribute('value')
+                                            amount_one = float(amount_one)
+                                            amount_one = amount_one*multiplicator
+                                            amount_one_input.clear()
+                                            amount_one_input.send_keys(str(amount_one))
+                                        except:
+                                            pass
+                                        try:
+                                            amount_two_input = sel_tools.get_element(sel_tools.css.STARTING_AMOUNT_TWO)
+                                            amount_two = amount_two_input.get_attribute('value')
+                                            amount_two = float(amount_two)
+                                            amount_two = amount_two*multiplicator
+                                            amount_two_input.clear()
+                                            amount_two_input.send_keys(str(amount_two))
+                                        except:
+                                            pass
+                                        tools.log(f"[ERROR][RUN][run] : Too many order skipped, retry with x{multiplicator} amount {retry_order_skipped}/3.")
+                                else:
+                                    backtest_failed = True
+                                    tools.log(log)
+                            except:
+                                backtest_failed = True
+                                pass
+                            if "missing data" in log:
+                                tools.log(f"[ERROR][RUN][run] : {log}")
+                                backtest_failed_screenshot = False
+                                backtest_failed = True
+                            if backtest_failed:
+                                api.backtest_add_failed(
+                                    pair=pair,
+                                    period=backtest_date["period"],
+                                    strat=strat_name,
+                                    version=strat_version,
+                                    exchange=exchange,
+                                    start_date=backtest_date["start"],
+                                    end_date=backtest_date["end"],
+                                    log=log,
+                                )
+                                tools.log("[ERROR][RUN][run] : Backtest Failed.")
+                                if backtest_failed_screenshot:
+                                    screenshot_name = "backtest_fail_" + str(strat_id) + "_" + str(pair.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date["period"]) + ".png"
+                                    sel_tools.save_screenshot(screenshot_name)
+                                    tools.log("[ERROR][RUN][run] : You can see the screenshot on this file : " + screenshot_name)
             tools.log(f"[INFO][RUN][run] : strat backtested : {strat_name}, version : {strat_version} : Done")
 
 

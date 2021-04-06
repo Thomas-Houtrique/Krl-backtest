@@ -44,10 +44,12 @@ class Api:
                 success = True
                 self.log_response("send_request", url, data, response)
             except Exception as error:
-                self.tools.log("[ERROR][API][send_request] : " + str(error))
-                self.tools.log("[WARNING][API][send_request] : Retry " + str(retry))
+                self.tools.log("[ERROR][API][send_request] : " + str(error), True)
+                self.tools.log("[WARNING][API][send_request] : Retry " + str(retry), True)
                 time.sleep(2)
                 retry = retry + 1
+        if retry == 5:
+            self.tools.log("[ERROR][API][send_request] : Unable to send the request")
         return response
 
 
@@ -77,7 +79,7 @@ class Api:
             result["period"] = send_result["backtest_date_period"]
             self.tools.log(f"[API][send_result] : Sending result to the Database, result = {result}", True)
             response = self.send_request("POST", url, data=result)
-            if response.status_code == 200:
+            if response != False and response.status_code == 200:
                 return True
         return False
 
@@ -88,13 +90,13 @@ class Api:
         self.tools.log(f"[INFO][API][get_backtest_dates][input] : (min_date ={min_date}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
         url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&strat_name=" + strat_name + "&strat_version=" + strat_version + "&pair=" + pair + "&exchange=" + exchange + "&token=" + self.token
         response = self.send_request("GET", url)
-        if response.status_code == 200:
+        if response != False and response.status_code == 200:
             response = response.json()["data"]
             return response
-        if response.status_code == 400:
+        if response != False and response.status_code == 400:
             self.tools.log("[INFO][API][get_backtest_dates][result] : No dates to backtest, next.", False)
             return []
-        return -1
+        return []
 
     def backtest_already_did(self, pair, period, strat, version, exchange):
         """
@@ -109,7 +111,7 @@ class Api:
             self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat + "&version=" + version + "&pair=" + pair + "&period=" + period + "&exchange=" + exchange + "&token=" + self.token
         )
         response = self.send_request("GET", url_backtest_already_did)
-        if response.status_code == 200:
+        if response != False and response.status_code == 200:
             self.tools.log("[INFO][API][backtest_already_did][Result] : Can be tested")
             return False
         self.tools.log("[INFO][API][backtest_already_did][Result] : Already tested, next")
@@ -144,7 +146,7 @@ class Api:
             + self.token
         )
         response = self.send_request("GET", url_backtest_has_failed)
-        if response.status_code == 200:
+        if response != False and response.status_code == 200:
             self.tools.log("[WARNING][API][backtest_has_failed] : Already failed, next")
             return True
         return False
@@ -171,7 +173,7 @@ class Api:
         post_data["token"] = self.token
         post_data["log"] = log
         response = self.send_request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
-        if response.status_code == 200:
+        if response != False and response.status_code == 200:
             return True
         return False
 
