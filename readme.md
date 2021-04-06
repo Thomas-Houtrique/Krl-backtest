@@ -83,6 +83,19 @@ accu:
 ```
 Les paires recommandées seront testées dans tous les cas en + des accumulations listées
 
+Si vous voulez lancer le script en cachant le navigateur, vous pouvez le lancer en headless :
+-Remplissez/ajoutez les sections "headless", "email" et "password" dans le fichier de configuration
+-Mettez le paramètre headless à "y"
+-Renseignez votre mail de connexion kryll dans le paramètre "email"
+-Renseignez votre mot de passe de connexion kryll dans le paramètre "password"
+Exemple :
+```yaml
+headless: y
+email: your_kryll_email@gmail.com
+password: your_kryll_password
+```
+Les paires recommandées seront testées dans tous les cas en + des accumulations listées
+
 Si vous voulez tester toutes les paires même les non recommandées, répondez "y" à la première question au lancement du script et suivez les instructions
 
 Exemple complet de fichier de config
@@ -103,6 +116,8 @@ strat_ids:
 - 5c4f25a24ca41aa0d326f956
 ```
 
+## FAQ
+-Si vous avez des problèmes de connexion aborted avec le script, pensez à télécharger la version du chromedriver en adéquation avec la version de chrome que vous avez installé : https://chromedriver.chromium.org/downloads
 
 ## License
 [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/)

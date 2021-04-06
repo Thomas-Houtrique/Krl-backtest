@@ -74,10 +74,12 @@ class UtilityTools:
                 options.add_argument("--disable-dev-shm-usage")
                 options.add_argument("--mute-audio")
                 if headless == "y":
+                    options.add_argument('--start-maximized') 
+                    options.add_argument('disable-infobars')
+                    options.add_argument('--disable-extensions')
+                    options.add_argument('window-size=1920x1080')
                     options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
-                if headless == "y":
-                    driver.set_window_size(1920, 1080)
             elif client_browser == "Firefox":
                 driver = webdriver.Firefox(executable_path=r"geckodriver.exe")
             return driver
