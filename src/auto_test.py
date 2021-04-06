@@ -145,7 +145,7 @@ def run():
         # To wait full load of exchange select
         strat_version = sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1]
         strat_name = sel_tools.get_element_text(css.STRAT_NAME_BACKTEST).strip()
-        tools.log(f"[RUN][run][INFO] : Testing strat : {strat_name}, version : {strat_version}")
+        tools.log(f"[RUN][run][INFO] : |||||||| Testing strat : {strat_name}, version : {strat_version}")
         exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
         time.sleep(4)
 

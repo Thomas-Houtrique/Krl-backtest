@@ -1,4 +1,5 @@
 import datetime
+import time
 import requests
 from custom.selenium_utilities import SeleniumUtilities
 from custom.utilities import UtilityTools
@@ -15,6 +16,15 @@ class Api:
         self.sel_tools = SeleniumUtilities(user_config=self.user_config, driver=self.driver)
         self.config = Config()
         self.css = CssConst()
+
+    def send_request(self, method, url, data=False):
+        if data:
+            response = requests.request(method, url, data=data)
+        else:
+            response = requests.request(method, url)
+        time.sleep(2)
+        return response
+
 
     def send_result(self, send_result):
         """
@@ -41,7 +51,7 @@ class Api:
             result["exchange"] = str(send_result["exchange"])
             result["period"] = send_result["backtest_date_period"]
             self.tools.log(f"[API][send_result] : Sending result to the Database, result = {result}", True)
-            response = requests.request("POST", url, data=result)
+            response = self.send_request("POST", url, data=result)
             self.tools.log(
                 f"[API][send_result][Request][URL] : {url}",
                 True,
@@ -64,7 +74,7 @@ class Api:
         """
         self.tools.log(f"[API][get_backtest_dates][input] : (min_date ={min_date}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
         url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&strat_name=" + strat_name + "&strat_version=" + strat_version + "&pair=" + pair + "&exchange=" + exchange + "&token=" + self.token
-        response = requests.request("GET", url)
+        response = self.send_request("GET", url)
         self.tools.log(
             f"[API][get_backtest_dates][Request][URL] : {url}",
             True,
@@ -98,7 +108,7 @@ class Api:
         url_backtest_already_did = (
             self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat + "&version=" + version + "&pair=" + pair + "&period=" + period + "&exchange=" + exchange + "&token=" + self.token
         )
-        response = requests.request("GET", url_backtest_already_did)
+        response = self.send_request("GET", url_backtest_already_did)
         self.tools.log(
             f"[API][backtest_already_did][Request][URL] : {url_backtest_already_did}",
             True,
@@ -145,7 +155,7 @@ class Api:
             + "&token="
             + self.token
         )
-        response = requests.request("GET", url_backtest_has_failed)
+        response = self.send_request("GET", url_backtest_has_failed)
         self.tools.log(
             f"[API][backtest_has_failed][Request][URL] : {url_backtest_has_failed}",
             True,
@@ -184,7 +194,7 @@ class Api:
         post_data["end_date"] = end_date
         post_data["token"] = self.token
         post_data["log"] = log
-        response = requests.request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
+        response = self.send_request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
         self.tools.log(
             f"[API][backtest_add_failed][Request][URL] : {self.config.API_BACKTEST_ADD_FAILED_URL}",
             True,
