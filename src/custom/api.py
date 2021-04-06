@@ -17,12 +17,37 @@ class Api:
         self.config = Config()
         self.css = CssConst()
 
+    def log_response(self, method, url, data, response):
+        self.tools.log(
+            f"[INFO][API][{method}][Request][URL] : {url}",
+            True,
+        )
+        self.tools.log(
+            f"[INFO][API][{method}][data] : {data}",
+            True,
+        )
+        self.tools.log(
+            f"[INFO][API][{method}][Response] : {response}",
+            True,
+        )
+
     def send_request(self, method, url, data=False):
-        if data:
-            response = requests.request(method, url, data=data)
-        else:
-            response = requests.request(method, url)
-        time.sleep(2)
+        response = False
+        retry = 1
+        success = False
+        while success == False and retry < 5:
+            try:
+                if data != False:
+                    response = requests.request(method, url, data=data)
+                else:
+                    response = requests.request(method, url)
+                success = True
+                self.log_response("send_request", url, data, response)
+            except Exception as error:
+                self.tools.log("[ERROR][API][send_request] : " + str(error))
+                self.tools.log("[WARNING][API][send_request] : Retry " + str(retry))
+                time.sleep(2)
+                retry = retry + 1
         return response
 
 
@@ -52,18 +77,6 @@ class Api:
             result["period"] = send_result["backtest_date_period"]
             self.tools.log(f"[API][send_result] : Sending result to the Database, result = {result}", True)
             response = self.send_request("POST", url, data=result)
-            self.tools.log(
-                f"[API][send_result][Request][URL] : {url}",
-                True,
-            )
-            self.tools.log(
-                f"[API][send_result][Response][Code] : {response.status_code}",
-                True,
-            )
-            self.tools.log(
-                f"[API][send_result][Response][Text] : {response.text}",
-                True,
-            )
             if response.status_code == 200:
                 return True
         return False
@@ -72,27 +85,14 @@ class Api:
         """
         Takes the pair, and client token, return precise periods if present in database
         """
-        self.tools.log(f"[API][get_backtest_dates][input] : (min_date ={min_date}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
+        self.tools.log(f"[INFO][API][get_backtest_dates][input] : (min_date ={min_date}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
         url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&strat_name=" + strat_name + "&strat_version=" + strat_version + "&pair=" + pair + "&exchange=" + exchange + "&token=" + self.token
         response = self.send_request("GET", url)
-        self.tools.log(
-            f"[API][get_backtest_dates][Request][URL] : {url}",
-            True,
-        )
-        self.tools.log(
-            f"[API][get_backtest_dates][Response][Code] : {response.status_code}",
-            True,
-        )
-        self.tools.log(
-            f"[API][get_backtest_dates][Response][Text] : {response.text}",
-            True,
-        )
         if response.status_code == 200:
             response = response.json()["data"]
-            self.tools.log(f"[API][get_backtest_dates][result] : {response}", False)
             return response
         if response.status_code == 400:
-            self.tools.log("[API][get_backtest_dates][result] : No dates to backtest, next.", False)
+            self.tools.log("[INFO][API][get_backtest_dates][result] : No dates to backtest, next.", False)
             return []
         return -1
 
@@ -101,7 +101,7 @@ class Api:
         Takes the pair,the period,the strat,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"[API][backtest_already_did][input] : (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version})",
+            f"[INFO][API][backtest_already_did][input] : (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version})",
             True,
         )
         pair = pair.replace(" ", "")
@@ -109,22 +109,10 @@ class Api:
             self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat + "&version=" + version + "&pair=" + pair + "&period=" + period + "&exchange=" + exchange + "&token=" + self.token
         )
         response = self.send_request("GET", url_backtest_already_did)
-        self.tools.log(
-            f"[API][backtest_already_did][Request][URL] : {url_backtest_already_did}",
-            True,
-        )
-        self.tools.log(
-            f"[API][backtest_already_did][Response][Code] : {response.status_code}",
-            True,
-        )
-        self.tools.log(
-            f"[API][backtest_already_did][Response][Text] : {response.text}",
-            True,
-        )
         if response.status_code == 200:
-            self.tools.log("[API][backtest_already_did][Result] : Can be tested")
+            self.tools.log("[INFO][API][backtest_already_did][Result] : Can be tested")
             return False
-        self.tools.log("[API][backtest_already_did][Result] : Already tested, next")
+        self.tools.log("[INFO][API][backtest_already_did][Result] : Already tested, next")
         return True
 
     def backtest_has_failed(self, pair, period, strat, version, exchange, start_date, end_date):
@@ -132,7 +120,7 @@ class Api:
         Takes the pair,the period,the strat,and client token, return if backtest has already failed
         """
         self.tools.log(
-            f"[API][backtest_has_failed][input] : (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat= {strat}, strat_version= {version})",
+            f"[INFO][API][backtest_has_failed][input] : (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat= {strat}, strat_version= {version})",
             True,
         )
         pair = pair.replace(" ", "")
@@ -156,20 +144,8 @@ class Api:
             + self.token
         )
         response = self.send_request("GET", url_backtest_has_failed)
-        self.tools.log(
-            f"[API][backtest_has_failed][Request][URL] : {url_backtest_has_failed}",
-            True,
-        )
-        self.tools.log(
-            f"[API][backtest_has_failed][Response][Code] : {response.status_code}",
-            True,
-        )
-        self.tools.log(
-            f"[API][backtest_has_failed][Response][Text] : {response.text}",
-            True,
-        )
         if response.status_code == 200:
-            self.tools.log("[API][backtest_has_failed][WARNING] : Already failed, next")
+            self.tools.log("[WARNING][API][backtest_has_failed] : Already failed, next")
             return True
         return False
 
@@ -195,18 +171,6 @@ class Api:
         post_data["token"] = self.token
         post_data["log"] = log
         response = self.send_request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
-        self.tools.log(
-            f"[API][backtest_add_failed][Request][URL] : {self.config.API_BACKTEST_ADD_FAILED_URL}",
-            True,
-        )
-        self.tools.log(
-            f"[API][backtest_add_failed][Response][Code] : {response.status_code}",
-            True,
-        )
-        self.tools.log(
-            f"[API][backtest_add_failed][Response][Text] : {response.text}",
-            True,
-        )
         if response.status_code == 200:
             return True
         return False
@@ -264,19 +228,15 @@ class Api:
             end_date_kryll_side = datetime.datetime(int(end_date.split("-")[2]), int(end_date.split("-")[0]), int(end_date.split("-")[1]))
             api_date_end = datetime.datetime(int(backtest_date_end.split("-")[0]), int(backtest_date_end.split("-")[1]), int(backtest_date_end.split("-")[2]))
             if end_date_kryll_side < api_date_end:
-                self.tools.log("==============================================")
-                self.tools.log("[API][get_advanced_result][ERROR] invalid deep analysis.")
-                self.tools.log("[API][get_advanced_result][ERROR] Backtest seems to be interrupt by other backtest on the same time")
-                self.tools.log(f"[API][get_advanced_result][ERROR][results] : {result}")
-                self.tools.log("==============================================")
+                self.tools.log("[ERROR][API][get_advanced_result] invalid deep analysis.")
+                self.tools.log("[ERROR][API][get_advanced_result] : Backtest seems to be interrupt by other backtest on the same time")
+                self.tools.log(f"[ERROR][API][get_advanced_result][results] : {result}")
                 return False
-            self.tools.log(f"[API][get_advanced_result] results : {result}")
+            self.tools.log(f"[INFO][API][get_advanced_result] results : {result}")
             return result
         except Exception:
-            self.tools.log("==============================================")
-            self.tools.log("[API][get_advanced_result][ERROR]invalid deep analysis.")
-            self.tools.log(f"[API][get_advanced_result][ERROR][results]results : {result}")
-            self.tools.log("==============================================")
+            self.tools.log("[ERROR][API][get_advanced_result] : invalid deep analysis.")
+            self.tools.log(f"[ERROR][API][get_advanced_result][results] : results : {result}")
         return False
 
     def __split_max_drawdown_informations(self, element_path):

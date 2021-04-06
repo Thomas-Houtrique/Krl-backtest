@@ -108,7 +108,7 @@ class SeleniumUtilities:
             element = self.check_if_element_exist(element_path, multiple)
             if element:
                 return element
-            self.tools.log(f"can't find element {element_path} retry {i+1}/10", verbose=True)
+            self.tools.log(f"[INFO][SeleniumUtilities][wait_for_element] : can't find element {element_path} retry {i+1}/10", verbose=True)
             time.sleep(1)
         return False
 
@@ -174,10 +174,10 @@ class SeleniumUtilities:
             for i in range(count_tabs - 1, 0, -1):
                 self.driver.switch_to.window(self.driver.window_handles[i])  # will close the last tab first.
                 self.driver.close()
-                self.tools.log("Closed Tab No. ", i)
+                self.tools.log("[INFO][SeleniumUtilities][close_unused_tabs] : Closed Tab No. ", i)
             self.driver.switch_to.window(self.driver.window_handles[0])  # Switching the driver focus to First tab.
         else:
-            self.tools.log("Found only Single tab.")
+            self.tools.log("[INFO][SeleniumUtilities][close_unused_tabs] : Found only Single tab.")
 
     def refresh(self):
         """
