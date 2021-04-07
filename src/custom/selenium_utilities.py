@@ -1,4 +1,5 @@
 import time
+from tqdm import tqdm
 from selenium.common.exceptions import NoSuchElementException
 from custom.utilities import UtilityTools
 from custom.errors import ElementNotFound
@@ -49,7 +50,7 @@ class SeleniumUtilities:
         Takes a css class, return str with " %" replaced by void
         """
         element = self.get_element_text(element_path, duration)
-        return element.replace(" %", "")
+        return element.replace(" %", "").replace("%", "")
 
     def get_element_days(self, element_path, duration=10):
         """
@@ -64,10 +65,10 @@ class SeleniumUtilities:
         """
         # ugly method to detect if there is an error or end page
         i=0
-        self.tools.log("[INFO][RUN][run_backtest] : " + "0%".rjust(20, '.'))
+        pbar = tqdm(range(100), dynamic_ncols=True)
         for _ in range(0, 10000):
-            if i!=0 and i%60==0:
-                self.tools.log(f"[INFO][RUN][run_backtest] : {self.get_element_text(self.css.PROGRESS_PERCENT).rjust(20, '.')}")
+            if i!=0:
+                self.refresh_pbar(pbar)
             i = i+10
             time.sleep(10)
             try:
@@ -76,6 +77,8 @@ class SeleniumUtilities:
                     # Check if analysis tab is open
                     analyse_tab = self.get_elements(self.css.ANALYSE_TAB_DEEP_ANALYSE_LINK)
                     if analyse_tab:
+                        self.refresh_pbar(pbar, 100)
+                        pbar.close()
                         return False
                     # If btn test is active, but analyse tab no, we have an error
                     self.tools.log(f"[INFO][RUN][run_backtest] : {self.get_element_text(self.css.PROGRESS_PERCENT).rjust(20, '.')}")
@@ -83,16 +86,32 @@ class SeleniumUtilities:
                     try:
                         self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
                     except Exception:
+                        pbar.close()
                         pass
+                    self.refresh_pbar(pbar)
+                    pbar.close()
                     return True
             except Exception:
+                pbar.close()
                 break
+        pbar.close()
         self.tools.log("[ERROR][check_error_during_backtest] : Error during the backtest")
         try:
             self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
         except Exception:
             pass
         return True
+
+    def refresh_pbar(self, pbar, value=False):
+        pbar.clear()
+        if value == False:
+            percent = int(self.get_element_percent(self.css.PROGRESS_PERCENT))
+            pbar.update(percent-pbar.n)
+            pbar.refresh()
+        else:
+            pbar.update(value-pbar.n)
+            pbar.refresh()
+
 
     """
     Check if an element existe in DOM. return True or False

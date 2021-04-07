@@ -20,7 +20,7 @@ Normalement vous avez reçu un token, il est personnel, ne le partagez pas, ça 
 - Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
 ```bash
-python3 -m pip install requests pyyaml selenium
+python3 -m pip install requests pyyaml selenium tqdm
 sudo python3 chemin/vers/auto_test.py
 ```
 - Répondez aux différentes questions
@@ -36,7 +36,7 @@ sudo python3 chemin/vers/auto_test.py
 sudo apt update
 sudo apt upgrade -y
 sudo apt install python3
-python3 -m pip install requests pyyaml selenium
+python3 -m pip install requests pyyaml selenium tqdm
 sudo apt-get install chromium-chromedriver
 sudo python3 auto_test.py
 ```
