@@ -98,17 +98,33 @@ class Api:
             return []
         return []
 
-    def backtest_already_did(self, pair, period, strat, version, exchange):
+    def backtest_already_did(self, pair, period, strat, version, exchange, start_date, end_date):
         """
         Takes the pair,the period,the strat,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"[INFO][API][backtest_already_did][input] : (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version})",
+            f"[INFO][API][backtest_already_did][input] : (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version}, start_date= {start_date}, end_date= {end_date})",
             True,
         )
         pair = pair.replace(" ", "")
         url_backtest_already_did = (
-            self.config.API_CHECK_BACKTEST_URL + "&strat=" + strat + "&version=" + version + "&pair=" + pair + "&period=" + period + "&exchange=" + exchange + "&token=" + self.token
+            self.config.API_CHECK_BACKTEST_URL
+            + "&strat="
+            + strat
+            + "&version="
+            + version
+            + "&pair="
+            + pair
+            + "&period="
+            + period
+            + "&exchange="
+            + exchange
+            + "&start_date="
+            + start_date
+            + "&end_date="
+            + end_date
+            + "&token="
+            + self.token
         )
         response = self.send_request("GET", url_backtest_already_did)
         if response != False and response.status_code == 200:

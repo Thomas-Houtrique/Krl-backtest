@@ -55,6 +55,8 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         strat=strat_name_run_backtest,
         version=strat_version_run_backtest,
         exchange=exchange,
+        start_date=backtest_date_run_backtest["start"],
+        end_date=backtest_date_run_backtest["end"],
     ):
         tools.log("[INFO][RUN][run_backtest] : Test in progress, Please Wait...")
         # set date into input
