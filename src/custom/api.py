@@ -81,12 +81,12 @@ class Api:
                 return True
         return False
 
-    def get_backtest_dates(self, min_date, strat_name, strat_version, pair, exchange):
+    def get_backtest_dates(self, min_date, strat_name, strat_version, pair, exchange, leverage=''):
         """
         Takes the pair, and client token, return precise periods if present in database
         """
         self.tools.log(f"[INFO][API][get_backtest_dates][input] : (min_date ={min_date}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
-        url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&strat_name=" + strat_name + "&strat_version=" + strat_version + "&pair=" + pair + "&exchange=" + exchange + "&token=" + self.token
+        url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&strat_name=" + strat_name + "&strat_version=" + strat_version + "&pair=" + pair + "&exchange=" + exchange + '&leverage=' + str(leverage) + "&token=" + self.token
         response = self.send_request("GET", url)
         if response.status_code == 200:
             response = response.json()["data"]

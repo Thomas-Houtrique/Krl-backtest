@@ -40,9 +40,11 @@ class UserConfig:
         if advanced == "y":
             user_advanced_configuration["every_pairs"] = self.yes_no_question("do you want to test every pairs ?")
             user_advanced_configuration["verbose"] = self.yes_no_question("do you want to show verbose logs ?")
+            user_advanced_configuration["futures"] = self.yes_no_question("do you want to activate futures mode ?")
         else:
             user_advanced_configuration["every_pairs"] = "n"
             user_advanced_configuration["verbose"] = "n"
+            user_advanced_configuration["futures"] = "n"
         return user_advanced_configuration
 
     def __config_file(self):

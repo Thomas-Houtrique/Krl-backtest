@@ -42,12 +42,16 @@ class CssConst:
     END_INPUT = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(6) > app-form-datepicker > div > input"
     RECOMMEND_PAIRS = ".table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a"
     ANALYSE_TAB_DEEP_ANALYSE_LINK = "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
+    ANALYSE_TAB_DEEP_ANALYSE_LINK_FUTURES = "a.backtest-logs-analysis:nth-child(3)"
     ANALYSE_TAB_HOLD = ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(3) > td:nth-child(1) > app-value:nth-child(1) > span:nth-child(1)"
     EXCHANGE = ".control-exchanges"
     SERVER_PROBLEM = "#dialog-unique > app-dialog-alert-api > div > div.dialog-body > div > button"
     BINANCE_EXCHANGE = ".control-exchanges > option[value=binance]"
+    BINANCE_EXCHANGE_FUTURES = '.control-exchanges > option[value=binance-futures]'
     GRAPH_TOP = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-graph > div > div.backtest-graph-top"
     BALANCE_BUTTON = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline div div.scope-balance-button"
+    LEVERAGE_BOX = 'div.form-group:nth-child(8)'
+    LEVERAGE_SLIDER = 'span.ng5-slider-span:nth-child(5)'
     # strategy page
     STRAT_NAME = (
         "app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(2) > div.card-name > h2"

@@ -1,5 +1,6 @@
 import time
 from selenium.common.exceptions import NoSuchElementException
+from custom.user_config import UserConfig
 from custom.utilities import UtilityTools
 from custom.errors import ElementNotFound
 from custom.css_const import CssConst
@@ -69,7 +70,10 @@ class SeleniumUtilities:
                 backtest_start_btn = self.get_element_text(self.css.BACKTEST_START_BTN)
                 if backtest_start_btn and backtest_start_btn == "Test":
                     # Check if analysis tab is open
-                    analyse_tab = self.get_elements(self.css.ANALYSE_TAB_DEEP_ANALYSE_LINK)
+                    if self.user_config['futures'] == 'n':
+                        analyse_tab = self.get_elements(self.css.ANALYSE_TAB_DEEP_ANALYSE_LINK)
+                    else:
+                        analyse_tab = self.get_elements(self.css.ANALYSE_TAB_DEEP_ANALYSE_LINK_FUTURES)
                     if analyse_tab:
                         return False
                     # If btn test is active, but analyse tab no, we have an error
