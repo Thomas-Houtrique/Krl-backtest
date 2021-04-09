@@ -242,29 +242,29 @@ def run():
                             log = ""
                             try:
                                 log = sel_tools.get_element_text(css.LOGS_LAST_LINE)
-                                if retry_order_skipped<=3 and ("order too small" in log or "Too many orders skipped" in log):
+                                if retry_order_skipped <= 3 and ("order too small" in log or "Too many orders skipped" in log):
                                     backtest_failed_screenshot = False
                                     retry_order_skipped = retry_order_skipped + 1
-                                    if retry_order_skipped >3:
+                                    if retry_order_skipped > 3:
                                         backtest_failed = True
                                         tools.log(log)
                                     else:
                                         sel_tools.click_on_element(sel_tools.get_element(sel_tools.css.BALANCE_BUTTON, 2))
-                                        multiplicator = 5*retry_order_skipped
+                                        multiplicator = 5 * retry_order_skipped
                                         try:
                                             amount_one_input = sel_tools.get_element(sel_tools.css.STARTING_AMOUNT_ONE)
-                                            amount_one = amount_one_input.get_attribute('value')
+                                            amount_one = amount_one_input.get_attribute("value")
                                             amount_one = float(amount_one)
-                                            amount_one = amount_one*multiplicator
+                                            amount_one = amount_one * multiplicator
                                             amount_one_input.clear()
                                             amount_one_input.send_keys(str(amount_one))
                                         except:
                                             pass
                                         try:
                                             amount_two_input = sel_tools.get_element(sel_tools.css.STARTING_AMOUNT_TWO)
-                                            amount_two = amount_two_input.get_attribute('value')
+                                            amount_two = amount_two_input.get_attribute("value")
                                             amount_two = float(amount_two)
-                                            amount_two = amount_two*multiplicator
+                                            amount_two = amount_two * multiplicator
                                             amount_two_input.clear()
                                             amount_two_input.send_keys(str(amount_two))
                                         except:
@@ -303,12 +303,12 @@ def run():
 # Start of the program
 # ----------------------
 user = UserConfig()
-tools = UtilityTools(user_config=user.config,user_config_file=user.config_file)
+tools = UtilityTools(user_config=user.config, user_config_file=user.config_file)
 css = CssConst()
 
 client_driver = tools.detect_browsers(user.config_file["headless"])
 api = Api(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
-sel_tools = SeleniumUtilities(user_config=user.config,user_config_file=user.config_file, driver=client_driver)
+sel_tools = SeleniumUtilities(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
 tools.log("[ℹ][RUN][MAIN] : Login...")
 if user.login:

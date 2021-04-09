@@ -10,7 +10,7 @@ class SeleniumUtilities:
     def __init__(self, user_config, user_config_file, driver):
         self.user_config = user_config
         self.css = CssConst()
-        self.tools = UtilityTools(user_config=self.user_config,user_config_file=user_config_file)
+        self.tools = UtilityTools(user_config=self.user_config, user_config_file=user_config_file)
         self.driver = driver
 
     def get_element(self, element_path, duration=10):
@@ -64,12 +64,12 @@ class SeleniumUtilities:
         Check if backtest broke return True if Bt broke and False if not
         """
         # ugly method to detect if there is an error or end page
-        i=0
+        i = 0
         pbar = tqdm(range(100), dynamic_ncols=True)
         for _ in range(0, 10000):
-            if i!=0:
+            if i != 0:
                 self.refresh_pbar(pbar)
-            i = i+10
+            i = i + 10
             time.sleep(10)
             try:
                 backtest_start_btn = self.get_element_text(self.css.BACKTEST_START_BTN)
@@ -106,12 +106,11 @@ class SeleniumUtilities:
         pbar.clear()
         if value == False:
             percent = int(self.get_element_percent(self.css.PROGRESS_PERCENT))
-            pbar.update(percent-pbar.n)
+            pbar.update(percent - pbar.n)
             pbar.refresh()
         else:
-            pbar.update(value-pbar.n)
+            pbar.update(value - pbar.n)
             pbar.refresh()
-
 
     """
     Check if an element existe in DOM. return True or False

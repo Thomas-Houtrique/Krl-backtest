@@ -13,9 +13,9 @@ class Api:
         self.user_config = user_config
         self.user_config_file = user_config_file
         self.driver = driver
-        self.token = self.user_config_file['token']
-        self.tools = UtilityTools(user_config=self.user_config,user_config_file=self.user_config_file)
-        self.sel_tools = SeleniumUtilities(user_config=self.user_config, user_config_file=user_config_file,driver=self.driver)
+        self.token = self.user_config_file["token"]
+        self.tools = UtilityTools(user_config=self.user_config, user_config_file=self.user_config_file)
+        self.sel_tools = SeleniumUtilities(user_config=self.user_config, user_config_file=user_config_file, driver=self.driver)
         self.config = Config()
         self.css = CssConst()
 
@@ -54,7 +54,6 @@ class Api:
             self.tools.log("[❌][API][send_request] : Unable to send the request")
         return response
 
-
     def send_result(self, send_result):
         """
         Takes a token, a pair, if strat is recommended, a strat id, a strat name, a strat version, the hold value,
@@ -90,7 +89,21 @@ class Api:
         Takes the pair, and client token, return precise periods if present in database
         """
         self.tools.log(f"[ℹ][API][get_backtest_dates][input] : (min_date ={min_date}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
-        url = self.config.API_GET_PERIOD_URL + "&min_date=" + min_date + "&strat_name=" + strat_name + "&strat_version=" + strat_version + "&pair=" + pair + "&exchange=" + exchange + "&token=" + self.token
+        url = (
+            self.config.API_GET_PERIOD_URL
+            + "&min_date="
+            + min_date
+            + "&strat_name="
+            + strat_name
+            + "&strat_version="
+            + strat_version
+            + "&pair="
+            + pair
+            + "&exchange="
+            + exchange
+            + "&token="
+            + self.token
+        )
         response = self.send_request("GET", url)
         if response != False and response.status_code == 200:
             response = response.json()["data"]

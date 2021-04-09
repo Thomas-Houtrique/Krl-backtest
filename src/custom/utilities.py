@@ -2,17 +2,20 @@
 from datetime import datetime
 import os
 import platform
+import tempfile
 from selenium import webdriver
 from custom.css_const import CssConst
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
+
 class UtilityTools:
     """Class containing utility tools"""
 
-    def __init__(self, user_config,user_config_file):
+    def __init__(self, user_config, user_config_file):
         self.css = CssConst()
         self.user_config = user_config
         self.user_config_file = user_config_file
+        self.temp_file = tempfile.gettempdir() + '/BackPlusScript.log'
 
     def convert_date_to_api(self, date):
         """
@@ -38,10 +41,10 @@ class UtilityTools:
         """
         Takes a log_text and a verbose boolean, print the log and save it to a log file
         """
-        if self.user_config_file['token'] in log_text:
-            log_text = log_text.replace(self.user_config_file['token'],'REDACTED TOKEN')
+        if self.user_config_file["token"] in log_text:
+            log_text = log_text.replace(self.user_config_file["token"], "REDACTED TOKEN")
         log_formated_string = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
-        log_file = open("Kryll_backtest.log", "a+", encoding="utf-8")
+        log_file = open(self.temp_file, "a+", encoding="utf-8")
         log_file.write(log_formated_string + "\n")
         log_file.close()
         if (self.user_config["verbose"] == "y" and verbose) or not verbose:
@@ -77,16 +80,16 @@ class UtilityTools:
                 options.add_argument("--disable-dev-shm-usage")
                 options.add_argument("--mute-audio")
                 if headless == "y":
-                    options.add_argument('--start-maximized') 
-                    options.add_argument('disable-infobars')
-                    options.add_argument('--disable-extensions')
-                    options.add_argument('window-size=1920x1080')
+                    options.add_argument("--start-maximized")
+                    options.add_argument("disable-infobars")
+                    options.add_argument("--disable-extensions")
+                    options.add_argument("window-size=1920x1080")
                     options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
             elif client_browser == "Firefox":
                 firefox_options = FirefoxOptions()
                 firefox_options.headless = True
-                driver = webdriver.Firefox(executable_path=r"geckodriver.exe",options=firefox_options)
+                driver = webdriver.Firefox(executable_path=r"geckodriver.exe", options=firefox_options)
             return driver
 
         elif client_os == "Linux":
