@@ -1,6 +1,7 @@
 import datetime
 import time
 import requests
+from yaml import tokens
 from custom.selenium_utilities import SeleniumUtilities
 from custom.utilities import UtilityTools
 from custom.config import Config
@@ -8,12 +9,13 @@ from custom.css_const import CssConst
 
 
 class Api:
-    def __init__(self, user_config, token, driver):
+    def __init__(self, user_config, user_config_file, driver):
         self.user_config = user_config
-        self.token = token
+        self.user_config_file = user_config_file
         self.driver = driver
-        self.tools = UtilityTools(user_config=self.user_config)
-        self.sel_tools = SeleniumUtilities(user_config=self.user_config, driver=self.driver)
+        self.token = self.user_config_file['token']
+        self.tools = UtilityTools(user_config=self.user_config,user_config_file=self.user_config_file)
+        self.sel_tools = SeleniumUtilities(user_config=self.user_config, user_config_file=user_config_file,driver=self.driver)
         self.config = Config()
         self.css = CssConst()
 

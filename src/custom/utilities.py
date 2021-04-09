@@ -9,9 +9,10 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 class UtilityTools:
     """Class containing utility tools"""
 
-    def __init__(self, user_config):
+    def __init__(self, user_config,user_config_file):
         self.css = CssConst()
         self.user_config = user_config
+        self.user_config_file = user_config_file
 
     def convert_date_to_api(self, date):
         """
@@ -37,6 +38,8 @@ class UtilityTools:
         """
         Takes a log_text and a verbose boolean, print the log and save it to a log file
         """
+        if self.user_config_file['token'] in log_text:
+            log_text = log_text.replace(self.user_config_file['token'],'REDACTED TOKEN')
         log_formated_string = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
         log_file = open("Kryll_backtest.log", "a+", encoding="utf-8")
         log_file.write(log_formated_string + "\n")

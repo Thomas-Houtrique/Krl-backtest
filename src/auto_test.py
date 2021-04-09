@@ -303,12 +303,12 @@ def run():
 # Start of the program
 # ----------------------
 user = UserConfig()
-tools = UtilityTools(user_config=user.config)
+tools = UtilityTools(user_config=user.config,user_config_file=user.config_file)
 css = CssConst()
 
 client_driver = tools.detect_browsers(user.config_file["headless"])
-api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
-sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
+api = Api(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
+sel_tools = SeleniumUtilities(user_config=user.config,user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
 tools.log("[ℹ][RUN][MAIN] : Login...")
 if user.login:

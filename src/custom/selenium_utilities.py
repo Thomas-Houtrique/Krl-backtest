@@ -7,10 +7,10 @@ from custom.css_const import CssConst
 
 
 class SeleniumUtilities:
-    def __init__(self, user_config, driver):
+    def __init__(self, user_config, user_config_file, driver):
         self.user_config = user_config
         self.css = CssConst()
-        self.tools = UtilityTools(user_config=self.user_config)
+        self.tools = UtilityTools(user_config=self.user_config,user_config_file=user_config_file)
         self.driver = driver
 
     def get_element(self, element_path, duration=10):
