@@ -4,7 +4,7 @@ import os
 import platform
 from selenium import webdriver
 from custom.css_const import CssConst
-
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 class UtilityTools:
     """Class containing utility tools"""
@@ -81,7 +81,9 @@ class UtilityTools:
                     options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
             elif client_browser == "Firefox":
-                driver = webdriver.Firefox(executable_path=r"geckodriver.exe")
+                firefox_options = FirefoxOptions()
+                firefox_options.headless = True
+                driver = webdriver.Firefox(executable_path=r"geckodriver.exe",options=firefox_options)
             return driver
 
         elif client_os == "Linux":
