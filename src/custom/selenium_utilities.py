@@ -81,8 +81,8 @@ class SeleniumUtilities:
                         pbar.close()
                         return False
                     # If btn test is active, but analyse tab no, we have an error
-                    self.tools.log(f"[INFO][RUN][run_backtest] : {self.get_element_text(self.css.PROGRESS_PERCENT).rjust(20, '.')}")
-                    self.tools.log("[ERROR][check_error_during_backtest][try] : Error during the backtest")
+                    self.tools.log(f"[ℹ][RUN][run_backtest] : {self.get_element_text(self.css.PROGRESS_PERCENT).rjust(20, '.')}")
+                    self.tools.log("[❌][check_error_during_backtest][try] : Error during the backtest")
                     try:
                         self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
                     except Exception:
@@ -95,7 +95,7 @@ class SeleniumUtilities:
                 pbar.close()
                 break
         pbar.close()
-        self.tools.log("[ERROR][check_error_during_backtest] : Error during the backtest")
+        self.tools.log("[❌][check_error_during_backtest] : Error during the backtest")
         try:
             self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
         except Exception:
@@ -133,7 +133,7 @@ class SeleniumUtilities:
             element = self.check_if_element_exist(element_path, multiple)
             if element:
                 return element
-            self.tools.log(f"[INFO][SeleniumUtilities][wait_for_element] : can't find element {element_path} retry {i+1}/10", verbose=True)
+            self.tools.log(f"[ℹ][SeleniumUtilities][wait_for_element] : can't find element {element_path} retry {i+1}/10", verbose=True)
             time.sleep(1)
         return False
 
@@ -199,10 +199,10 @@ class SeleniumUtilities:
             for i in range(count_tabs - 1, 0, -1):
                 self.driver.switch_to.window(self.driver.window_handles[i])  # will close the last tab first.
                 self.driver.close()
-                self.tools.log("[INFO][SeleniumUtilities][close_unused_tabs] : Closed Tab No. ", i)
+                self.tools.log("[ℹ][SeleniumUtilities][close_unused_tabs] : Closed Tab No. ", i)
             self.driver.switch_to.window(self.driver.window_handles[0])  # Switching the driver focus to First tab.
         else:
-            self.tools.log("[INFO][SeleniumUtilities][close_unused_tabs] : Found only Single tab.")
+            self.tools.log("[ℹ][SeleniumUtilities][close_unused_tabs] : Found only Single tab.")
 
     def refresh(self):
         """

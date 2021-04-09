@@ -39,8 +39,8 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
     backtest_date_start = tools.convert_date_to_html(backtest_date_run_backtest["start"])
     backtest_date_end = tools.convert_date_to_html(backtest_date_run_backtest["end"])
     exchange = exchange_select_run_backtest.first_selected_option.text.strip()
-    tools.log(f"[INFO][RUN][run_backtest] : Selected exchange = {exchange}")
-    tools.log(f"[INFO][RUN][run_backtest] : Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
+    tools.log(f"[ℹ][RUN][run_backtest] : Selected exchange = {exchange}")
+    tools.log(f"[ℹ][RUN][run_backtest] : Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
     if not api.backtest_has_failed(
         pair=pair_run_backtest,
         period=backtest_date_period,
@@ -58,7 +58,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         start_date=backtest_date_run_backtest["start"],
         end_date=backtest_date_run_backtest["end"],
     ):
-        tools.log("[INFO][RUN][run_backtest] : Test in progress, Please Wait...")
+        tools.log("[ℹ][RUN][run_backtest] : Test in progress, Please Wait...")
         # set date into input
         set_input_date(backtest_date_start, backtest_date_end)
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
@@ -74,7 +74,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
         sel_tools.click_on_element(sel_tools.get_element(css.ANALYSE_TAB_DEEP_ANALYSE_LINK))
         windows_handle = sel_tools.wait_for_windows_handle(120)
         if not windows_handle:
-            tools.log("[ERROR][RUN][run_backtest] : depth analysis button is break on kryll side, period canceled")
+            tools.log("[❌][RUN][run_backtest] : depth analysis button is break on kryll side, period canceled")
             raise Exception("depth analysis button is break on kryll side, period canceled")
         send_ok = False
         try:
@@ -82,7 +82,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
             # wait for the advanced bt page to load
             depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
             if not depth_analysis_page_loaded:
-                tools.log("[WARNING][RUN][run_backtest] : depth analysis tab seems to don't load, refresh and retry...")
+                tools.log("[⚠][RUN][run_backtest] : depth analysis tab seems to don't load, refresh and retry...")
                 # retry
                 sel_tools.refresh()
                 depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
@@ -103,13 +103,13 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
                 )
 
         except Exception as error:
-            tools.log("[ERROR][RUN][run_backtest] : Sending backtest : Exception occured : " + str(error))
+            tools.log("[❌][RUN][run_backtest] : Sending backtest : Exception occured : " + str(error))
         sel_tools.driver.close()
         sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[0])
         if send_ok:
-            tools.log("[INFO][RUN][run_backtest] : Done.")
+            tools.log("[ℹ][RUN][run_backtest] : Done.")
             return True
-        tools.log("[ERROR][RUN][run_backtest] : Error during sending the result, period canceled.")
+        tools.log("[❌][RUN][run_backtest] : Error during sending the result, period canceled.")
         raise Exception("Error during backtest")
     return False
 
@@ -122,32 +122,32 @@ def run():
         try:
             recommended_pairs = sel_tools.get_elements(css.RECOMMEND_PAIRS)
         except Exception:
-            tools.log("[WARNING][RUN][run] : No recommanded pair")
+            tools.log("[⚠][RUN][run] : No recommanded pair")
             recommended_pairs = {}
         strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
-        tools.log(f"[INFO][RUN][run] : Checking strat : {strat_name}")
+        tools.log(f"[ℹ][RUN][run] : Checking strat : {strat_name}")
         recommended_pairs_list = []
         for i in recommended_pairs:
             recommended_pairs_list.append(i)
         # try to install the strat
         try:
-            tools.log("[INFO][RUN][run] : Checking if strat is installed...")
+            tools.log("[ℹ][RUN][run] : Checking if strat is installed...")
             backtest_btn = sel_tools.get_element(css.BACKTEST_BTN)
         except Exception:
-            tools.log("[INFO][RUN][run] : Install in progress...")
+            tools.log("[ℹ][RUN][run] : Install in progress...")
             install_btn = sel_tools.get_element(css.INSTALL_BTN)
             sel_tools.click_on_element(install_btn)
-            tools.log("[INFO][RUN][run] : Done")
+            tools.log("[ℹ][RUN][run] : Done")
             backtest_btn = sel_tools.get_element(css.BACKTEST_BTN)
 
         # click on backtest btn
-        tools.log("[INFO][RUN][run] : Strat can be backtested...")
-        tools.log("[INFO][RUN][run] : Initialisation, please wait...")
+        tools.log("[ℹ][RUN][run] : Strat can be backtested...")
+        tools.log("[ℹ][RUN][run] : Initialisation, please wait...")
         sel_tools.click_on_element(backtest_btn)
         # To wait full load of exchange select
         strat_version = sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1]
         strat_name = sel_tools.get_element_text(css.STRAT_NAME_BACKTEST).strip()
-        tools.log(f"[INFO][RUN][run] : |||||||| Testing strat : {strat_name}, version : {strat_version}")
+        tools.log(f"[ℹ][RUN][run] : |||||||| Testing strat : {strat_name}, version : {strat_version}")
         exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
         time.sleep(4)
 
@@ -164,7 +164,7 @@ def run():
         for exchange in final_exchanges:
             exchange = exchange.text
             if exchange:
-                tools.log(f"[INFO][RUN][run] : Testing on exchange {exchange}")
+                tools.log(f"[ℹ][RUN][run] : Testing on exchange {exchange}")
                 exchange_select.select_by_visible_text(exchange)
                 time.sleep(2)
                 sel_tools.check_if_server_problem()
@@ -186,13 +186,13 @@ def run():
 
                 if "pair" in user.config_file:
                     if recommended == 0 and not pair.replace(" / ", "/") in user.config_file["pair"]:
-                        tools.log(f"[INFO][RUN][run] : Pair {pair} skipped", True)
+                        tools.log(f"[ℹ][RUN][run] : Pair {pair} skipped", True)
                         continue
                     if pair.replace(" / ", "/") in user.config_file["pair"]:
                         force_pair = 1
                 if "accu" in user.config_file:
                     if recommended == 0 and not pair.split(" / ")[1] in user.config_file["accu"]:
-                        tools.log(f"[INFO][RUN][run] : Pair {pair} skipped", True)
+                        tools.log(f"[ℹ][RUN][run] : Pair {pair} skipped", True)
                         continue
 
                 # check if user want to test every pairs
@@ -201,7 +201,7 @@ def run():
                 if recommended == 1:
                     if "skip_recommended_pair" in user.config_file and user.config_file["skip_recommended_pair"] == "y" and force_pair == 0:
                         continue
-                tools.log(f"[INFO][RUN][run] : pair = {pair}, recommended = {recommended}")
+                tools.log(f"[ℹ][RUN][run] : pair = {pair}, recommended = {recommended}")
 
                 # Configure backtesting
                 pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
@@ -220,7 +220,7 @@ def run():
                     pairs_input.select_by_value(pair.replace(" / ", "-"))
                     sel_tools.wait_for_pair_loaded(previous_balance_button)
                 except Exception:
-                    tools.log(fr"[WARNING][RUN][run] : /!\ Error recommanded pair {pair} not listed on {exchange}")
+                    tools.log(fr"[⚠][RUN][run] : /!\ Error recommanded pair {pair} not listed on {exchange}")
                     continue
 
                 # get min/max dates
@@ -228,7 +228,7 @@ def run():
                 exchange = exchange_select.first_selected_option.text.strip()
                 backtest_dates = api.get_backtest_dates(min_date=min_date, strat_name=strat_name, strat_version=strat_version, pair=pair, exchange=exchange)
                 # run backtests on all dates
-                tools.log("[INFO][RUN][run] : run backtest for pair " + pair + " for all selected periods")
+                tools.log("[ℹ][RUN][run] : run backtest for pair " + pair + " for all selected periods")
                 for backtest_date in backtest_dates:
                     backtest_done = False
                     backtest_failed = False
@@ -269,7 +269,7 @@ def run():
                                             amount_two_input.send_keys(str(amount_two))
                                         except:
                                             pass
-                                        tools.log(f"[ERROR][RUN][run] : Too many order skipped, retry with x{multiplicator} amount {retry_order_skipped}/3.")
+                                        tools.log(f"[❌][RUN][run] : Too many order skipped, retry with x{multiplicator} amount {retry_order_skipped}/3.")
                                 else:
                                     backtest_failed = True
                                     tools.log(log)
@@ -277,7 +277,7 @@ def run():
                                 backtest_failed = True
                                 pass
                             if "missing data" in log:
-                                tools.log(f"[ERROR][RUN][run] : {log}")
+                                tools.log(f"[❌][RUN][run] : {log}")
                                 backtest_failed_screenshot = False
                                 backtest_failed = True
                             if backtest_failed:
@@ -291,12 +291,12 @@ def run():
                                     end_date=backtest_date["end"],
                                     log=log,
                                 )
-                                tools.log("[ERROR][RUN][run] : Backtest Failed.")
+                                tools.log("[❌][RUN][run] : Backtest Failed.")
                                 if backtest_failed_screenshot:
                                     screenshot_name = "backtest_fail_" + str(strat_id) + "_" + str(pair.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date["period"]) + ".png"
                                     sel_tools.save_screenshot(screenshot_name)
-                                    tools.log("[ERROR][RUN][run] : You can see the screenshot on this file : " + screenshot_name)
-            tools.log(f"[INFO][RUN][run] : strat backtested : {strat_name}, version : {strat_version} : Done")
+                                    tools.log("[❌][RUN][run] : You can see the screenshot on this file : " + screenshot_name)
+            tools.log(f"[ℹ][RUN][run] : strat backtested : {strat_name}, version : {strat_version} : Done")
 
 
 # ----------------------
@@ -310,7 +310,7 @@ client_driver = tools.detect_browsers(user.config_file["headless"])
 api = Api(user_config=user.config, token=user.config_file["token"], driver=client_driver)
 sel_tools = SeleniumUtilities(user_config=user.config, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
-tools.log("[INFO][RUN][MAIN] : Login...")
+tools.log("[ℹ][RUN][MAIN] : Login...")
 if user.login:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
@@ -319,7 +319,7 @@ if user.login:
     sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
 if "update_strat" in user.config_file and user.config_file["update_strat"] == "y":
-    tools.log("[INFO][RUN][MAIN] : Strat update in progress...")
+    tools.log("[ℹ][RUN][MAIN] : Strat update in progress...")
     sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
     ids = sel_tools.get_elements(
         "div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)"
@@ -327,7 +327,7 @@ if "update_strat" in user.config_file and user.config_file["update_strat"] == "y
     strat_ids = []
     for strat_id in ids:
         strat_ids.append(strat_id.get_attribute("href").split("/")[4])
-    tools.log("[INFO][RUN][MAIN] : Done!")
+    tools.log("[ℹ][RUN][MAIN] : Done!")
 else:
     if "strat_ids" in user.config_file:
         strat_ids = user.config_file["strat_ids"]
@@ -346,13 +346,13 @@ while COUNT_QUICK_FAIL < 3:
     except Exception as error:
         SCREENSHOT_NAME = "screen_fail_" + str(EXECUTION_ID) + ".png"
         sel_tools.save_screenshot(SCREENSHOT_NAME)
-        tools.log("[ERROR][RUN][MAIN] : Exception occured on execution " + str(EXECUTION_ID) + " : " + str(error))
-        tools.log("[ERROR][RUN][MAIN] : You can see the screenshot on this file : " + SCREENSHOT_NAME)
-        tools.log("[ERROR][RUN][MAIN] : Retry...")
+        tools.log("[❌][RUN][MAIN] : Exception occured on execution " + str(EXECUTION_ID) + " : " + str(error))
+        tools.log("[❌][RUN][MAIN] : You can see the screenshot on this file : " + SCREENSHOT_NAME)
+        tools.log("[❌][RUN][MAIN] : Retry...")
     end = time.time()
     elapsed = end - start
     if elapsed < 30:
         COUNT_QUICK_FAIL = COUNT_QUICK_FAIL + 1
-        tools.log("[ERROR][RUN][MAIN][ERROR] : Quick fail : " + str(COUNT_QUICK_FAIL) + "/3")
+        tools.log("[❌][RUN][MAIN][❌] : Quick fail : " + str(COUNT_QUICK_FAIL) + "/3")
     else:
         COUNT_QUICK_FAIL = 0
