@@ -39,11 +39,11 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
     backtest_date_start = tools.convert_date_to_html(backtest_date_run_backtest["start"])
     backtest_date_end = tools.convert_date_to_html(backtest_date_run_backtest["end"])
     exchange = exchange_select_run_backtest.first_selected_option.text.strip()
-    tools.log(f"[ℹ][RUN][run_backtest] : Selected exchange = {exchange}")
     tools.log(f"[ℹ][RUN][run_backtest] : Testing period = {backtest_date_period}, from {backtest_date_start} to {backtest_date_end}")
     if not api.backtest_has_failed(
         pair=pair_run_backtest,
         period=backtest_date_period,
+        strat_id=strat_id_run_backtest,
         strat=strat_name_run_backtest,
         version=strat_version_run_backtest,
         exchange=exchange,
@@ -52,6 +52,7 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
     ) and not api.backtest_already_did(
         pair=pair_run_backtest,
         period=backtest_date_period,
+        strat_id=strat_id_run_backtest,
         strat=strat_name_run_backtest,
         version=strat_version_run_backtest,
         exchange=exchange,
@@ -147,7 +148,9 @@ def run():
         # To wait full load of exchange select
         strat_version = sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1]
         strat_name = sel_tools.get_element_text(css.STRAT_NAME_BACKTEST).strip()
-        tools.log(f"[ℹ][RUN][run] : |||||||| Testing strat : {strat_name}, version : {strat_version}")
+        tools.log(f"[ℹ][RUN][run] : ****************************************************************")
+        tools.log(f"[ℹ][RUN][run] :     Testing strat : {strat_name}, version : {strat_version}")
+        tools.log(f"[ℹ][RUN][run] : ****************************************************************")
         exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
         time.sleep(4)
 
@@ -201,7 +204,7 @@ def run():
                 if recommended == 1:
                     if "skip_recommended_pair" in user.config_file and user.config_file["skip_recommended_pair"] == "y" and force_pair == 0:
                         continue
-                tools.log(f"[ℹ][RUN][run] : pair = {pair}, recommended = {recommended}")
+                tools.log(f"[ℹ][RUN][run] : pair = {pair}, recommended = {recommended}", True)
 
                 # Configure backtesting
                 pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
@@ -226,9 +229,9 @@ def run():
                 # get min/max dates
                 min_date = sel_tools.wait_for_attribute_value(start_input, "min")
                 exchange = exchange_select.first_selected_option.text.strip()
-                backtest_dates = api.get_backtest_dates(min_date=min_date, strat_name=strat_name, strat_version=strat_version, pair=pair, exchange=exchange)
+                backtest_dates = api.get_backtest_dates(min_date=min_date, strat_id=strat_id, strat_name=strat_name, strat_version=strat_version, pair=pair, exchange=exchange)
                 # run backtests on all dates
-                tools.log("[ℹ][RUN][run] : run backtest for pair " + pair + " for all selected periods")
+                tools.log("[ℹ][RUN][run] : run backtest for pair " + pair)
                 for backtest_date in backtest_dates:
                     backtest_done = False
                     backtest_failed = False
@@ -284,6 +287,7 @@ def run():
                                 api.backtest_add_failed(
                                     pair=pair,
                                     period=backtest_date["period"],
+                                    strat_id=strat_id,
                                     strat=strat_name,
                                     version=strat_version,
                                     exchange=exchange,

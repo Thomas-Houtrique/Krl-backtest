@@ -37,14 +37,23 @@ class Api:
         response = False
         retry = 1
         success = False
+        url = url + "&api_version=" + self.config.API_VERSION
         while success == False and retry < 5:
             try:
                 if data != False:
                     response = requests.request(method, url, data=data)
                 else:
                     response = requests.request(method, url)
-                success = True
-                self.log_response("send_request", url, data, response)
+                if response.status_code == 501:
+                    self.tools.log("[❌][API][send_request] : Votre version n'est plus à jour, veuillez télécharger la nouvelle version.")
+                    input("Appuyez sur une touche pour quitter")
+                    quit()
+                if response.status_code != 503:
+                    success = True
+                    self.log_response("send_request", url, data, response)
+                else:
+                    self.tools.log("[⚠][API][send_request] : Maintenance de l'API en cours, veuillez patienter...")
+                    time.sleep(300)
             except Exception as error:
                 self.tools.log("[❌][API][send_request] : " + str(error), True)
                 self.tools.log("[⚠][API][send_request] : Retry " + str(retry), True)
@@ -62,6 +71,7 @@ class Api:
         """
         advanced_analyse_link = self.sel_tools.driver.current_url
         result = self.get_advanced_result(
+            send_result["strat_id"],
             send_result["strat_name"],
             send_result["pair"],
             send_result["backtest_date_start"],
@@ -84,15 +94,17 @@ class Api:
                 return True
         return False
 
-    def get_backtest_dates(self, min_date, strat_name, strat_version, pair, exchange):
+    def get_backtest_dates(self, min_date, strat_id, strat_name, strat_version, pair, exchange):
         """
         Takes the pair, and client token, return precise periods if present in database
         """
-        self.tools.log(f"[ℹ][API][get_backtest_dates][input] : (min_date ={min_date}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
+        self.tools.log(f"[ℹ][API][get_backtest_dates][input] : (min_date ={min_date}, strat_id= {strat_id}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
         url = (
             self.config.API_GET_PERIOD_URL
             + "&min_date="
             + min_date
+            + "&strat_id="
+            + strat_id
             + "&strat_name="
             + strat_name
             + "&strat_version="
@@ -113,17 +125,19 @@ class Api:
             return []
         return []
 
-    def backtest_already_did(self, pair, period, strat, version, exchange, start_date, end_date):
+    def backtest_already_did(self, pair, period, strat_id, strat, version, exchange, start_date, end_date):
         """
         Takes the pair,the period,the strat,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"[ℹ][API][backtest_already_did][input] : (pair ={pair}, period = {period}, exchange = {exchange}, strat= {strat}, version= {version}, start_date= {start_date}, end_date= {end_date})",
+            f"[ℹ][API][backtest_already_did][input] : (pair ={pair}, period = {period}, exchange = {exchange}, strat_id= {strat_id}, strat= {strat}, version= {version}, start_date= {start_date}, end_date= {end_date})",
             True,
         )
         pair = pair.replace(" ", "")
         url_backtest_already_did = (
             self.config.API_CHECK_BACKTEST_URL
+            + "&strat_id="
+            + strat_id
             + "&strat="
             + strat
             + "&version="
@@ -143,22 +157,24 @@ class Api:
         )
         response = self.send_request("GET", url_backtest_already_did)
         if response != False and response.status_code == 200:
-            self.tools.log("[ℹ][API][backtest_already_did][Result] : Can be tested")
+            self.tools.log("[ℹ][API][backtest_already_did][Result] : Can be tested", True)
             return False
         self.tools.log("[ℹ][API][backtest_already_did][Result] : Already tested, next")
         return True
 
-    def backtest_has_failed(self, pair, period, strat, version, exchange, start_date, end_date):
+    def backtest_has_failed(self, pair, period, strat_id, strat, version, exchange, start_date, end_date):
         """
         Takes the pair,the period,the strat,and client token, return if backtest has already failed
         """
         self.tools.log(
-            f"[ℹ][API][backtest_has_failed][input] : (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat= {strat}, strat_version= {version})",
+            f"[ℹ][API][backtest_has_failed][input] : (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat_id= {strat_id}, strat= {strat}, strat_version= {version})",
             True,
         )
         pair = pair.replace(" ", "")
         url_backtest_has_failed = (
             self.config.API_BACKTEST_HAS_FAILED_URL
+            + "&strat_id="
+            + strat_id
             + "&strat="
             + strat
             + "&strat_version="
@@ -182,18 +198,19 @@ class Api:
             return True
         return False
 
-    def backtest_add_failed(self, pair, period, strat, version, exchange, start_date, end_date, log):
+    def backtest_add_failed(self, pair, period, strat_id, strat, version, exchange, start_date, end_date, log):
         """
         Takes the pair,the period,the strat,and client token,
         increase fail for this backtest in database
         return True if request success, false if failed
         """
         self.tools.log(
-            f"Function backtest_add_failed input (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat= {strat}, strat_version= {version})",
+            f"Function backtest_add_failed input (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat_id= {strat_id}, strat= {strat}, strat_version= {version})",
             True,
         )
         pair = pair.replace(" ", "")
         post_data = {}
+        post_data["strat_id"] = strat_id
         post_data["strat"] = strat
         post_data["strat_version"] = version
         post_data["pair"] = pair
@@ -210,6 +227,7 @@ class Api:
 
     def get_advanced_result(
         self,
+        strat_id,
         strat_name,
         pair,
         backtest_date_start,
@@ -223,6 +241,7 @@ class Api:
         result = {}
         try:
             result["trade"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_TRADE)
+            result["strat_id"] = strat_id
             result["strat"] = strat_name
             result["pair"] = pair
             result["start"] = backtest_date_start
