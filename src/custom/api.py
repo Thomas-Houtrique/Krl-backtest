@@ -263,13 +263,13 @@ class Api:
             if end_date_kryll_side < api_date_end:
                 self.tools.log("[❌][API][get_advanced_result] invalid deep analysis.")
                 self.tools.log("[❌][API][get_advanced_result] : Backtest seems to be interrupt by other backtest on the same time")
-                self.tools.log(f"[❌][API][get_advanced_result][results] : {result}")
+                self.tools.log(f"[❌][API][get_advanced_result][results] : {result}", True)
                 return False
-            self.tools.log(f"[ℹ][API][get_advanced_result] results : {result}")
+            self.tools.log(f"[ℹ][API][get_advanced_result] results : {result}", True)
             return result
         except Exception:
             self.tools.log("[❌][API][get_advanced_result] : invalid deep analysis.")
-            self.tools.log(f"[❌][API][get_advanced_result][results] : results : {result}")
+            self.tools.log(f"[❌][API][get_advanced_result][results] : results : {result}", True)
         return False
 
     def __split_max_drawdown_informations(self, element_path):

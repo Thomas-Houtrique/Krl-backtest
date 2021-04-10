@@ -10,12 +10,17 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 class UtilityTools:
     """Class containing utility tools"""
+    temp_file = False
 
     def __init__(self, user_config, user_config_file):
         self.css = CssConst()
         self.user_config = user_config
         self.user_config_file = user_config_file
-        self.temp_file = tempfile.gettempdir() + '/BackPlusScript.log'
+    
+    def get_log_file_name(self):
+        if UtilityTools.temp_file == False or UtilityTools.temp_file[20:-11] != datetime.now().strftime("%Y_%m_%d"):
+            UtilityTools.temp_file = "BackPlusScript_Logs_" + datetime.now().strftime("%Y_%m_%d_%H%M%S") + ".log"
+        return UtilityTools.temp_file
 
     def convert_date_to_api(self, date):
         """
@@ -44,7 +49,7 @@ class UtilityTools:
         if self.user_config_file["token"] in log_text:
             log_text = log_text.replace(self.user_config_file["token"], "REDACTED TOKEN")
         log_formated_string = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
-        log_file = open(self.temp_file, "a+", encoding="utf-8")
+        log_file = open(self.get_log_file_name(), "a+", encoding="utf-8")
         log_file.write(log_formated_string + "\n")
         log_file.close()
         if (self.user_config["verbose"] == "y" and verbose) or not verbose:
