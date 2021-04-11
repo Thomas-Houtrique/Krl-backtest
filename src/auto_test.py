@@ -105,6 +105,9 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
 
         except Exception as error:
             tools.log("[❌][RUN][run_backtest] : Sending backtest : Exception occured : " + str(error))
+            screenshot_name = "backtest_fail_deep_analysis_" + str(strat_id_run_backtest) + "_" + str(pair_run_backtest.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date_period) + ".png"
+            sel_tools.save_screenshot(screenshot_name)
+            tools.log("[❌][RUN][run] : You can see the screenshot on this file : " + screenshot_name)
         sel_tools.driver.close()
         sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[0])
         if send_ok:

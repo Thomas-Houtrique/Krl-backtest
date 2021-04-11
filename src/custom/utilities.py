@@ -93,7 +93,8 @@ class UtilityTools:
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
             elif client_browser == "Firefox":
                 firefox_options = FirefoxOptions()
-                firefox_options.headless = True
+                if headless == "y":
+                    firefox_options.headless = True
                 driver = webdriver.Firefox(executable_path=r"geckodriver.exe", options=firefox_options)
             return driver
 
