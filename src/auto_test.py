@@ -187,13 +187,13 @@ def run():
                     recommended = 1
 
                 if "pair" in user.config_file:
-                    if recommended == 0 and not pair.replace(" / ", "/") in user.config_file["pair"]:
+                    if not pair.replace(" / ", "/") in user.config_file["pair"]:
                         tools.log(f"[ℹ][RUN][run] : Pair {pair} skipped", True)
                         continue
                     if pair.replace(" / ", "/") in user.config_file["pair"]:
                         force_pair = 1
                 if "accu" in user.config_file:
-                    if recommended == 0 and not pair.split(" / ")[1] in user.config_file["accu"]:
+                    if not pair.split(" / ")[1] in user.config_file["accu"]:
                         tools.log(f"[ℹ][RUN][run] : Pair {pair} skipped", True)
                         continue
 
