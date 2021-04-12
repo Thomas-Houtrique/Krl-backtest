@@ -24,12 +24,6 @@ def set_input_date(start, end):
     end_input.clear()
     end_input.send_keys(end)
 
-
-# progress bar path :
-# div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-graph > div > div.backtest-graph-top.backtest-percent
-# if think we can user that to check error during backtest
-
-
 def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_run_backtest, pair_run_backtest, recommanded_run_backtest, backtest_date_run_backtest, exchange_select_run_backtest):
     """
     Takes a strat name, a strat id, a pair, and a backtest date
@@ -105,6 +99,8 @@ def run_backtest(strat_name_run_backtest, strat_id_run_backtest, strat_version_r
 
         except Exception as error:
             tools.log("[❌][RUN][run_backtest] : Sending backtest : Exception occured : " + str(error))
+        
+        if not send_ok:
             screenshot_name = "backtest_fail_deep_analysis_" + str(strat_id_run_backtest) + "_" + str(pair_run_backtest.replace(" / ", "-")) + "_" + str(exchange) + "_" + str(backtest_date_period) + ".png"
             sel_tools.save_screenshot(screenshot_name)
             tools.log("[❌][RUN][run] : You can see the screenshot on this file : " + screenshot_name)

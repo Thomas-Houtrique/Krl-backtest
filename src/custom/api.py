@@ -34,6 +34,9 @@ class Api:
         )
 
     def send_request(self, method, url, data=False):
+        """
+        Generic function to send request
+        """
         response = False
         retry = 1
         success = False
@@ -44,16 +47,20 @@ class Api:
                     response = requests.request(method, url, data=data)
                 else:
                     response = requests.request(method, url)
-                if response.status_code == 501:
+                if response.status_code == 501 and response.reason == "not supported version":
+                    self.log_response("send_request", url, data, response, True)
                     self.tools.log("[❌][API][send_request] : Votre version n'est plus à jour, veuillez télécharger la nouvelle version.")
                     input("Appuyez sur une touche pour quitter")
-                    quit()
-                if response.status_code != 503:
-                    success = True
-                    self.log_response("send_request", url, data, response)
-                else:
+                    exit()
+                elif response.status_code == 503 and response.reason == "maintenance":
                     self.tools.log("[⚠][API][send_request] : Maintenance de l'API en cours, veuillez patienter...")
                     time.sleep(300)
+                elif response.status_code == 500 or  response.status_code == 404:
+                    self.tools.log("[⚠][API][send_request] : Impossible d'envoyer la requête en raison d'un problème serveur. Nouvelle tentative dans 5 minutes...")
+                    time.sleep(300)
+                else:
+                    success = True
+                    self.log_response("send_request", url, data, response, True)
             except Exception as error:
                 self.tools.log("[❌][API][send_request] : " + str(error), True)
                 self.tools.log("[⚠][API][send_request] : Retry " + str(retry), True)
