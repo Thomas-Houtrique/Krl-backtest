@@ -48,7 +48,7 @@ class Api:
                 else:
                     response = requests.request(method, url)
                 if response.status_code == 501 and response.reason == "not supported version":
-                    self.log_response("send_request", url, data, response, True)
+                    self.log_response("send_request", url, data, response)
                     self.tools.log("[❌][API][send_request] : Votre version n'est plus à jour, veuillez télécharger la nouvelle version.")
                     input("Appuyez sur une touche pour quitter")
                     exit()
@@ -60,7 +60,7 @@ class Api:
                     time.sleep(300)
                 else:
                     success = True
-                    self.log_response("send_request", url, data, response, True)
+                    self.log_response("send_request", url, data, response)
             except Exception as error:
                 self.tools.log("[❌][API][send_request] : " + str(error), True)
                 self.tools.log("[⚠][API][send_request] : Retry " + str(retry), True)
