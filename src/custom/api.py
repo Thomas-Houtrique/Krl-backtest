@@ -51,7 +51,7 @@ class Api:
                     self.log_response("send_request", url, data, response)
                     self.tools.log("[❌][API][send_request] : Votre version n'est plus à jour, veuillez télécharger la nouvelle version.")
                     input("Appuyez sur une touche pour quitter")
-                    exit()
+                    quit()
                 elif response.status_code == 503 and response.reason == "maintenance":
                     self.tools.log("[⚠][API][send_request] : Maintenance de l'API en cours, veuillez patienter...")
                     time.sleep(300)
