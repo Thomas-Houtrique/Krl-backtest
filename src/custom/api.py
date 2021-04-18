@@ -43,10 +43,10 @@ class Api:
         url = url + "&api_version=" + self.config.API_VERSION
         while success == False and retry < 5:
             try:
-                if data != False:
-                    response = requests.request(method, url, data=data)
+                if method.upper() == "GET":
+                    response = requests.get(url, params=data)
                 else:
-                    response = requests.request(method, url)
+                    response = requests.post(url, data=data)
                 if response.status_code == 501 and response.reason == "not supported version":
                     self.log_response("send_request", url, data, response)
                     self.tools.log("[❌][API][send_request] : Votre version n'est plus à jour, veuillez télécharger la nouvelle version.")
@@ -106,24 +106,17 @@ class Api:
         Takes the pair, and client token, return precise periods if present in database
         """
         self.tools.log(f"[ℹ][API][get_backtest_dates][input] : (min_date ={min_date}, strat_id= {strat_id}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
-        url = (
-            self.config.API_GET_PERIOD_URL
-            + "&min_date="
-            + min_date
-            + "&strat_id="
-            + strat_id
-            + "&strat_name="
-            + strat_name
-            + "&strat_version="
-            + strat_version
-            + "&pair="
-            + pair
-            + "&exchange="
-            + exchange
-            + "&token="
-            + self.token
-        )
-        response = self.send_request("GET", url)
+        url = self.config.API_GET_PERIOD_URL
+        
+        data = {}
+        data["min_date"] = min_date
+        data["strat_id"] = strat_id
+        data["strat_name"] = strat_name
+        data["strat_version"] = strat_version
+        data["pair"] = pair
+        data["exchange"] = exchange
+        data["token"] = self.token
+        response = self.send_request("GET", url, data)
         if response != False and response.status_code == 200:
             response = response.json()["data"]
             return response
@@ -141,28 +134,18 @@ class Api:
             True,
         )
         pair = pair.replace(" ", "")
-        url_backtest_already_did = (
-            self.config.API_CHECK_BACKTEST_URL
-            + "&strat_id="
-            + strat_id
-            + "&strat="
-            + strat
-            + "&version="
-            + version
-            + "&pair="
-            + pair
-            + "&period="
-            + period
-            + "&exchange="
-            + exchange
-            + "&start_date="
-            + start_date
-            + "&end_date="
-            + end_date
-            + "&token="
-            + self.token
-        )
-        response = self.send_request("GET", url_backtest_already_did)
+        url_backtest_already_did = self.config.API_CHECK_BACKTEST_URL
+        data = {}
+        data["strat_id"] = strat_id
+        data["strat"] = strat
+        data["version"] = version
+        data["pair"] = pair
+        data["period"] = period
+        data["exchange"] = exchange
+        data["start_date"] = start_date
+        data["end_date"] = end_date
+        data["token"] = self.token
+        response = self.send_request("GET", url_backtest_already_did, data)
         if response != False and response.status_code == 200:
             self.tools.log("[ℹ][API][backtest_already_did][Result] : Can be tested", True)
             return False
@@ -178,28 +161,18 @@ class Api:
             True,
         )
         pair = pair.replace(" ", "")
-        url_backtest_has_failed = (
-            self.config.API_BACKTEST_HAS_FAILED_URL
-            + "&strat_id="
-            + strat_id
-            + "&strat="
-            + strat
-            + "&strat_version="
-            + version
-            + "&pair="
-            + pair
-            + "&period="
-            + period
-            + "&exchange="
-            + exchange
-            + "&start_date="
-            + start_date
-            + "&end_date="
-            + end_date
-            + "&token="
-            + self.token
-        )
-        response = self.send_request("GET", url_backtest_has_failed)
+        url_backtest_has_failed = self.config.API_BACKTEST_HAS_FAILED_URL
+        data = {}
+        data["strat_id"] = strat_id
+        data["strat"] = strat
+        data["strat_version"] = version
+        data["pair"] = pair
+        data["period"] = period
+        data["exchange"] = exchange
+        data["start_date"] = start_date
+        data["end_date"] = end_date
+        data["token"] = self.token
+        response = self.send_request("GET", url_backtest_has_failed, data)
         if response != False and response.status_code == 200:
             self.tools.log("[⚠][API][backtest_has_failed] : Already failed, next")
             return True

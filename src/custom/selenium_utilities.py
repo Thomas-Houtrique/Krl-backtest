@@ -205,7 +205,7 @@ class SeleniumUtilities:
                 self.tools.log("[ℹ][SeleniumUtilities][close_unused_tabs] : Closed Tab No. ", i)
             self.driver.switch_to.window(self.driver.window_handles[0])  # Switching the driver focus to First tab.
         else:
-            self.tools.log("[ℹ][SeleniumUtilities][close_unused_tabs] : Found only Single tab.")
+            self.tools.log("[ℹ][SeleniumUtilities][close_unused_tabs] : Found only Single tab.", True)
 
     def refresh(self):
         """
