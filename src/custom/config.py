@@ -11,4 +11,4 @@ class Config:
     API_BACKTEST_ADD_FAILED_URL = API_BASE_URL + "index.php?controller=Backtest&action=addFailed"
     API_GET_PERIOD_URL = API_BASE_URL + "index.php?controller=Period&action=get"
     API_SEND_URL = API_BASE_URL + "index.php?controller=Backtest&action=send"
-    API_VERSION = "1.0"
+    API_VERSION = "1.1"
