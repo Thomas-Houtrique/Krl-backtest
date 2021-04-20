@@ -220,6 +220,8 @@ def run():
                 try:
                     previous_balance_button = sel_tools.get_element_text(sel_tools.css.BALANCE_BUTTON, 10)
                     pairs_input.select_by_value(pair.replace(" / ", "-"))
+                    tools.log("[ℹ][RUN][run] : waiting 10 sec to loading pair with good min/max date ")
+                    time.sleep(10)
                     if selected_pair_value != selected_pair_value and not sel_tools.wait_for_pair_loaded(previous_balance_button):
                         tools.log(fr"[⚠][RUN][run] : /!\ Pair not loaded, next")
                         continue
