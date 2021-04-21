@@ -55,7 +55,7 @@ class UtilityTools:
         if (self.user_config["verbose"] == "y" and verbose) or not verbose:
             print(log_formated_string)
 
-    def detect_browsers(self, headless="n"):
+    def detect_browsers(self, headless="n", config_browser=False):
         """
         Takes the client os, return the correct driver according to client browsers
         """
@@ -69,9 +69,16 @@ class UtilityTools:
                 self.log("Chrome detected")
                 browsers.append("Google Chrome")
             if len(browsers) > 1:
-                for idx, browser in enumerate(browsers):
-                    print(f"{idx}) {browser}")
-                browser_choice = int(input(f"please choice between your browsers (0 to {len(browsers) - 1})"))
+                browser_choice = None
+                if config_browser :
+                    if config_browser == "firefox":
+                        browser_choice = 0
+                    if config_browser == "chrome":
+                        browser_choice = 1
+                if browser_choice is None:
+                    for idx, browser in enumerate(browsers):
+                        print(f"{idx}) {browser}")
+                    browser_choice = int(input(f"please choice between your browsers (0 to {len(browsers) - 1})"))
                 client_browser = browsers[browser_choice]
             elif len(browsers) == 1:
                 client_browser = browsers[0]

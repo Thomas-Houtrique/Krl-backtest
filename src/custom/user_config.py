@@ -4,7 +4,15 @@ import yaml
 
 class UserConfig:
     def __init__(self):
-        self.advanced_user_choice = self.yes_no_question(question="Do you want to configure the script ?")
+        
+        self.advanced_user_choice = None
+        if os.path.isfile("config.yaml"):
+            with open(r"config.yaml") as conf_file:
+                tmp_config_file = yaml.load(conf_file, Loader=yaml.FullLoader)
+                if "ask_config" in tmp_config_file and tmp_config_file["ask_config"] == "n":
+                    self.advanced_user_choice = 'n'
+        if self.advanced_user_choice is None:
+            self.advanced_user_choice = self.yes_no_question(question="Do you want to configure the script ?")
         self.config = self.__advanced_configuration(advanced=self.advanced_user_choice)
         self.config_file = self.__config_file()
         self.login = self.__auto_login()

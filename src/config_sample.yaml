@@ -12,3 +12,11 @@ strat_ids:
 - 5c58b255812598100207aaaf
 - 5e4915c0567b48b089605ee1
 - 5c4f25a24ca41aa0d326f956
+
+###### Other optionnal config parameters ######
+# browser choice (chrome or firefox)
+# browser: chrome
+# option to uncomment when you have no 2FA
+# ask_2fa: n
+# to remove first configuration script question
+# ask_config: n
