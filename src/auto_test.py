@@ -338,7 +338,11 @@ user = UserConfig()
 tools = UtilityTools(user_config=user.config, user_config_file=user.config_file)
 css = CssConst()
 
-client_driver = tools.detect_browsers(user.config_file["headless"])
+if "browser" in user.config_file:
+    config_browser = user.config_file["browser"].lower()
+else:
+    config_browser = False
+client_driver = tools.detect_browsers(user.config_file["headless"], config_browser)
 api = Api(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
 sel_tools = SeleniumUtilities(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
@@ -349,8 +353,13 @@ if user.login:
 else:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(input("email :"))
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(getpass("password :"))
-twofa = input("2FA :").lower()
+
+if "ask_2fa" in user.config_file and user.config_file["ask_2fa"] == "n":
+    twofa = ""
+else:
+    twofa = input("2FA :").lower()
 sel_tools.get_element(css.TWO_FA_INPUT).send_keys(twofa)
+
 sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
