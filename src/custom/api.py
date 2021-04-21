@@ -70,7 +70,7 @@ class Api:
             self.tools.log("[❌][API][send_request] : Unable to send the request")
         return response
 
-    def send_result(self, send_result):
+    def send_result(self, backtest_config, send_result):
         """
         Takes a token, a pair, if strat is recommended, a strat id, a strat name, a strat version, the hold value,
         the backtest period, the backtest start date, the backtest end date
@@ -78,43 +78,32 @@ class Api:
         """
         advanced_analyse_link = self.sel_tools.driver.current_url
         result = self.get_advanced_result(
-            send_result["strat_id"],
-            send_result["strat_name"],
-            send_result["pair"],
-            send_result["backtest_date_start"],
-            send_result["backtest_date_end"],
+            backtest_config,
             advanced_analyse_link,
+            send_result["hold"]
         )
         if result:
             url = self.config.API_SEND_URL
-
-            result["token"] = self.token
-            result["recommended"] = str(send_result["recommended"]).replace(" ", "")
-            result["strat_id"] = str(send_result["strat_id"])
-            result["strat_version"] = str(send_result["strat_version"])
-            result["hold"] = str(send_result["hold"])
-            result["exchange"] = str(send_result["exchange"])
-            result["period"] = send_result["backtest_date_period"]
             self.tools.log(f"[API][send_result] : Sending result to the Database, result = {result}", True)
             response = self.send_request("POST", url, data=result)
             if response != False and response.status_code == 200:
                 return True
         return False
 
-    def get_backtest_dates(self, min_date, strat_id, strat_name, strat_version, pair, exchange):
+    def get_backtest_dates(self, min_date, backtest_config):
         """
         Takes the pair, and client token, return precise periods if present in database
         """
-        self.tools.log(f"[ℹ][API][get_backtest_dates][input] : (min_date ={min_date}, strat_id= {strat_id}, strat_name= {strat_name}, strat_version= {strat_version}, pair ={pair}, exchange = {exchange})", True)
+        self.tools.log(f"[ℹ][API][get_backtest_dates][input] : ({backtest_config.toString()})", True)
         url = self.config.API_GET_PERIOD_URL
         
         data = {}
         data["min_date"] = min_date
-        data["strat_id"] = strat_id
-        data["strat_name"] = strat_name
-        data["strat_version"] = strat_version
-        data["pair"] = pair
-        data["exchange"] = exchange
+        data["strat_id"] = backtest_config.getStratId()
+        data["strat_name"] = backtest_config.getStratName()
+        data["strat_version"] = backtest_config.getStratVersion()
+        data["pair"] = backtest_config.getPair()
+        data["exchange"] = backtest_config.getExchange()
         data["token"] = self.token
         response = self.send_request("GET", url, data)
         if response != False and response.status_code == 200:
@@ -125,25 +114,24 @@ class Api:
             return []
         return []
 
-    def backtest_already_did(self, pair, period, strat_id, strat, version, exchange, start_date, end_date):
+    def backtest_already_did(self, backtest_config):
         """
         Takes the pair,the period,the strat,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"[ℹ][API][backtest_already_did][input] : (pair ={pair}, period = {period}, exchange = {exchange}, strat_id= {strat_id}, strat= {strat}, version= {version}, start_date= {start_date}, end_date= {end_date})",
+            f"[ℹ][API][backtest_already_did][input] : ({backtest_config.toString()})",
             True,
         )
-        pair = pair.replace(" ", "")
         url_backtest_already_did = self.config.API_CHECK_BACKTEST_URL
         data = {}
-        data["strat_id"] = strat_id
-        data["strat"] = strat
-        data["version"] = version
-        data["pair"] = pair
-        data["period"] = period
-        data["exchange"] = exchange
-        data["start_date"] = start_date
-        data["end_date"] = end_date
+        data["strat_id"] = backtest_config.getStratId()
+        data["strat"] = backtest_config.getStratName()
+        data["version"] = backtest_config.getStratVersion()
+        data["pair"] = backtest_config.getPair().replace(" ", "")
+        data["period"] = backtest_config.getPeriod()
+        data["exchange"] = backtest_config.getExchange()
+        data["start_date"] = backtest_config.getStart()
+        data["end_date"] = backtest_config.getEnd()
         data["token"] = self.token
         response = self.send_request("GET", url_backtest_already_did, data)
         if response != False and response.status_code == 200:
@@ -152,25 +140,24 @@ class Api:
         self.tools.log("[ℹ][API][backtest_already_did][Result] : Already tested, next")
         return True
 
-    def backtest_has_failed(self, pair, period, strat_id, strat, version, exchange, start_date, end_date):
+    def backtest_has_failed(self, backtest_config):
         """
         Takes the pair,the period,the strat,and client token, return if backtest has already failed
         """
         self.tools.log(
-            f"[ℹ][API][backtest_has_failed][input] : (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat_id= {strat_id}, strat= {strat}, strat_version= {version})",
+            f"[ℹ][API][backtest_has_failed][input] : ({backtest_config.toString()})",
             True,
         )
-        pair = pair.replace(" ", "")
         url_backtest_has_failed = self.config.API_BACKTEST_HAS_FAILED_URL
         data = {}
-        data["strat_id"] = strat_id
-        data["strat"] = strat
-        data["strat_version"] = version
-        data["pair"] = pair
-        data["period"] = period
-        data["exchange"] = exchange
-        data["start_date"] = start_date
-        data["end_date"] = end_date
+        data["strat_id"] = backtest_config.getStratId()
+        data["strat"] = backtest_config.getStratName()
+        data["version"] = backtest_config.getStratVersion()
+        data["pair"] = backtest_config.getPair().replace(" ", "")
+        data["period"] = backtest_config.getPeriod()
+        data["exchange"] = backtest_config.getExchange()
+        data["start_date"] = backtest_config.getStart()
+        data["end_date"] = backtest_config.getEnd()
         data["token"] = self.token
         response = self.send_request("GET", url_backtest_has_failed, data)
         if response != False and response.status_code == 200:
@@ -178,26 +165,25 @@ class Api:
             return True
         return False
 
-    def backtest_add_failed(self, pair, period, strat_id, strat, version, exchange, start_date, end_date, log):
+    def backtest_add_failed(self, backtest_config, log):
         """
         Takes the pair,the period,the strat,and client token,
         increase fail for this backtest in database
         return True if request success, false if failed
         """
         self.tools.log(
-            f"Function backtest_add_failed input (pair ={pair}, period = {period}, exchange = {exchange}, start_date = {start_date}, end_date = {end_date}, strat_id= {strat_id}, strat= {strat}, strat_version= {version})",
+            f"Function backtest_add_failed input ({backtest_config.toString()})",
             True,
         )
-        pair = pair.replace(" ", "")
         post_data = {}
-        post_data["strat_id"] = strat_id
-        post_data["strat"] = strat
-        post_data["strat_version"] = version
-        post_data["pair"] = pair
-        post_data["period"] = period
-        post_data["exchange"] = exchange
-        post_data["start_date"] = start_date
-        post_data["end_date"] = end_date
+        post_data["strat_id"] = backtest_config.getStratId()
+        post_data["strat"] = backtest_config.getStratName()
+        post_data["version"] = backtest_config.getStratVersion()
+        post_data["pair"] = backtest_config.getPair().replace(" ", "")
+        post_data["period"] = backtest_config.getPeriod()
+        post_data["exchange"] = backtest_config.getExchange()
+        post_data["start_date"] = backtest_config.getStart()
+        post_data["end_date"] = backtest_config.getEnd()
         post_data["token"] = self.token
         post_data["log"] = log
         response = self.send_request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
@@ -207,25 +193,28 @@ class Api:
 
     def get_advanced_result(
         self,
-        strat_id,
-        strat_name,
-        pair,
-        backtest_date_start,
-        backtest_date_end,
+        backtest_config,
         advanced_analyse_link,
+        hold
     ):
         """
         Takes a strat name, a pair, a backtest start date, a backtest end date and the analyse link
         return dict of results
         """
         result = {}
+        result["hold"] = hold
+        result["token"] = self.token
+        result["recommended"] = backtest_config.getRecommended()
+        result["strat"] = str(backtest_config.getStratName())
+        result["strat_id"] = str(backtest_config.getStratId())
+        result["strat_version"] = str(backtest_config.getStratVersion())
+        result["exchange"] = str(backtest_config.getExchange())
+        result["pair"] = str(backtest_config.getPair()).replace(" ", "")
+        result["period"] = backtest_config.getPeriod()
         try:
             result["trade"] = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_TRADE)
-            result["strat_id"] = strat_id
-            result["strat"] = strat_name
-            result["pair"] = pair
-            result["start"] = backtest_date_start
-            result["end"] = backtest_date_end
+            result["start"] = backtest_config.getStart()
+            result["end"] = backtest_config.getEnd()
             result["link"] = advanced_analyse_link.split("=")[1]
             result["duration"] = self.sel_tools.get_element_days(self.css.ADVANCED_ANALYSE_DURATION)
             result["volatility"] = self.sel_tools.get_element_percent(self.css.ADVANCED_ANALYSE_VOLATILITY)
@@ -256,14 +245,30 @@ class Api:
 
             # check if date_end on analysis is the same as date end backtested
             advanced_analyse_dates = self.sel_tools.get_element_text(self.css.ADVANCED_ANALYSE_DATES)
+            start_date = advanced_analyse_dates.split(" — ")[0]
+            start_date_kryll_side = datetime.datetime(int(start_date.split("-")[2]), int(start_date.split("-")[0]), int(start_date.split("-")[1]))
+            api_date_start = datetime.datetime(int(result["start"].split("-")[0]), int(result["start"].split("-")[1]), int(result["start"].split("-")[2]))
             end_date = advanced_analyse_dates.split(" — ")[1]
             end_date_kryll_side = datetime.datetime(int(end_date.split("-")[2]), int(end_date.split("-")[0]), int(end_date.split("-")[1]))
-            api_date_end = datetime.datetime(int(backtest_date_end.split("-")[0]), int(backtest_date_end.split("-")[1]), int(backtest_date_end.split("-")[2]))
+            api_date_end = datetime.datetime(int(result["end"].split("-")[0]), int(result["end"].split("-")[1]), int(result["end"].split("-")[2]))
+            
+            days_kryll_side = self._get_number_of_days(start_date_kryll_side, end_date_kryll_side)
+            days_api_side = self._get_number_of_days(api_date_start, api_date_end)
+            diff = abs(days_kryll_side-days_api_side)
+
+            #If date end on deep analysis < date end required, the backtest was interrupt
             if end_date_kryll_side < api_date_end:
                 self.tools.log("[❌][API][get_advanced_result] invalid deep analysis.")
                 self.tools.log("[❌][API][get_advanced_result] : Backtest seems to be interrupt by other backtest on the same time")
                 self.tools.log(f"[❌][API][get_advanced_result][results] : {result}", True)
                 return False
+            
+            # If more than 2 days on deep analysis period, error occurs
+            if diff > 2:
+                self.tools.log(f"[❌][API][get_advanced_result] {diff} days difference between required period and deep analysis period. Canceled.")
+                self.tools.log(f"[❌][API][get_advanced_result][results] : {result}", True)
+                return False
+            
             self.tools.log(f"[ℹ][API][get_advanced_result] results : {result}", True)
             return result
         except Exception:
@@ -281,3 +286,9 @@ class Api:
         max_drawdown_informations["maximum_drawdown_start"] = self.tools.convert_date_to_api(max_drawdown_dates[0])
         max_drawdown_informations["maximum_drawdown_end"] = self.tools.convert_date_to_api(max_drawdown_dates[1])
         return max_drawdown_informations
+
+    def _get_number_of_days(self, date_from, date_to):
+            """Returns a float equals to the timedelta between two dates given as string."""
+            timedelta = date_to - date_from
+            diff_day = timedelta.days
+            return diff_day

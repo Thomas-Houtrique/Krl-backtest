@@ -40,7 +40,7 @@ class CssConst:
     DATES_INPUTS = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div > app-form-datepicker > div > input"
     START_INPUT = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline  div:nth-child(4) > app-form-datepicker > div > input"
     END_INPUT = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-backtest > app-backtest > div.backtest-bar > div.form-inline > div:nth-child(6) > app-form-datepicker > div > input"
-    RECOMMEND_PAIRS = ".table > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > div:nth-child(2) > span > a"
+    RECOMMEND_PAIRS = "app-dialog-strategy-backtest > app-backtest-container > div > div.backtest-container-body > div.backtest-container-published.ng-star-inserted > div.ng-star-inserted > div.backtest-container-published-left > app-strategy-published-meta > table > tbody > tr > td.col-2 > div > span > a"
     ANALYSE_TAB_DEEP_ANALYSE_LINK = "div.backtest-panel:nth-child(4) > div:nth-child(1) > a:nth-child(2)"
     ANALYSE_TAB_HOLD = ".analysis > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(5) > tr:nth-child(3) > td:nth-child(1) > app-value:nth-child(1) > span:nth-child(1)"
     EXCHANGE = ".control-exchanges"

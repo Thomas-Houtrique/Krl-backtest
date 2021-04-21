@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import platform
 import tempfile
-from selenium import webdriver
+from seleniumwire import webdriver
 from custom.css_const import CssConst
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
