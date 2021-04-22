@@ -1,5 +1,9 @@
 log.txt
 config.yaml
+dist/logs/
+dist/sreeenshots/
+dist/config.yaml
+src/config.yaml
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

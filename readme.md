@@ -61,6 +61,12 @@ strat_ids:
 ```
 L'identifiant de la strat se trouve dans l'url de la strat sur la page de la strat.
 
+Si vous souhaitez que le script ne demande plus un identifiant de stratégie et les backtests automatiquement, indiquer y à update_strat
+Exemple : 
+```yaml
+update_strat: y
+```
+
 Si vous voulez tester des paires en particulier :
 -Remplissez/ajoutez la section "pair" dans le fichier de configuration
 -Listez les paires que vous voulez tester
@@ -83,6 +89,16 @@ accu:
 ```
 Les paires recommandées seront testées dans tous les cas en + des accumulations listées
 
+Si vous voulez tester toutes les paires même les non recommandées, répondez "y" à la première question au lancement du script et suivez les instructions
+
+Si vous voulez tester des exchanges en particulier :
+Exemple :
+```yaml
+exchanges:
+- BINANCE
+- FTX
+```
+
 Si vous voulez lancer le script en cachant le navigateur, vous pouvez le lancer en headless :
 -Remplissez/ajoutez les sections "headless", "email" et "password" dans le fichier de configuration
 -Mettez le paramètre headless à "y"
@@ -94,26 +110,41 @@ headless: y
 email: your_kryll_email@gmail.com
 password: your_kryll_password
 ```
-Les paires recommandées seront testées dans tous les cas en + des accumulations listées
 
-Si vous voulez tester toutes les paires même les non recommandées, répondez "y" à la première question au lancement du script et suivez les instructions
-
-Exemple complet de fichier de config
+Si votre compte Kryll n'a pas de protection Google Authenticator (2FA), vous pouvez mettre n pour cette option.
 ```yaml
-# replace your_token by your token
-token: your_token
-# Set to "y" if you activate autologin and want to hide browser
-headless: n
-# set to y if you want to auto update strat list
-update_strat: y
-# strat to test. Automatically updated if update_strat is set to y
-strat_ids:
-- 5cd021a7a2b4ea1b142a01a7c
-- 5ea5eba876621921e1ab037f
-- 5dc70e5fb9a8334b7d9b4716
-- 5c58b255812598100207aaaf
-- 5e4915c0567b48b089605ee1
-- 5c4f25a24ca41aa0d326f956
+# set to "n" if you don't have 2FA on your kryll account 
+ask_2fa: y
+```
+
+Lorsque vous avez Chrome et Firefox installés sur votre PC, le script demande lequel vous souhaitez utiliser. Cette option permet de le définir en configuration pour que la question ne soit plus posé au lancement.
+```yaml
+# browser choice, replace your_browser by chrome or firefox if you have both on your system
+browser: your_browser
+```
+
+**Exemple complet de fichier de config : voir le fichier config-sample.yaml**
+
+### Paramétrage avancé (config.json)
+
+Ces options permettent principalement de définir dans le fichier de configuration toutes les réponses aux questions qui sont demandés à son lancement.
+
+Au démarrage du script, il est demandé si on souhaite le configurer pour activer le backtesting de toutes les paires (et pas seulement les paires recommandées par chaque stratégies) et si on souhaite activer le mode verbeux (information pour le debug en console). Cette option permet de désactiver cette question, par défaut, seuls les paires recommandées seront backtestées et le mode verbeux désactivé. Il est possible de définir aussi en config ces paramètres (voir ci-après)
+```yaml
+# set to "n" to not ask configuration when starting the script
+ask_config: y
+```
+
+Si ask_config: n, on peut mettre sur y l'option suivante pour que toute les paires soient testées et pas seulement celles recommandées pour chaque stratégie.
+```yaml
+# set to "y" to test all pairs instead of only recommanded pairs - if ask_config is "y", this option is ignored
+every_pairs: n
+```
+
+Si ask_config: n, on peut mettre sur y l'option suivante pour afficher dans la console les informations de debuggage. Il est recommandé de la mettre que sur y à la demande des développeurs pour résoudre des problèmes.
+```yaml
+# set to "y" to display debug information in console - if ask_config is "y", this option is ignored
+verbose: n
 ```
 
 ## FAQ

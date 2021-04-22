@@ -4,7 +4,7 @@ from selenium.common.exceptions import NoSuchElementException
 from custom.utilities import UtilityTools
 from custom.errors import ElementNotFound
 from custom.css_const import CssConst
-
+import os
 
 class SeleniumUtilities:
     def __init__(self, user_config, user_config_file, driver):
@@ -248,8 +248,10 @@ class SeleniumUtilities:
         """
         Save a screenshot of page
         """
+        if not os.path.exists('screenshots'):
+            os.makedirs('screenshots')
         self.driver.set_window_size(1920, 1080)  # the trick
-        self.driver.save_screenshot(filename)
+        self.driver.save_screenshot("screenshots/"+filename)
 
     def get(self, url):
         self.driver.get(url)
