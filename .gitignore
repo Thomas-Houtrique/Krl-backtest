@@ -143,6 +143,3 @@ dmypy.json
 
 # profiling data
 .prof
-config.yaml
-dist/config.yaml
-src/config.yaml
