@@ -360,7 +360,8 @@ else:
     twofa = input("2FA :").lower()
 sel_tools.get_element(css.TWO_FA_INPUT).send_keys(twofa)
 
-sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
+if twofa == "":
+    sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
 if "update_strat" in user.config_file and user.config_file["update_strat"] == "y":
