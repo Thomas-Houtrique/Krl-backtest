@@ -4,31 +4,34 @@
 
 [Télécharger le repository github](https://github.com/Thomas-Houtrique/BackPlusScript/archive/main.zip) et l'extraire sur votre bureau.
 
-Normalement vous avez reçu un token, il est personnel, ne le partagez pas, ça permet au script de communiquer avec le site pour envoyer les backtests.
+Normalement vous avez reçu un token, il est personnel, ne le partagez pas, il permet au script de communiquer avec le site pour envoyer les backtests.
 
-## Windows
+## Windows 🪟
 **il vous faut absolument Google Chrome ou Firefox** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire dist, remplacez your_token par votre token 
 - Exécutez dist/auto_test.exe
 - Répondez aux différentes questions
 - Un navigateur va s'ouvrir sur la page de login, identifiez vous.
 - Ensuite laissez tranquillement tourner le script.
-- /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
+- ⚠️ : en cas de problème, vérifier que le fichier dist/config.yaml est correct et que votre token est bon
 
-## Mac OSX
+## Mac OSX 🍎
 **il vous faut absolument Firefox** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
 ```bash
+sudo -i
 python3 -m pip install requests pyyaml selenium tqdm selenium-wire
-sudo python3 chemin/vers/auto_test.py
+cd /Users/VOTRENOM/Desktop/BackPlusScript-main
+chmod +x geckodriver
+python3 src/auto_test.py
 ```
 - Répondez aux différentes questions
 - Un navigateur va s'ouvrir sur la page de login, identifiez vous.
 - Ensuite laissez tranquillement tourner le script.
-- /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
+- ⚠️ : en cas de problème, vérifier que le fichier dist/config.yaml est correct et que votre token est bon
 
-## Linux / Raspberry pi
+## Linux / Raspberry pi 🐧
 **il vous faut absolument Chromium** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
@@ -43,13 +46,13 @@ sudo python3 auto_test.py
 - Répondez aux différentes questions
 - Un navigateur va s'ouvrir sur la page de login, identifiez vous.
 - Ensuite laissez tranquillement tourner le script.
-- /!\ : en cas de problème, vérifier que le fichier dist/config.yaml est correct, que le format correspond au config_sample.yaml, que votre token est bon
+- ⚠️ : en cas de problème, vérifier que le fichier dist/config.yaml est correct et que votre token est bon
 
-# Config File
+# Config File 📄
 
 Par défaut il va automatiquement à l'exécution aller récupérer toutes les strats de la marketplace, les backtester dans un ordre aléatoire, sur les paires recommandées uniquement, sur différentes périodes.
 
-Si vous voulez tester des strats en particulier :
+Si vous voulez tester des stratégies en particulier :
 - Mettez le paramètre update_strat à la valeur "n"
 - Dans strat_ids il faut mettre uniquement les identifiants de strat que vous voulez tester
 Exemple : 
@@ -125,7 +128,7 @@ browser: your_browser
 
 **Exemple complet de fichier de config : voir le fichier config-sample.yaml**
 
-### Paramétrage avancé (config.json)
+### Paramétrage avancé (config.json) ⚙️
 
 Ces options permettent principalement de définir dans le fichier de configuration toutes les réponses aux questions qui sont demandés à son lancement.
 
@@ -147,7 +150,7 @@ Si ask_config: n, on peut mettre sur y l'option suivante pour afficher dans la c
 verbose: n
 ```
 
-## FAQ
+## FAQ ❓
 -Si vous avez des problèmes de connexion aborted avec le script, pensez à télécharger la version du chromedriver en adéquation avec la version de chrome que vous avez installé : https://chromedriver.chromium.org/downloads
 
 ## License
