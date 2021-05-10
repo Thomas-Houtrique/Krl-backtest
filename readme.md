@@ -98,9 +98,11 @@ Si vous voulez tester des exchanges en particulier :
 Exemple :
 ```yaml
 exchanges:
-- BINANCE
+- Binance
 - FTX
 ```
+/!\ : Le nom des exchange doit exactement correspondre à ce qu'on trouve dans les listes déroulantes des écrans de backtest, à la majuscule près (par exemple KuCoin, Binance, FTX, et pas KUCOIN, BINANCE, ftx)
+
 
 Si vous voulez lancer le script en cachant le navigateur, vous pouvez le lancer en headless :
 -Remplissez/ajoutez les sections "headless", "email" et "password" dans le fichier de configuration
