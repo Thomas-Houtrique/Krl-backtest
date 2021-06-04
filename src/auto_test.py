@@ -38,16 +38,17 @@ def exec_backtest(backtest_config):
         # set date into input
         set_input_date(backtest_config.getStart(), backtest_config.getEnd())
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
+        sel_tools.clean_network_calls()
         sel_tools.click_on_element(test_btn)
 
         error = sel_tools.check_error_during_backtest()
         if error:
             raise Exception("Error during backtest")
-        sel_tools.wait_network_calls_loaded()
+        sel_tools.clean_network_calls()
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
         # click on depth analysis button
         sel_tools.click_on_element(sel_tools.get_element(css.ANALYSE_TAB_DEEP_ANALYSE_LINK))
-        windows_handle = sel_tools.wait_for_windows_handle(120)
+        windows_handle = sel_tools.wait_for_windows_handle(300)
         if not windows_handle:
             tools.log("[❌][RUN][run_backtest] : depth analysis button is break on kryll side, period canceled")
             raise Exception("depth analysis button is break on kryll side, period canceled")
@@ -55,7 +56,7 @@ def exec_backtest(backtest_config):
         try:
             sel_tools.driver.switch_to.window(sel_tools.driver.window_handles[1])
             # wait for the advanced bt page to load
-            depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
+            depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 300)
             if not depth_analysis_page_loaded:
                 tools.log("[⚠][RUN][run_backtest] : depth analysis tab seems to don't load, refresh and retry...")
                 # retry
@@ -156,17 +157,19 @@ def get_pairs_to_test():
 
 
 def select_exchange(exchange):
+    sel_tools.clean_network_calls()
     exchange_text = exchange.text
     exchange_select = Select(sel_tools.get_element(css.EXCHANGE))
     exchange_select.select_by_visible_text(exchange_text)
-    sel_tools.wait_network_calls_loaded()
+    sel_tools.wait_network_calls_loaded(5)
     return True
 
 def select_pair(pair):
+    sel_tools.clean_network_calls()
     pair_text = pair.text
     pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
     pairs_input.select_by_value(pair_text.replace(" / ", "-"))
-    sel_tools.wait_network_calls_loaded()
+    sel_tools.wait_network_calls_loaded(5)
 
 def is_pair_listed(pair):
     pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
@@ -189,15 +192,13 @@ def click_on_backtest_button():
     backtest_page_loaded = False
     while not backtest_page_loaded:
         try:
-            sel_tools.click_on_element(sel_tools.get_element(css.BACKTEST_BTN))
-            sel_tools.wait_network_calls_loaded()
+            sel_tools.click_on_element(sel_tools.get_element(css.BACKTEST_BTN), True)
             sel_tools.get_element_text(css.STRAT_NAME_BACKTEST)
             sel_tools.get_element_text(css.STRAT_VERSION)
             backtest_page_loaded = True
         except:
             tools.log(f"[ℹ][RUN][run] : White page... Retry")
             sel_tools.refresh()
-            sel_tools.wait_network_calls_loaded()
             continue
 
 def is_recommended_pair(pair):

@@ -76,7 +76,6 @@ class SeleniumUtilities:
             try:
                 backtest_start_btn = self.get_element_text(self.css.BACKTEST_START_BTN)
                 if backtest_start_btn and backtest_start_btn == "Test":
-                    self.wait_network_calls_loaded()
                     # Check if analysis tab is open
                     analyse_tab = self.get_elements(self.css.ANALYSE_TAB_DEEP_ANALYSE_LINK)
                     if analyse_tab:
@@ -133,7 +132,6 @@ class SeleniumUtilities:
         """
         Takes a selenium element and a duration, return element if element detected and False if not
         """
-        self.wait_network_calls_loaded()
         for i in range(0, duration):
             element = self.check_if_element_exist(element_path, multiple)
             if element:
@@ -153,14 +151,19 @@ class SeleniumUtilities:
             time.sleep(1)
         return ""
 
-    def wait_network_calls_loaded(self):
-        request_not_load = True
-        while request_not_load:
-            request_not_load = False
+    def wait_network_calls_loaded(self, duration=False, path=False):
+        if duration:
+            time.sleep(duration)
+        if path:
+            self.driver.wait_for_request(path, 90)
+            return True
+        new_requests = True
+        while new_requests:
+            request_counter = len(self.driver.requests)
             for request in self.driver.requests:
-                if not request.response:
-                    request_not_load = True
-        self.clean_network_calls()
+                self.driver.wait_for_request(request.path, 90)
+            if request_counter == len(self.driver.requests):
+                new_requests = False
         return True
 
     def wait_network_call_start(self, pattern, duration=10):
@@ -180,7 +183,6 @@ class SeleniumUtilities:
         """
         Takes a duration, return True if more than 1 window else return False
         """
-        self.wait_network_calls_loaded()
         for _ in range(0, duration):
             if len(self.driver.window_handles) > 1:
                 return True
@@ -231,18 +233,23 @@ class SeleniumUtilities:
         """
         Refresh current tab
         """
+        self.clean_network_calls()
         self.driver.refresh()
         self.wait_network_calls_loaded()
 
-    def click_on_element(self, element):
+    def click_on_element(self, element, wait=False):
         """
         Click on element
         """
+        self.clean_network_calls()
         try:
             element.click()
         except Exception:
             self.check_if_popup(10)
             element.click()
+        if wait:
+            time.sleep(5)
+            self.wait_network_calls_loaded()
 
     def save_screenshot(self, filename):
         """
@@ -255,4 +262,4 @@ class SeleniumUtilities:
 
     def get(self, url):
         self.driver.get(url)
-        self.wait_network_calls_loaded()
+        self.clean_network_calls()
