@@ -24,10 +24,10 @@ pair:
 accu:
 - USDT
 - BTC
-# to restrict exchanges
+# to restrict exchanges. MUST RESPECT THE SAME CASE AS SELECTBOX INTO KRYLL BACKTEST PAGE (KuCoin, Binance, FTX...)
 exchanges:
 - FTX
-- BINANCE
+- Binance
 # browser choice, replace your_browser by chrome or firefox if you have both on your system
 browser: your_browser
 # set to "n" if you don't have 2FA on your kryll account 
