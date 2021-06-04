@@ -109,12 +109,27 @@ class UtilityTools:
 
         elif client_os == "Linux":
             self.log("Please make sure to have Chromium installed")
-            driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+            options = webdriver.ChromeOptions()
+            options.add_experimental_option("excludeSwitches", ["enable-logging"])
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--mute-audio")
+            if headless == "y":
+                options.add_argument("--start-maximized")
+                options.add_argument("disable-infobars")
+                options.add_argument("--disable-extensions")
+                options.add_argument("window-size=1920x1080")
+                options.set_headless()
+            driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver", options=options)
             return driver
 
         elif client_os == "Darwin":
             self.log("Please make sure to have Firefox installed")
-            driver = webdriver.Firefox(executable_path=r"./geckodriver")
+
+            firefox_options = FirefoxOptions()
+            if headless == "y":
+                firefox_options.headless = True
+            driver = webdriver.Firefox(executable_path=r"./geckodriver", options=firefox_options)
             return driver
 
     def ask_strat(self):
