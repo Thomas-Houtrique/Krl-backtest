@@ -21,15 +21,15 @@ class Api:
 
     def log_response(self, method, url, data, response):
         self.tools.log(
-            f"[ℹ][API][{method}][Request][URL] : {url}",
+            f"[ℹ][{method}][Request][URL] : {url}",
             True,
         )
         self.tools.log(
-            f"[ℹ][API][{method}][data] : {data}",
+            f"[ℹ][{method}][data] : {data}",
             True,
         )
         self.tools.log(
-            f"[ℹ][API][{method}][Response] : {response}",
+            f"[ℹ][{method}][Response] : {response}",
             True,
         )
 
@@ -49,30 +49,30 @@ class Api:
                     response = requests.post(url, data=data)
                 if response.status_code == 501 and response.reason == "not supported version":
                     self.log_response("send_request", url, data, response)
-                    self.tools.log("[❌][API][send_request] : Votre version n'est plus à jour, veuillez télécharger la nouvelle version.")
+                    self.tools.log("[❌] Votre version n'est plus à jour, veuillez télécharger la nouvelle version.")
                     input("Appuyez sur une touche pour quitter")
                     quit()
                 elif response.status_code == 503 and response.reason == "maintenance":
-                    self.tools.log("[⚠][API][send_request] : Maintenance de l'API en cours, veuillez patienter...")
+                    self.tools.log("[⚠] Maintenance de l'API en cours, veuillez patienter...")
                     time.sleep(300)
                 elif response.status_code == 500 or  response.status_code == 404:
-                    self.tools.log("[⚠][API][send_request] : Impossible d'envoyer la requête en raison d'un problème serveur. Nouvelle tentative dans 5 minutes...")
+                    self.tools.log("[⚠] Impossible d'envoyer la requête en raison d'un problème serveur. Nouvelle tentative dans 5 minutes...")
                     time.sleep(300)
                 else:
                     success = True
                     self.log_response("send_request", url, data, response)
             except Exception as error:
-                self.tools.log("[❌][API][send_request] : " + str(error), True)
-                self.tools.log("[⚠][API][send_request] : Retry " + str(retry), True)
+                self.tools.log("[❌] " + str(error), True)
+                self.tools.log("[⚠] Retry " + str(retry), True)
                 time.sleep(2)
                 retry = retry + 1
         if retry == 5:
-            self.tools.log("[❌][API][send_request] : Unable to send the request")
+            self.tools.log("[❌] Unable to send the request")
         return response
 
     def send_result(self, backtest_config, send_result):
         """
-        Takes a token, a pair, if strat is recommended, a strat id, a strat name, a strat version, the hold value,
+        Takes a token, a pair, if strategy is recommended, a strategy id, a strategy name, a strategy version, the hold value,
         the backtest period, the backtest start date, the backtest end date
         return True if request worked else return False
         """
@@ -84,7 +84,7 @@ class Api:
         )
         if result:
             url = self.config.API_SEND_URL
-            self.tools.log(f"[API][send_result] : Sending result to the Database, result = {result}", True)
+            self.tools.log(f"[ℹ] Sending result to the Database, result = {result}", True)
             response = self.send_request("POST", url, data=result)
             if response != False and response.status_code == 200:
                 return True
@@ -94,7 +94,7 @@ class Api:
         """
         Takes the pair, and client token, return precise periods if present in database
         """
-        self.tools.log(f"[ℹ][API][get_backtest_dates][input] : ({backtest_config.toString()})", True)
+        self.tools.log(f"[ℹ] ({backtest_config.toString()})", True)
         url = self.config.API_GET_PERIOD_URL
         
         data = {}
@@ -110,16 +110,16 @@ class Api:
             response = response.json()["data"]
             return response
         if response != False and response.status_code == 400:
-            self.tools.log("[ℹ][API][get_backtest_dates][result] : No dates to backtest, next.", False)
+            self.tools.log("[ℹ] No dates to backtest, next.", False)
             return []
         return []
 
     def backtest_already_did(self, backtest_config):
         """
-        Takes the pair,the period,the strat,and client token, return if backtest present in database
+        Takes the pair,the period,the strategy,and client token, return if backtest present in database
         """
         self.tools.log(
-            f"[ℹ][API][backtest_already_did][input] : ({backtest_config.toString()})",
+            f"[ℹ] ({backtest_config.toString()})",
             True,
         )
         url_backtest_already_did = self.config.API_CHECK_BACKTEST_URL
@@ -135,17 +135,17 @@ class Api:
         data["token"] = self.token
         response = self.send_request("GET", url_backtest_already_did, data)
         if response != False and response.status_code == 200:
-            self.tools.log("[ℹ][API][backtest_already_did][Result] : Can be tested", True)
+            self.tools.log("[ℹ] Can be tested", True)
             return False
-        self.tools.log("[ℹ][API][backtest_already_did][Result] : Already tested, next")
+        self.tools.log("[ℹ] Already tested, next")
         return True
 
     def backtest_has_failed(self, backtest_config):
         """
-        Takes the pair,the period,the strat,and client token, return if backtest has already failed
+        Takes the pair,the period,the strategy,and client token, return if backtest has already failed
         """
         self.tools.log(
-            f"[ℹ][API][backtest_has_failed][input] : ({backtest_config.toString()})",
+            f"[ℹ] ({backtest_config.toString()})",
             True,
         )
         url_backtest_has_failed = self.config.API_BACKTEST_HAS_FAILED_URL
@@ -161,13 +161,13 @@ class Api:
         data["token"] = self.token
         response = self.send_request("GET", url_backtest_has_failed, data)
         if response != False and response.status_code == 200:
-            self.tools.log("[⚠][API][backtest_has_failed] : Already failed, next")
+            self.tools.log("[⚠] Already failed, next")
             return True
         return False
 
     def backtest_add_failed(self, backtest_config, log):
         """
-        Takes the pair,the period,the strat,and client token,
+        Takes the pair,the period,the strategy,and client token,
         increase fail for this backtest in database
         return True if request success, false if failed
         """
@@ -198,7 +198,7 @@ class Api:
         hold
     ):
         """
-        Takes a strat name, a pair, a backtest start date, a backtest end date and the analyse link
+        Takes a strategy name, a pair, a backtest start date, a backtest end date and the analyse link
         return dict of results
         """
         result = {}
@@ -258,22 +258,22 @@ class Api:
 
             #If date end on deep analysis < date end required, the backtest was interrupt
             if end_date_kryll_side < api_date_end:
-                self.tools.log("[❌][API][get_advanced_result] invalid deep analysis.")
-                self.tools.log("[❌][API][get_advanced_result] : Backtest seems to be interrupt by other backtest on the same time")
-                self.tools.log(f"[❌][API][get_advanced_result][results] : {result}", True)
+                self.tools.log("[❌] invalid deep analysis.")
+                self.tools.log("[❌] Backtest seems to be interrupt by other backtest on the same time")
+                self.tools.log(f"[❌] {result}", True)
                 return False
             
             # If more than 2 days on deep analysis period, error occurs
             if diff > 2:
-                self.tools.log(f"[❌][API][get_advanced_result] {diff} days difference between required period and deep analysis period. Canceled.")
-                self.tools.log(f"[❌][API][get_advanced_result][results] : {result}", True)
+                self.tools.log(f"[❌] {diff} days difference between required period and deep analysis period. Canceled.")
+                self.tools.log(f"[❌] {result}", True)
                 return False
             
-            self.tools.log(f"[ℹ][API][get_advanced_result] results : {result}", True)
+            self.tools.log(f"[ℹ] {result}", True)
             return result
         except Exception:
-            self.tools.log("[❌][API][get_advanced_result] : invalid deep analysis.")
-            self.tools.log(f"[❌][API][get_advanced_result][results] : results : {result}", True)
+            self.tools.log("[❌] invalid deep analysis.")
+            self.tools.log(f"[❌] results : {result}", True)
         return False
 
     def __split_max_drawdown_informations(self, element_path):

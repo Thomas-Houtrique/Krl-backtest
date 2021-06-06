@@ -28,20 +28,20 @@ class UtilityTools:
         """
         Takes date format Year-Month-Day, return date format Month/Day/Year
         """
-        self.log(f"[ℹ][UtilityTools][convert_date_to_api] : Function convert date input = {date}", True)
+        self.log(f"[ℹ] Function convert date input = {date}", True)
         dto = datetime.strptime(date, "%m/%d/%Y").date()
         dto = str(dto.strftime("%Y-%m-%d"))
-        self.log(f"[ℹ][UtilityTools][convert_date_to_api] : Function convert date output = {dto}", True)
+        self.log(f"[ℹ] Function convert date output = {dto}", True)
         return dto
 
     def convert_date_to_html(self, date):
         """
         Takes date format Year-Month-Day, return date format Month/Day/Year
         """
-        self.log(f"[ℹ][UtilityTools][convert_date_to_html] : Function convert date input = {date}", True)
+        self.log(f"[ℹ] Function convert date input = {date}", True)
         dto = datetime.strptime(date, "%Y-%m-%d").date()
         dto = str(dto.strftime("%m/%d/%Y"))
-        self.log(f"[ℹ][UtilityTools][convert_date_to_html] : Function convert date output = {dto}", True)
+        self.log(f"[ℹ] Function convert date output = {dto}", True)
         return dto
 
     def log(self, log_text, verbose=False):
@@ -50,7 +50,7 @@ class UtilityTools:
         """
         if self.user_config_file["token"] in log_text:
             log_text = log_text.replace(self.user_config_file["token"], "REDACTED TOKEN")
-        log_formated_string = datetime.now().strftime("%d %B %Y %H:%M:%S -> ") + log_text
+        log_formated_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S ") + log_text
         log_file = open('logs/' + self.get_log_file_name(), "a+", encoding="utf-8")
         log_file.write(log_formated_string + "\n")
         log_file.close()
@@ -65,10 +65,10 @@ class UtilityTools:
         browsers = []
         if client_os == "Windows":
             if os.environ["ProgramFiles"] + r"\Mozilla Firefox":
-                self.log("Firefox detected")
+                self.log("[ℹ] Firefox detected")
                 browsers.append("Firefox")
             if os.environ["ProgramFiles"] + r"\Google\Chrome\Application":
-                self.log("Chrome detected")
+                self.log("[ℹ] Chrome detected")
                 browsers.append("Google Chrome")
             if len(browsers) > 1:
                 browser_choice = None
@@ -108,7 +108,7 @@ class UtilityTools:
             return driver
 
         elif client_os == "Linux":
-            self.log("Please make sure to have Chromium installed")
+            self.log("[⚠] Please make sure to have Chromium installed")
             options = webdriver.ChromeOptions()
             options.add_experimental_option("excludeSwitches", ["enable-logging"])
             options.add_argument("--no-sandbox")
@@ -124,7 +124,7 @@ class UtilityTools:
             return driver
 
         elif client_os == "Darwin":
-            self.log("Please make sure to have Firefox installed")
+            self.log("[⚠] Please make sure to have Firefox installed")
 
             firefox_options = FirefoxOptions()
             if headless == "y":
@@ -134,14 +134,14 @@ class UtilityTools:
 
     def ask_strat(self):
         """
-        Ask the user for strat id
+        Ask the user for strategy id
         """
         strat_ids = []
-        strat_id = str(input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :"))
+        strat_id = str(input("Enter a strategy id (ex 5f9f0342dd6ac25bd05cf515) :"))
         strat_ids.append(strat_id)
         while strat_id != "":
-            self.log("Do you want to test an other strat? (empty to next)")
-            strat_id = input("Enter a strat id (ex 5f9f0342dd6ac25bd05cf515) :")
+            self.log("Do you want to test an other strategy? (empty to next)")
+            strat_id = input("Enter a strategy id (ex 5f9f0342dd6ac25bd05cf515) :")
             if strat_id != "":
                 strat_ids.append(strat_id)
         return strat_ids
