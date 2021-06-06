@@ -61,7 +61,7 @@ class CssConst:
     STRAT_VERSION = ".backtest-container-published-left > app-strategy-published-meta:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(1) > div:nth-child(1) > div:nth-child(1)"
     BACKTEST_BTN = "button.d-sm-inline-block"
     INSTALL_BTN = ".right > button:nth-child(1)"
-    UPDATE_BTN = "div.card-header.card-header-strong > div > div:nth-child(3) > button > span"
+    UPDATE_BTN = "body > app-root > div > app-marketplace-details-page > div > div.layout-body > div > div > div.col-md-12.col-xl-8.main > div > div.card-header.card-header-strong > div > div:nth-child(3) > button"
     # login page
     EMAIL_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div:nth-child(4) > input"
     PASSWORD_INPUT = "body > app-root > div > app-auth-login-page > div > div > div > form > div > div > div.form-group.form-required.mb-0 > input"

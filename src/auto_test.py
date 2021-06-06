@@ -92,8 +92,8 @@ def install_strat_if_needed():
 
 def update_strat_if_needed():
     tools.log("[ℹ] Checking if strategy needs to be updated")
-    time.sleep(2)
-    if 'Upgrade' or 'Installer' in sel_tools.get_element(css.UPDATE_BTN).text:
+    time.sleep(5)
+    if 'btn-warning' in sel_tools.get_element(css.UPDATE_BTN).get_attribute('class').split():
         tools.log("[ℹ] Updating the strategy...")
         update_btn = sel_tools.get_element(css.UPDATE_BTN)
         sel_tools.click_on_element(update_btn)
