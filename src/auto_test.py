@@ -229,10 +229,10 @@ def run_backtest(backtest_config):
                     retry_order_skipped = retry_order_skipped + 1
                     if retry_order_skipped > 3:
                         backtest_failed = True
-                        tools.log(log)
+                        tools.log(f'[❌] {log}')
                     else:
                         sel_tools.click_on_element(sel_tools.get_element(sel_tools.css.BALANCE_BUTTON, 2))
-                        multiplicator = 5 * retry_order_skipped
+                        multiplicator = 1000 * retry_order_skipped
                         try:
                             amount_one_input = sel_tools.get_element(sel_tools.css.STARTING_AMOUNT_ONE)
                             amount_one = amount_one_input.get_attribute("value")
@@ -254,7 +254,7 @@ def run_backtest(backtest_config):
                         tools.log(f"[❌] Too many order skipped, retry with x{multiplicator} amount {retry_order_skipped}/3.")
                 else:
                     backtest_failed = True
-                    tools.log(log)
+                    tools.log(f'[❌] {log}')
             except:
                 backtest_failed = True
                 pass

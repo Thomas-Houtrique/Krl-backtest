@@ -108,6 +108,11 @@ class Api:
         response = self.send_request("GET", url, data)
         if response != False and response.status_code == 200:
             response = response.json()["data"]
+            self.tools.log("[ℹ] **************************************")
+            self.tools.log(f"[ℹ] *        Dates to backtest          *")
+            self.tools.log("[ℹ] **************************************")
+            for i in response:
+                self.tools.log(f"[ℹ] * {i['period']} from {i['start']} to {i['end']}")
             return response
         if response != False and response.status_code == 400:
             self.tools.log("[ℹ] No dates to backtest, next.", False)
