@@ -52,7 +52,7 @@ class UtilityTools:
         if self.user_config_file["token"] in log_text:
             log_text = log_text.replace(self.user_config_file["token"], "REDACTED TOKEN")
         log_formated_string = datetime.now().strftime("%d/%m/%Y %H:%M:%S ") + log_text
-        with open(f"logs/{self.get_log_file_name()}", "a+", encoding='utf8') as log_file:
+        with open(f"logs/{self.get_log_file_name()}", "a+", encoding="utf8") as log_file:
             log_file.write(log_formated_string + "\n")
         if (self.user_config_file["verbose"] == "y" and verbose) or not verbose:
             print(log_formated_string)
@@ -131,6 +131,8 @@ class UtilityTools:
                 firefox_options.headless = True
             driver = webdriver.Firefox(executable_path=r"./geckodriver", options=firefox_options)
             return driver
+        else:
+            return None
 
     def ask_strat(self):
         """

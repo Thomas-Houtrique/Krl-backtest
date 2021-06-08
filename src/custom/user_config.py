@@ -21,7 +21,7 @@ class UserConfig:
         if "email" and "password" in self.config_file:
             login = {"email": self.config_file["email"], "password": self.config_file["password"]}
             return login
-        return
+        return None
 
     def __config_file(self):
         """
