@@ -107,7 +107,7 @@ class SeleniumUtilities:
 
     def refresh_pbar(self, pbar, value=False):
         pbar.clear()
-        if value == False:
+        if value is False:
             percent = int(self.get_element_percent(self.css.PROGRESS_PERCENT))
             pbar.update(percent - pbar.n)
             pbar.refresh()
