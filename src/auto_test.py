@@ -4,6 +4,7 @@ Made by Thomas with the help of torkium
 """
 import time
 import random
+import sys
 from selenium.webdriver.support.ui import Select
 from custom.user_config import UserConfig
 from custom.utilities import UtilityTools
@@ -347,8 +348,14 @@ def run():
 # ----------------------
 # Start of the program
 # ----------------------
-user = UserConfig()
+configFile = 'config.yaml'
+if len(sys.argv) > 1:
+    configFile = sys.argv[1] + '.yaml'
+    #print("Use config file " + configFile)
+user = UserConfig(configFile)
 tools = UtilityTools(user_config=user.config, user_config_file=user.config_file)
+if configFile != 'config.yaml':
+    tools.log("[ℹ] Config File: " + configFile)
 css = CssConst()
 
 if "browser" in user.config_file:
@@ -359,7 +366,7 @@ client_driver = tools.detect_browsers(user.config_file["headless"], config_brows
 api = Api(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
 sel_tools = SeleniumUtilities(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
-tools.log("[ℹ] Login...")
+tools.log("[ℹ] Login..." + user.login["email"])
 if user.login:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
