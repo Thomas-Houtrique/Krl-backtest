@@ -90,7 +90,6 @@ class SeleniumUtilities:
                         self.tools.log(self.get_element_text(self.css.LOGS_LAST_LINE))
                     except Exception:
                         pbar.close()
-                        pass
                     self.refresh_pbar(pbar)
                     pbar.close()
                     return True
