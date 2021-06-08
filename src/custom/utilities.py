@@ -20,7 +20,7 @@ class UtilityTools:
     def get_log_file_name(self):
         if not os.path.exists('logs'):
             os.makedirs('logs')        
-        if UtilityTools.temp_file == False or UtilityTools.temp_file[20:-11] != datetime.now().strftime("%Y_%m_%d"):
+        if UtilityTools.temp_file is False or UtilityTools.temp_file[20:-11] != datetime.now().strftime("%Y_%m_%d"):
             UtilityTools.temp_file = "BackPlusScript_Logs_" + datetime.now().strftime("%Y_%m_%d_%H%M%S") + ".log"
         return UtilityTools.temp_file
 
