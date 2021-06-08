@@ -155,16 +155,14 @@ def get_pairs_to_test():
                 continue
             if pair.replace(" / ", "/") in user.config_file["pair"]:
                 force_pair = 1
-        if "accu" in user.config_file:
-            if not pair.split(" / ")[1] in user.config_file["accu"]:
-                continue
+        if "accu" in user.config_file and not pair.split(" / ")[1] in user.config_file["accu"]:
+            continue
 
         # check if user want to test every pairs
         if force_pair == 0 and recommended == 0 and user.config_file["every_pairs"] == "n":
             continue
-        if recommended == 1:
-            if "skip_recommended_pair" in user.config_file and user.config_file["skip_recommended_pair"] == "y" and force_pair == 0:
-                continue
+        if recommended == 1 and "skip_recommended_pair" in user.config_file and user.config_file["skip_recommended_pair"] == "y" and force_pair == 0:
+            continue
         final_pairs.append(i)
     return final_pairs
 
