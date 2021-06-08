@@ -257,7 +257,6 @@ def run_backtest(backtest_config):
                     tools.log(f'[❌] {log}')
             except:
                 backtest_failed = True
-                pass
             if "missing data" in log:
                 tools.log(f"[❌] {log}")
                 backtest_failed_screenshot = False
