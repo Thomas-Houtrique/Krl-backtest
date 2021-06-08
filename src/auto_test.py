@@ -111,7 +111,6 @@ def get_recommended_pairs():
     except Exception:
         tools.log("[⚠] No recommanded pair")
         recommended_pairs = {}
-    strat_name = sel_tools.get_element_text(css.STRAT_NAME).strip()
     recommended_pairs_list = []
     for i in recommended_pairs:
         recommended_pairs_list.append(i)
@@ -188,7 +187,7 @@ def is_pair_listed(pair):
     pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
     try:
         pairs_input.select_by_value(pair.text.strip().replace(" / ", "-"))
-    except Exception as error:
+    except Exception:
         return False
     return True
 
