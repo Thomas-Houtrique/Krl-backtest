@@ -282,7 +282,8 @@ class Api:
         max_drawdown_informations["maximum_drawdown_end"] = self.tools.convert_date_to_api(max_drawdown_dates[1])
         return max_drawdown_informations
 
-    def _get_number_of_days(self, date_from, date_to):
+    @staticmethod
+    def _get_number_of_days(date_from, date_to):
         """Returns a float equals to the timedelta between two dates given as string."""
         timedelta = date_to - date_from
         diff_day = timedelta.days

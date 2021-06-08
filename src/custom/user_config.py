@@ -9,7 +9,8 @@ class UserConfig:
         self.config_file = self.__config_file()
         self.login = self.__auto_login()
 
-    def write_config(self, key, value):
+    @staticmethod
+    def write_config(key, value):
         with open(r"{self.config_filename}", "r") as conf_file:
             new_conf_file = yaml.safe_load(conf_file)
             new_conf_file[key] = value
