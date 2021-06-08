@@ -15,7 +15,7 @@ from custom.api import Api
 from getpass import getpass
 
 
-def set_input_date(start, end):
+def set_input_date(start_input_date, end_input_date):
     """
     Takes a start date, end date and set them in inputs
     """
@@ -25,9 +25,9 @@ def set_input_date(start, end):
     sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', start_input)
     sel_tools.driver.execute_script('arguments[0].removeAttribute("readonly")', end_input)
     start_input.clear()
-    start_input.send_keys(start)
+    start_input.send_keys(start_input_date)
     end_input.clear()
-    end_input.send_keys(end)
+    end_input.send_keys(end_input_date)
 
 
 def exec_backtest(backtest_config):
@@ -43,8 +43,8 @@ def exec_backtest(backtest_config):
         sel_tools.clean_network_calls()
         sel_tools.click_on_element(test_btn)
 
-        error = sel_tools.check_error_during_backtest()
-        if error:
+        error_during_backtest = sel_tools.check_error_during_backtest()
+        if error_during_backtest:
             raise Exception("Error during backtest")
         sel_tools.clean_network_calls()
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
@@ -397,8 +397,8 @@ if user.config_file["get_strategies_from_marketplace"] == "y":
         "div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)"
     )
     strat_ids = []
-    for strat_id in ids:
-        strat_ids.append(strat_id.get_attribute("href").split("/")[4])
+    for strategy_id in ids:
+        strat_ids.append(strategy_id.get_attribute("href").split("/")[4])
 else:
     if "strat_ids" in user.config_file:
         strat_ids = user.config_file["strat_ids"]
