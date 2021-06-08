@@ -155,8 +155,7 @@ def get_pairs_to_test():
                 continue
             if pair.replace(" / ", "/") in user.config_file["pair"]:
                 force_pair = 1
-        if "accu" in user.config_file:
-            if not pair.split(" / ")[1] in user.config_file["accu"]:
+        if "accu" in user.config_file and not pair.split(" / ")[1] in user.config_file["accu"]:
                 continue
 
         # check if user want to test every pairs

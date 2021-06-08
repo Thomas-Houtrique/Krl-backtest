@@ -1,38 +1,20 @@
-# replace your_token by your Back+ token
-token: your_token
+# replace your_token by your token
+token: 91dc188149dfaca6f94e551413024808
 # Set to "y" if you activate autologin and want to hide browser
 headless: y
-# email of your kryll account. This param can be removed if you don't want to store this informations
-email: your_email
-# password of your kryll account. This param can be removed if you don't want to store this informations
-password: your_password
+email: monajah180@mailnest.net
+password : YN&F&8^nuZNKn%
 # set to y if you want to auto update strat list
 get_strategies_from_marketplace: y
-# strat to test. Automatically updated if update_strat is set to y
+
+# strat to test. Automatically updated if get_strategies_from_marketplace is set to y
 strat_ids:
-- 5cd021a7a2b4ea1b142a01a7c
-- 5ea5eba876621921e1ab037f
-- 5dc70e5fb9a8334b7d9b4716
-- 5c58b255812598100207aaaf
-- 5e4915c0567b48b089605ee1
-- 5c4f25a24ca41aa0d326f956
-# to restrict test to pairs
-pair:
-- BTC/USDT
-- ETH/BTC
-# to restrict test to assets accumulation 
-accu:
-- USDT
-- BTC
-# to restrict exchanges. MUST RESPECT THE SAME CASE AS SELECTBOX INTO KRYLL BACKTEST PAGE (KuCoin, Binance, FTX...)
-exchanges:
-- FTX
-- Binance
-# browser choice, replace your_browser by chrome or firefox if you have both on your system
-browser: your_browser
-# set to "n" if you don't have 2FA on your kryll account 
-ask_2fa: y
-# set to "y" to test all pairs instead of only recommanded pairs - if ask_config is "y", this option is ignored
+- 607a0e416f10396b0be05c0a
+
+ask_config: n
 every_pairs: n
-# set to "y" to display debug information in console - if ask_config is "y", this option is ignored
 verbose: n
+browser: chrome
+ask_2fa: n
+exchanges:
+- Binance
