@@ -211,7 +211,7 @@ def click_on_backtest_button():
             sel_tools.get_element_text(css.STRAT_VERSION)
             backtest_page_loaded = True
         except:
-            tools.log(f"[ℹ] White page... Retry")
+            tools.log("[ℹ] White page... Retry")
             sel_tools.refresh()
             continue
 
@@ -350,7 +350,7 @@ def run():
                     # Run backtest
                     run_backtest(backtest_config)
         # strategy backtested, next
-        tools.log(f"[ℹ] strategy backtested !")
+        tools.log("[ℹ] strategy backtested !")
     return True
 
 

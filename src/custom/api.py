@@ -40,7 +40,7 @@ class Api:
         retry = 1
         success = False
         url = url + "&api_version=" + self.config.API_VERSION
-        while success == False and retry < 5:
+        while success is False and retry < 5:
             try:
                 if method.upper() == "GET":
                     response = requests.get(url, params=data)
@@ -81,7 +81,7 @@ class Api:
             url = self.config.API_SEND_URL
             self.tools.log(f"[ℹ] Sending result to the Database, result = {result}", True)
             response = self.send_request("POST", url, data=result)
-            if response != False and response.status_code == 200:
+            if response is not False and response.status_code == 200:
                 return True
         return False
 
@@ -101,7 +101,7 @@ class Api:
         data["exchange"] = backtest_config.getExchange()
         data["token"] = self.token
         response = self.send_request("GET", url, data)
-        if response != False and response.status_code == 200:
+        if response is not False and response.status_code == 200:
             response = response.json()["data"]
             self.tools.log("[ℹ] **************************************")
             self.tools.log("[ℹ] *        Dates to backtest           *")
@@ -109,7 +109,7 @@ class Api:
             for i in response:
                 self.tools.log(f"[ℹ] * {i['period']} from {i['start']} to {i['end']}")
             return response
-        if response != False and response.status_code == 400:
+        if response is not False and response.status_code == 400:
             self.tools.log("[ℹ] No dates to backtest, next.", False)
             return []
         return []
@@ -134,7 +134,7 @@ class Api:
         data["end_date"] = backtest_config.getEnd()
         data["token"] = self.token
         response = self.send_request("GET", url_backtest_already_did, data)
-        if response != False and response.status_code == 200:
+        if response is not False and response.status_code == 200:
             self.tools.log("[ℹ] Can be tested", True)
             return False
         self.tools.log("[ℹ] Already tested, next")
@@ -160,7 +160,7 @@ class Api:
         data["end_date"] = backtest_config.getEnd()
         data["token"] = self.token
         response = self.send_request("GET", url_backtest_has_failed, data)
-        if response != False and response.status_code == 200:
+        if response is not False and response.status_code == 200:
             self.tools.log("[⚠] Already failed, next")
             return True
         return False
@@ -187,7 +187,7 @@ class Api:
         post_data["token"] = self.token
         post_data["log"] = log
         response = self.send_request("POST", self.config.API_BACKTEST_ADD_FAILED_URL, data=post_data)
-        if response != False and response.status_code == 200:
+        if response is not False and response.status_code == 200:
             return True
         return False
 
