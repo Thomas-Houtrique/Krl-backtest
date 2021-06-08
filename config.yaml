@@ -7,7 +7,7 @@ email: your_email
 # password of your kryll account. This param can be removed if you don't want to store this informations
 password: your_password
 # set to y if you want to auto update strat list
-update_strat: y
+get_strategies_from_marketplace: y
 # strat to test. Automatically updated if update_strat is set to y
 strat_ids:
 - 5cd021a7a2b4ea1b142a01a7c
@@ -32,8 +32,6 @@ exchanges:
 browser: your_browser
 # set to "n" if you don't have 2FA on your kryll account 
 ask_2fa: y
-# set to "n" to not ask configuration when starting the script
-ask_config: n
 # set to "y" to test all pairs instead of only recommanded pairs - if ask_config is "y", this option is ignored
 every_pairs: n
 # set to "y" to display debug information in console - if ask_config is "y", this option is ignored

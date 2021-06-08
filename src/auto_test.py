@@ -29,6 +29,7 @@ def set_input_date(start, end):
     end_input.clear()
     end_input.send_keys(end)
 
+
 def exec_backtest(backtest_config):
     """
     Takes a strategy name, a strategy id, a pair, and a backtest date
@@ -68,7 +69,7 @@ def exec_backtest(backtest_config):
 
         except Exception as error:
             tools.log("[❌] Sending backtest : Exception occured : " + str(error))
-        
+
         if not send_ok:
             screenshot_name = "backtest_fail_deep_analysis_" + str(backtest_config.getId()) + ".png"
             sel_tools.save_screenshot(screenshot_name)
@@ -81,6 +82,7 @@ def exec_backtest(backtest_config):
         raise Exception("Error during backtest")
     return False
 
+
 def install_strat_if_needed():
     try:
         tools.log("[ℹ] Checking if strategy is installed...")
@@ -91,15 +93,18 @@ def install_strat_if_needed():
         sel_tools.click_on_element(install_btn)
     return True
 
+
 def update_strat_if_needed():
     tools.log("[ℹ] Checking if strategy needs to be updated")
     time.sleep(5)
-    if 'btn-warning' in sel_tools.get_element(css.UPDATE_BTN).get_attribute('class').split():
+    if "btn-warning" in sel_tools.get_element(css.UPDATE_BTN).get_attribute("class").split():
         tools.log("[ℹ] Updating the strategy...")
         update_btn = sel_tools.get_element(css.UPDATE_BTN)
         sel_tools.click_on_element(update_btn)
     else:
         tools.log("[ℹ] Strategy is up to date")
+
+
 def get_recommended_pairs():
     try:
         recommended_pairs = sel_tools.get_elements(css.RECOMMEND_PAIRS)
@@ -112,6 +117,7 @@ def get_recommended_pairs():
         recommended_pairs_list.append(i)
     return recommended_pairs_list
 
+
 def get_exchanges_to_test():
     if "exchanges" in user.config_file:
         exchange_options = sel_tools.get_element(css.EXCHANGE).find_elements_by_tag_name("option")
@@ -123,6 +129,7 @@ def get_exchanges_to_test():
     else:
         final_exchanges = [sel_tools.get_element(css.BINANCE_EXCHANGE)]
     return final_exchanges
+
 
 def get_pairs_to_test():
     recommended_pairs_list = get_recommended_pairs()
@@ -153,7 +160,7 @@ def get_pairs_to_test():
                 continue
 
         # check if user want to test every pairs
-        if force_pair == 0 and recommended == 0 and user.config["every_pairs"] == "n":
+        if force_pair == 0 and recommended == 0 and user.config_file["every_pairs"] == "n":
             continue
         if recommended == 1:
             if "skip_recommended_pair" in user.config_file and user.config_file["skip_recommended_pair"] == "y" and force_pair == 0:
@@ -170,12 +177,14 @@ def select_exchange(exchange):
     sel_tools.wait_network_calls_loaded(5)
     return True
 
+
 def select_pair(pair):
     sel_tools.clean_network_calls()
     pair_text = pair.text
     pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
     pairs_input.select_by_value(pair_text.replace(" / ", "-"))
     sel_tools.wait_network_calls_loaded(5)
+
 
 def is_pair_listed(pair):
     pairs_input = Select(sel_tools.get_element(css.PAIRS_INPUT))
@@ -185,13 +194,15 @@ def is_pair_listed(pair):
         return False
     return True
 
+
 def get_periods(backtest_config):
     dates_inputs = sel_tools.get_elements(css.DATES_INPUTS)
     start_input = dates_inputs[0]
     min_date = sel_tools.wait_for_attribute_value(start_input, "min")
-    tools.log(f"[ℹ] min date : {min_date}",verbose=True)
+    tools.log(f"[ℹ] min date : {min_date}", verbose=True)
     backtest_dates = api.get_backtest_dates(min_date=min_date, backtest_config=backtest_config)
     return backtest_dates
+
 
 def click_on_backtest_button():
     backtest_page_loaded = False
@@ -206,9 +217,11 @@ def click_on_backtest_button():
             sel_tools.refresh()
             continue
 
+
 def is_recommended_pair(pair):
     recommended_pairs_list = get_recommended_pairs()
-    return (pair in recommended_pairs_list)
+    return pair in recommended_pairs_list
+
 
 def run_backtest(backtest_config):
     backtest_done = False
@@ -230,7 +243,7 @@ def run_backtest(backtest_config):
                     retry_order_skipped = retry_order_skipped + 1
                     if retry_order_skipped > 3:
                         backtest_failed = True
-                        tools.log(f'[❌] {log}')
+                        tools.log(f"[❌] {log}")
                     else:
                         sel_tools.click_on_element(sel_tools.get_element(sel_tools.css.BALANCE_BUTTON, 2))
                         multiplicator = 1000 * retry_order_skipped
@@ -255,7 +268,7 @@ def run_backtest(backtest_config):
                         tools.log(f"[❌] Too many order skipped, retry with x{multiplicator} amount {retry_order_skipped}/3.")
                 else:
                     backtest_failed = True
-                    tools.log(f'[❌] {log}')
+                    tools.log(f"[❌] {log}")
             except:
                 backtest_failed = True
                 pass
@@ -264,15 +277,13 @@ def run_backtest(backtest_config):
                 backtest_failed_screenshot = False
                 backtest_failed = True
             if backtest_failed:
-                api.backtest_add_failed(
-                    backtest_config=backtest_config,
-                    log=log
-                )
+                api.backtest_add_failed(backtest_config=backtest_config, log=log)
                 tools.log("[❌] Backtest Failed.")
                 if backtest_failed_screenshot:
                     screenshot_name = "backtest_fail_" + str(backtest_config.getId()) + ".png"
                     sel_tools.save_screenshot(screenshot_name)
                     tools.log("[❌] You can see the screenshot on this file : " + screenshot_name)
+
 
 def run():
     # If more 1 tab open, closed useless tabs
@@ -340,7 +351,7 @@ def run():
                     tools.log("[ℹ] ***************************************")
                     # Run backtest
                     run_backtest(backtest_config)
-        # strategy backtested, next 
+        # strategy backtested, next
         tools.log(f"[ℹ] strategy backtested !")
     return True
 
@@ -348,13 +359,13 @@ def run():
 # ----------------------
 # Start of the program
 # ----------------------
-configFile = 'config.yaml'
+configFile = "config.yaml"
 if len(sys.argv) > 1:
-    configFile = sys.argv[1] + '.yaml'
-    #print("Use config file " + configFile)
+    configFile = sys.argv[1] + ".yaml"
+    # print("Use config file " + configFile)
 user = UserConfig(configFile)
-tools = UtilityTools(user_config=user.config, user_config_file=user.config_file)
-if configFile != 'config.yaml':
+tools = UtilityTools(user_config_file=user.config_file)
+if configFile != "config.yaml":
     tools.log("[ℹ] Config File: " + configFile)
 css = CssConst()
 
@@ -363,10 +374,10 @@ if "browser" in user.config_file:
 else:
     config_browser = False
 client_driver = tools.detect_browsers(user.config_file["headless"], config_browser)
-api = Api(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
-sel_tools = SeleniumUtilities(user_config=user.config, user_config_file=user.config_file, driver=client_driver)
+api = Api(user_config_file=user.config_file, driver=client_driver)
+sel_tools = SeleniumUtilities(user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
-tools.log("[ℹ] Login..." + user.login["email"])
+tools.log("[ℹ] Login using account :" + user.login["email"])
 if user.login:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
@@ -374,17 +385,16 @@ else:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(input("email :"))
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(getpass("password :"))
 
-if "ask_2fa" in user.config_file and user.config_file["ask_2fa"] == "n":
-    twofa = ""
+if user.config_file["ask_2fa"] == "n":
+    sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 else:
     twofa = input("2FA :").lower()
-sel_tools.get_element(css.TWO_FA_INPUT).send_keys(twofa)
+    sel_tools.get_element(css.TWO_FA_INPUT).send_keys(twofa)
 
-if twofa == "":
-    sel_tools.click_on_element(sel_tools.get_element(css.LOG_IN_BTN))
 
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
-if "update_strat" in user.config_file and user.config_file["update_strat"] == "y":
+
+if user.config_file["get_strategies_from_marketplace"] == "y":
     tools.log("[ℹ] Getting strategies from the marketplace...")
     sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
     ids = sel_tools.get_elements(

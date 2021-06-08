@@ -1,6 +1,4 @@
-
 class BacktestConfig:
-
     def __init__(self):
         self.strat_id = ""
         self.strat_name = ""
@@ -21,7 +19,7 @@ class BacktestConfig:
 
     def setStratVersion(self, strat_version):
         self.strat_version = strat_version
-    
+
     def setPair(self, pair):
         self.pair = pair
 
@@ -45,7 +43,7 @@ class BacktestConfig:
             self.recommended = 1
         else:
             self.recommended = 0
-    
+
     def getStratId(self):
         return self.strat_id
 
@@ -72,12 +70,39 @@ class BacktestConfig:
 
     def getEnd(self):
         return self.end
-    
+
     def getRecommended(self):
         return self.recommended
 
     def getId(self):
-        return str(self.getStratId())+str(self.getStratVersion())+str(self.getExchange())+str(self.getPair()).replace(" / ", "-")+str(self.getPeriod())
+        return str(self.getStratId()) + str(self.getStratVersion()) + str(self.getExchange()) + str(self.getPair()).replace(" / ", "-") + str(self.getPeriod())
 
     def toString(self):
-        return "strat_id = " + str(self.getStratId()) + "," +  "strat_name = " + str(self.getStratName()) + "," +  "strat_version = " + str(self.getStratVersion()) + "," +  "pair = " + str(self.getPair()) + "," +  "exchange = " + str(self.getExchange()) + "," +  "period = " + str(self.getPeriod()) + "," +  "start = " + str(self.getStart()) + "," +  "end = " + str(self.getEnd()) + "," +  "recommended = " + str(self.getRecommended())
+        return (
+            "strat_id = "
+            + str(self.getStratId())
+            + ","
+            + "strat_name = "
+            + str(self.getStratName())
+            + ","
+            + "strat_version = "
+            + str(self.getStratVersion())
+            + ","
+            + "pair = "
+            + str(self.getPair())
+            + ","
+            + "exchange = "
+            + str(self.getExchange())
+            + ","
+            + "period = "
+            + str(self.getPeriod())
+            + ","
+            + "start = "
+            + str(self.getStart())
+            + ","
+            + "end = "
+            + str(self.getEnd())
+            + ","
+            + "recommended = "
+            + str(self.getRecommended())
+        )

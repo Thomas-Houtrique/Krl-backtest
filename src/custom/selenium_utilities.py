@@ -6,11 +6,11 @@ from custom.errors import ElementNotFound
 from custom.css_const import CssConst
 import os
 
+
 class SeleniumUtilities:
-    def __init__(self, user_config, user_config_file, driver):
-        self.user_config = user_config
+    def __init__(self, user_config_file, driver):
         self.css = CssConst()
-        self.tools = UtilityTools(user_config=self.user_config, user_config_file=user_config_file)
+        self.tools = UtilityTools(user_config_file=user_config_file)
         self.driver = driver
 
     def get_element(self, element_path, duration=10):
@@ -255,10 +255,10 @@ class SeleniumUtilities:
         """
         Save a screenshot of page
         """
-        if not os.path.exists('screenshots'):
-            os.makedirs('screenshots')
+        if not os.path.exists("screenshots"):
+            os.makedirs("screenshots")
         self.driver.set_window_size(1920, 1080)  # the trick
-        self.driver.save_screenshot("screenshots/"+filename)
+        self.driver.save_screenshot("screenshots/" + filename)
 
     def get(self, url):
         self.driver.get(url)

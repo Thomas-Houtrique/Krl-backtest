@@ -6,7 +6,8 @@
 
 Normalement vous avez reçu un token, il est personnel, ne le partagez pas, il permet au script de communiquer avec le site pour envoyer les backtests.
 
-## Windows 🪟
+![Windows](https://icons-for-free.com/iconfiles/png/512/mircrosoft+windows+windows+8+windows+logo+icon-1320196084120774130.png "Windows logo")
+## Windows
 **il vous faut absolument Google Chrome ou Firefox** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire dist, remplacez your_token par votre token 
 - Exécutez dist/auto_test.exe
@@ -15,7 +16,8 @@ Normalement vous avez reçu un token, il est personnel, ne le partagez pas, il p
 - Ensuite laissez tranquillement tourner le script.
 - ⚠️ : en cas de problème, vérifier que le fichier dist/config.yaml est correct et que votre token est bon
 
-## Mac OSX 🍎
+![Mac](https://icons-for-free.com/iconfiles/png/512/apple+logo+imac+ipad+macbook+technology+icon-1320196076486517764.png "Mac logo")
+## Mac OSX
 **il vous faut absolument Firefox** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
@@ -31,7 +33,8 @@ python3 src/auto_test.py
 - Ensuite laissez tranquillement tourner le script.
 - ⚠️ : en cas de problème, vérifier que le fichier dist/config.yaml est correct et que votre token est bon
 
-## Linux / Raspberry pi 🐧
+![Linux](http://pngimg.com/uploads/linux/linux_PNG32.png "Linux logo")
+## Linux / Raspberry pi
 **il vous faut absolument Chromium** sur votre machine.
 - Dans le fichier config.yaml présent dans le répertoire principal, remplacez your_token par votre token 
 - Ouvir un terminal et coller ceci :
@@ -53,21 +56,21 @@ sudo python3 auto_test.py
 Par défaut il va automatiquement à l'exécution aller récupérer toutes les strats de la marketplace, les backtester dans un ordre aléatoire, sur les paires recommandées uniquement, sur différentes périodes.
 
 Si vous voulez tester des stratégies en particulier :
-- Mettez le paramètre update_strat à la valeur "n"
+- Mettez le paramètre get_strategies_from_marketplace à la valeur "n"
 - Dans strat_ids il faut mettre uniquement les identifiants de strat que vous voulez tester
 Exemple : 
 ```yaml
-update_strat: n
+get_strategies_from_marketplace: n
 strat_ids:
 - 5d65371ad9d67b9dbe83xxx
 - 5d65371ad9d67b9dbe83xxx
 ```
 L'identifiant de la strat se trouve dans l'url de la strat sur la page de la strat.
 
-Si vous souhaitez que le script ne demande plus un identifiant de stratégie et les backtests automatiquement, indiquer y à update_strat
+Si vous souhaitez que le script ne demande plus un identifiant de stratégie et les backtests automatiquement, indiquer y à get_strategies_from_marketplace
 Exemple : 
 ```yaml
-update_strat: y
+get_strategies_from_marketplace: y
 ```
 
 Si vous voulez tester des paires en particulier :
@@ -133,12 +136,6 @@ browser: your_browser
 ### Paramétrage avancé (config.json) ⚙️
 
 Ces options permettent principalement de définir dans le fichier de configuration toutes les réponses aux questions qui sont demandés à son lancement.
-
-Au démarrage du script, il est demandé si on souhaite le configurer pour activer le backtesting de toutes les paires (et pas seulement les paires recommandées par chaque stratégies) et si on souhaite activer le mode verbeux (information pour le debug en console). Cette option permet de désactiver cette question, par défaut, seuls les paires recommandées seront backtestées et le mode verbeux désactivé. Il est possible de définir aussi en config ces paramètres (voir ci-après)
-```yaml
-# set to "n" to not ask configuration when starting the script
-ask_config: y
-```
 
 Si ask_config: n, on peut mettre sur y l'option suivante pour que toute les paires soient testées et pas seulement celles recommandées pour chaque stratégie.
 ```yaml

@@ -9,13 +9,12 @@ from custom.css_const import CssConst
 
 
 class Api:
-    def __init__(self, user_config, user_config_file, driver):
-        self.user_config = user_config
+    def __init__(self, user_config_file, driver):
         self.user_config_file = user_config_file
         self.driver = driver
         self.token = self.user_config_file["token"]
-        self.tools = UtilityTools(user_config=self.user_config, user_config_file=self.user_config_file)
-        self.sel_tools = SeleniumUtilities(user_config=self.user_config, user_config_file=user_config_file, driver=self.driver)
+        self.tools = UtilityTools(user_config_file=self.user_config_file)
+        self.sel_tools = SeleniumUtilities(user_config_file=user_config_file, driver=self.driver)
         self.config = Config()
         self.css = CssConst()
 
@@ -55,7 +54,7 @@ class Api:
                 elif response.status_code == 503 and response.reason == "maintenance":
                     self.tools.log("[⚠] Maintenance de l'API en cours, veuillez patienter...")
                     time.sleep(300)
-                elif response.status_code == 500 or  response.status_code == 404:
+                elif response.status_code == 500 or response.status_code == 404:
                     self.tools.log("[⚠] Impossible d'envoyer la requête en raison d'un problème serveur. Nouvelle tentative dans 5 minutes...")
                     time.sleep(300)
                 else:
@@ -77,11 +76,7 @@ class Api:
         return True if request worked else return False
         """
         advanced_analyse_link = self.sel_tools.driver.current_url
-        result = self.get_advanced_result(
-            backtest_config,
-            advanced_analyse_link,
-            send_result["hold"]
-        )
+        result = self.get_advanced_result(backtest_config, advanced_analyse_link, send_result["hold"])
         if result:
             url = self.config.API_SEND_URL
             self.tools.log(f"[ℹ] Sending result to the Database, result = {result}", True)
@@ -96,7 +91,7 @@ class Api:
         """
         self.tools.log(f"[ℹ] ({backtest_config.toString()})", True)
         url = self.config.API_GET_PERIOD_URL
-        
+
         data = {}
         data["min_date"] = min_date
         data["strat_id"] = backtest_config.getStratId()
@@ -109,7 +104,7 @@ class Api:
         if response != False and response.status_code == 200:
             response = response.json()["data"]
             self.tools.log("[ℹ] **************************************")
-            self.tools.log(f"[ℹ] *        Dates to backtest          *")
+            self.tools.log("[ℹ] *        Dates to backtest           *")
             self.tools.log("[ℹ] **************************************")
             for i in response:
                 self.tools.log(f"[ℹ] * {i['period']} from {i['start']} to {i['end']}")
@@ -196,12 +191,7 @@ class Api:
             return True
         return False
 
-    def get_advanced_result(
-        self,
-        backtest_config,
-        advanced_analyse_link,
-        hold
-    ):
+    def get_advanced_result(self, backtest_config, advanced_analyse_link, hold):
         """
         Takes a strategy name, a pair, a backtest start date, a backtest end date and the analyse link
         return dict of results
@@ -256,24 +246,24 @@ class Api:
             end_date = advanced_analyse_dates.split(" — ")[1]
             end_date_kryll_side = datetime.datetime(int(end_date.split("-")[2]), int(end_date.split("-")[0]), int(end_date.split("-")[1]))
             api_date_end = datetime.datetime(int(result["end"].split("-")[0]), int(result["end"].split("-")[1]), int(result["end"].split("-")[2]))
-            
+
             days_kryll_side = self._get_number_of_days(start_date_kryll_side, end_date_kryll_side)
             days_api_side = self._get_number_of_days(api_date_start, api_date_end)
-            diff = abs(days_kryll_side-days_api_side)
+            diff = abs(days_kryll_side - days_api_side)
 
-            #If date end on deep analysis < date end required, the backtest was interrupt
+            # If date end on deep analysis < date end required, the backtest was interrupt
             if end_date_kryll_side < api_date_end:
                 self.tools.log("[❌] invalid deep analysis.")
                 self.tools.log("[❌] Backtest seems to be interrupt by other backtest on the same time")
                 self.tools.log(f"[❌] {result}", True)
                 return False
-            
+
             # If more than 2 days on deep analysis period, error occurs
             if diff > 2:
                 self.tools.log(f"[❌] {diff} days difference between required period and deep analysis period. Canceled.")
                 self.tools.log(f"[❌] {result}", True)
                 return False
-            
+
             self.tools.log(f"[ℹ] {result}", True)
             return result
         except Exception:
@@ -293,7 +283,7 @@ class Api:
         return max_drawdown_informations
 
     def _get_number_of_days(self, date_from, date_to):
-            """Returns a float equals to the timedelta between two dates given as string."""
-            timedelta = date_to - date_from
-            diff_day = timedelta.days
-            return diff_day
+        """Returns a float equals to the timedelta between two dates given as string."""
+        timedelta = date_to - date_from
+        diff_day = timedelta.days
+        return diff_day
