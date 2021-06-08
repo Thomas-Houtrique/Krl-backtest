@@ -11,7 +11,7 @@ class UserConfig:
 
     def write_config(self, key, value):
         with open(r"{self.config_filename}", "r") as conf_file:
-            new_conf_file = yaml.load(conf_file)
+            new_conf_file = yaml.safe_load(conf_file)
             new_conf_file[key] = value
         with open(r"{self.config_filename}", "w") as conf_file:
             yaml.dump(new_conf_file, conf_file)
@@ -28,13 +28,13 @@ class UserConfig:
         """
         if os.path.exists(self.config_filename):
             with open(self.config_filename, "r") as conf_file:
-                config_file = yaml.load(conf_file, Loader=yaml.FullLoader)
+                config_file = yaml.safe_load(conf_file)
         else:
             token = input("Enter your token :")
             with open(r"{self.config_filename}", "w+") as conf_file:
                 yaml.dump({"token": token}, conf_file)
             with open(r"{self.config_filename}") as conf_file:
-                config_file = yaml.load(conf_file, Loader=yaml.FullLoader)
+                config_file = yaml.safe_load(conf_file)
         if not "headless" in config_file:
             config_file["headless"] = "n"
         return config_file
