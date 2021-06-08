@@ -107,7 +107,7 @@ class UtilityTools:
                 driver = webdriver.Firefox(executable_path=r"geckodriver.exe", options=firefox_options)
             return driver
 
-        elif client_os == "Linux":
+        if client_os == "Linux":
             self.log("[⚠] Please make sure to have Chromium installed")
             options = webdriver.ChromeOptions()
             options.add_experimental_option("excludeSwitches", ["enable-logging"])
@@ -123,7 +123,7 @@ class UtilityTools:
             driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver", options=options)
             return driver
 
-        elif client_os == "Darwin":
+        if client_os == "Darwin":
             self.log("[⚠] Please make sure to have Firefox installed")
 
             firefox_options = FirefoxOptions()
@@ -131,8 +131,7 @@ class UtilityTools:
                 firefox_options.headless = True
             driver = webdriver.Firefox(executable_path=r"./geckodriver", options=firefox_options)
             return driver
-        else:
-            return None
+        return None
 
     def ask_strat(self):
         """
