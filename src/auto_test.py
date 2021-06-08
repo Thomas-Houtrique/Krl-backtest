@@ -228,7 +228,7 @@ def run_backtest(backtest_config):
     backtest_failed = False
     backtest_failed_screenshot = True
     retry_order_skipped = 0
-    while backtest_done != True and backtest_failed != True:
+    while True not in (backtest_done, backtest_failed):
         # Try to exec the backtest
         try:
             exec_backtest(backtest_config)

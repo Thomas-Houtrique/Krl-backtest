@@ -54,7 +54,7 @@ class Api:
                 elif response.status_code == 503 and response.reason == "maintenance":
                     self.tools.log("[⚠] Maintenance de l'API en cours, veuillez patienter...")
                     time.sleep(300)
-                elif response.status_code == 500 or response.status_code == 404:
+                elif response.status_code in (500, 404):
                     self.tools.log("[⚠] Impossible d'envoyer la requête en raison d'un problème serveur. Nouvelle tentative dans 5 minutes...")
                     time.sleep(300)
                 else:
