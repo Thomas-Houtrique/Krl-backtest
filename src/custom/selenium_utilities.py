@@ -139,7 +139,8 @@ class SeleniumUtilities:
             time.sleep(1)
         return False
 
-    def wait_for_attribute_value(self, element, attribute, duration=10):
+    @staticmethod
+    def wait_for_attribute_value(element, attribute, duration=10):
         """
         Takes a selenium element and a duration, return attribute value when attribute value is not empty
         """

@@ -12,7 +12,8 @@ class UserConfig:
         self.config = self.__advanced_configuration(advanced=self.advanced_user_choice)
         self.login = self.__auto_login()
 
-    def write_config(self, key, value):
+    @staticmethod
+    def write_config(key, value):
         with open(r"config.yaml", "r") as conf_file:
             new_conf_file = yaml.load(conf_file)
             new_conf_file[key] = value
@@ -52,7 +53,8 @@ class UserConfig:
                 user_advanced_configuration["verbose"] = "y"
         return user_advanced_configuration
 
-    def __config_file(self):
+    @staticmethod
+    def __config_file():
         """
         Return user config if config file exist, if not return -1
         """

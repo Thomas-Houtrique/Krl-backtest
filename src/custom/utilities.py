@@ -17,7 +17,8 @@ class UtilityTools:
         self.user_config = user_config
         self.user_config_file = user_config_file
     
-    def get_log_file_name(self):
+    @staticmethod
+    def get_log_file_name():
         if not os.path.exists('logs'):
             os.makedirs('logs')        
         if UtilityTools.temp_file is False or UtilityTools.temp_file[20:-11] != datetime.now().strftime("%Y_%m_%d"):
