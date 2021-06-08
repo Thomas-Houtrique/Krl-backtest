@@ -207,7 +207,7 @@ def click_on_backtest_button():
 
 def is_recommended_pair(pair):
     recommended_pairs_list = get_recommended_pairs()
-    return (pair in recommended_pairs_list)
+    return pair in recommended_pairs_list
 
 def run_backtest(backtest_config):
     backtest_done = False
