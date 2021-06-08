@@ -116,11 +116,10 @@ class SeleniumUtilities:
             pbar.update(value - pbar.n)
             pbar.refresh()
 
-    """
-    Check if an element existe in DOM. return True or False
-    """
-
     def check_if_element_exist(self, element_path, multiple=False):
+        """
+        Check if an element existe in DOM. return True or False
+        """
         try:
             if multiple:
                 return self.driver.find_elements_by_css_selector(element_path)
