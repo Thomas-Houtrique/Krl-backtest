@@ -373,8 +373,8 @@ client_driver = tools.detect_browsers(user.config_file["headless"], config_brows
 api = Api(user_config_file=user.config_file, driver=client_driver)
 sel_tools = SeleniumUtilities(user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
-tools.log("[ℹ] Login using account :" + user.login["email"])
 if user.login:
+    tools.log("[ℹ] Login using account :" + user.login["email"])
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
 else:
