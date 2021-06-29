@@ -98,6 +98,7 @@ class UtilityTools:
                     options.add_argument("disable-infobars")
                     options.add_argument("--disable-extensions")
                     options.add_argument("window-size=1920x1080")
+                    options.add_argument("--disable-http2")
                     options.set_headless()
                 driver = webdriver.Chrome(executable_path=r"chromedriver.exe", options=options)
             elif client_browser == "Firefox":
@@ -119,6 +120,7 @@ class UtilityTools:
                 options.add_argument("disable-infobars")
                 options.add_argument("--disable-extensions")
                 options.add_argument("window-size=1920x1080")
+                options.add_argument("--disable-http2")
                 options.set_headless()
             driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver", options=options)
             return driver
