@@ -5,7 +5,8 @@ from custom.utilities import UtilityTools
 from custom.errors import ElementNotFound
 from custom.css_const import CssConst
 import os
-
+import brotli
+from pprint import pprint
 
 class SeleniumUtilities:
     def __init__(self, user_config_file, driver):
@@ -262,3 +263,9 @@ class SeleniumUtilities:
     def get(self, url):
         self.driver.get(url)
         self.clean_network_calls()
+
+    def get_response_body(self, url_suffix):
+        for request in self.driver.requests:
+            if request.response and request.url.endswith(url_suffix):
+                return brotli.decompress(request.response.body)
+                #return brotli.decompress(request.response.body).decode('utf8')

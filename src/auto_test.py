@@ -2,9 +2,16 @@
 Script automating backtest on kryll.io and sending results to an API
 Made by Thomas with the help of torkium
 """
+from pprint import pprint
 import time
 import random
 import sys
+import datetime
+import argparse
+import json
+import csv
+import hashlib
+import requests
 from selenium.webdriver.support.ui import Select
 from custom.user_config import UserConfig
 from custom.utilities import UtilityTools
@@ -30,13 +37,14 @@ def set_input_date(start_input_date, end_input_date):
     end_input.send_keys(end_input_date)
 
 
-def exec_backtest(backtest_config):
+def exec_backtest(backtest_config, my_strats = False):
     """
     Takes a strategy name, a strategy id, a pair, and a backtest date
     return True if no errors else return False
     """
-    if not api.backtest_has_failed(backtest_config) and not api.backtest_already_did(backtest_config):
+    if my_strats or ("periods" in user.config_file) or (not api.backtest_has_failed(backtest_config) and not api.backtest_already_did(backtest_config)):
         tools.log("[ℹ] Test in progress, Please Wait...")
+        bt_start = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # set date into input
         set_input_date(backtest_config.getStart(), backtest_config.getEnd())
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
@@ -48,6 +56,34 @@ def exec_backtest(backtest_config):
             raise Exception("Error during backtest")
         sel_tools.clean_network_calls()
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
+        gain = sel_tools.get_element_double(css.ANALYSE_TAB_GAIN)
+        bt_end = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        tools.log("[ℹ] Test finished (hold: "+ str(hold) + ", gain: " + str(gain) + "), waiting depth analysis Please Wait...")
+        if "history" in user.config_file:
+            try:
+                csv_data = [
+                    backtest_config.getStratId(),
+                    backtest_config.getStratName(),
+                    backtest_config.getStratVersion(),
+                    backtest_config.getPair(),
+                    backtest_config.getExchange(),
+                    backtest_config.getPeriod(),
+                    backtest_config.getStart(),
+                    backtest_config.getEnd(),
+                    hold.replace(',',''),
+                    gain.replace(',',''),
+                    user.config_file['email'],
+                    '', #todo : deep analyse id if available
+                    bt_start,
+                    bt_end
+                ]
+                with open(user.config_file['history'], 'a') as csv_file:
+                    csv_writer = csv.writer(csv_file)
+                    csv_writer.writerow(csv_data)
+                    csv_file.close()
+                tools.log("[ℹ] Backtest data added to history CSV file: " + user.config_file['history'])
+            except Exception as error:
+                tools.log("[❌] Fail saving data to history CSV file: "+ user.config_file['history'] + "\n" + str(error))
         # click on depth analysis button
         sel_tools.click_on_element(sel_tools.get_element(css.ANALYSE_TAB_DEEP_ANALYSE_LINK))
         windows_handle = sel_tools.wait_for_windows_handle(300)
@@ -130,8 +166,11 @@ def get_exchanges_to_test():
     return final_exchanges
 
 
-def get_pairs_to_test():
-    recommended_pairs_list = get_recommended_pairs()
+def get_pairs_to_test(recommended_pairs = True):
+    if recommended_pairs == True:
+        recommended_pairs_list = get_recommended_pairs()
+    else:
+        recommended_pairs_list = []
     final_pairs = []
     pairs_input = sel_tools.get_element(css.PAIRS_INPUT)
     pairs_list = pairs_input.find_elements_by_tag_name("option")
@@ -192,22 +231,42 @@ def is_pair_listed(pair):
     return True
 
 
-def get_periods(backtest_config):
+def get_periods(backtest_config, from_config = False):
     dates_inputs = sel_tools.get_elements(css.DATES_INPUTS)
     start_input = dates_inputs[0]
     min_date = sel_tools.wait_for_attribute_value(start_input, "min")
     tools.log(f"[ℹ] min date : {min_date}", verbose=True)
-    backtest_dates = api.get_backtest_dates(min_date=min_date, backtest_config=backtest_config)
+    if from_config:
+        backtest_dates = []
+        periods = user.config_file['periods']
+        for period in periods:
+            min_dt = datetime.datetime.strptime(min_date, '%Y-%m-%d').date()
+            start_dt = periods[period][0]
+            end_dt = periods[period][1]
+            if(min_dt > start_dt):
+                #we add one day because first day of pair prices on an exchange is usualy not revelant
+                start_dt = min_dt + datetime.timedelta(days=1)
+            if(end_dt > start_dt):
+                backtest_dates.append({
+                    'period': period,
+                    'start': str(start_dt),
+                    'end': str(end_dt)
+                })
+    else:
+        backtest_dates = api.get_backtest_dates(min_date=min_date, backtest_config=backtest_config)
     return backtest_dates
 
 
-def click_on_backtest_button():
+def click_on_backtest_button(bt_button = False):
+    if bt_button == False:
+        bt_button = sel_tools.get_element(css.BACKTEST_BTN)
     backtest_page_loaded = False
     while not backtest_page_loaded:
         try:
-            sel_tools.click_on_element(sel_tools.get_element(css.BACKTEST_BTN), True)
+            sel_tools.click_on_element(bt_button, True)
             sel_tools.get_element_text(css.STRAT_NAME_BACKTEST)
-            sel_tools.get_element_text(css.STRAT_VERSION)
+            if bt_button == False:
+                sel_tools.get_element_text(css.STRAT_VERSION)
             backtest_page_loaded = True
         except:
             tools.log("[ℹ] White page... Retry")
@@ -220,7 +279,7 @@ def is_recommended_pair(pair):
     return pair in recommended_pairs_list
 
 
-def run_backtest(backtest_config):
+def run_backtest(backtest_config, my_strats = False):
     backtest_done = False
     backtest_failed = False
     backtest_failed_screenshot = True
@@ -228,7 +287,7 @@ def run_backtest(backtest_config):
     while True not in (backtest_done, backtest_failed):
         # Try to exec the backtest
         try:
-            exec_backtest(backtest_config)
+            exec_backtest(backtest_config, my_strats)
             backtest_done = True
         # If backtest failed, check if order too small or too many order skipped. If yes, retry x3 with more start wallet
         except:
@@ -281,29 +340,79 @@ def run_backtest(backtest_config):
                     tools.log("[❌] You can see the screenshot on this file : " + screenshot_name)
 
 
-def run():
+def run(my_strats = False):
     # If more 1 tab open, closed useless tabs
     sel_tools.close_unused_tabs()
     for strat_id in strat_ids:
         backtest_config = BacktestConfig()
+        strat_file = None
+        strat_found = False
+        if strat_id.endswith('.kryll'):
+            strat_file = strat_id
+            file = open('my_strats/' + strat_file,'r')
+            strat_data = json.loads(file.read())
+            file.close()
+            strat_id = strat_data['name']
+
         backtest_config.setStratId(strat_id)
-        # Go to strategy page
-        tools.log("[ℹ] Go to strategy page...")
-        sel_tools.get("https://platform.kryll.io/marketplace/" + strat_id)
-        # Check if strategy is installed, and install it
-        install_strat_if_needed()
-        # Check if strategy needs to be updated
-        update_strat_if_needed()
-        # Click on backtest button
-        tools.log("[ℹ] Click on backtest button...", True)
-        click_on_backtest_button()
-        # Get strategy name, strategy version
-        tools.log("[ℹ] Get strategy name and version...", True)
-        backtest_config.setStratName(sel_tools.get_element_text(css.STRAT_NAME_BACKTEST).strip())
-        backtest_config.setStratVersion(sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1])
-        # Get recommended pairs list
-        tools.log("[ℹ] Get recommended pair list...", True)
-        recommended_pairs = get_recommended_pairs()
+        if(my_strats != False):
+            recommended_pairs = []
+            sel_tools.driver.get("https://platform.kryll.io/strategies")
+            my_strats_cards = sel_tools.get_elements(css.MY_STRATS)
+            #we browse "my strategies" section and try to find the strategy name
+            tools.log('[ℹ] Looking for strategy "' + strat_id + '" in My Strategies', True)
+            for my_strat_card in my_strats_cards:
+                strat_name = my_strat_card.find_elements_by_tag_name('h3')[0].text
+                if strat_name.lower().startswith(strat_id.lower()):
+                    backtest_config.setStratName(strat_name)
+                    backtest_config.setStratVersion(1)
+                    bt_button = my_strat_card.find_elements_by_class_name('d-none')[0]
+                    tools.log("[ℹ] Strategy found, click on backtest button of " + strat_name, True)
+                    strat_found = True
+                    click_on_backtest_button(bt_button)
+                    break
+            #don't found, if there is a file, we import it
+            if not strat_found:
+                try:
+                    tools.log("[ℹ] strategy not found, try to import: " + strat_file, True)
+                    headers = {'x-access-token': auth_token, 'Content-Type': 'application/json'}
+                    response = requests.post(url = 'https://platform.kryll.io/api/users/me/strategies', json = strat_data, headers = headers)
+                    if response.status_code == 200:
+                        tools.log("[ℹ] Strategy imported successfully: " + strat_id, True)
+                        sel_tools.driver.get("https://platform.kryll.io/strategies")
+                        my_strats_cards = sel_tools.get_elements(css.MY_STRATS)
+                        #we browse "my strategies" section and try to find the strategy name
+                        tools.log('[ℹ] Looking for strategy "' + strat_id + '" in My Strategies', True)
+                        for my_strat_card in my_strats_cards:
+                            strat_name = my_strat_card.find_elements_by_tag_name('h3')[0].text
+                            if strat_name.lower().startswith(strat_id.lower()):
+                                backtest_config.setStratName(strat_name)
+                                backtest_config.setStratVersion(1)
+                                bt_button = my_strat_card.find_elements_by_class_name('d-none')[0]
+                                tools.log("[ℹ] Strategy found, click on backtest button of " + strat_name, True)
+                                click_on_backtest_button(bt_button)
+                                break
+                except:
+                    tools.log("[❌] Fail to import strategy: " + strat_file)
+        else:
+            # Go to strategy page
+            tools.log("[ℹ] Go to strategy page...")
+            sel_tools.get("https://platform.kryll.io/marketplace/" + strat_id)
+            # Check if strategy is installed, and install it
+            install_strat_if_needed()
+            # Check if strategy needs to be updated
+            update_strat_if_needed()
+            # Click on backtest button
+            tools.log("[ℹ] Click on backtest button...", True)
+            click_on_backtest_button()
+            # Get strategy name, strategy version
+            tools.log("[ℹ] Get strategy name and version...", True)
+            backtest_config.setStratName(sel_tools.get_element_text(css.STRAT_NAME_BACKTEST).strip())
+            backtest_config.setStratVersion(sel_tools.get_element_text(css.STRAT_VERSION).split(" ")[1])
+            # Get recommended pairs list
+            tools.log("[ℹ] Get recommended pair list...", True)
+            recommended_pairs = get_recommended_pairs()
+
         # Get Exchanges to test
         tools.log("[ℹ] Get exchanges to test...", True)
         exchanges = get_exchanges_to_test()
@@ -315,7 +424,7 @@ def run():
             select_exchange(exchange)
             # Get pairs to test
             tools.log("[ℹ] Get pairs...", True)
-            pairs = get_pairs_to_test()
+            pairs = get_pairs_to_test(not my_strats)
             # For each pairs
             for pair in pairs:
                 backtest_config.setPair(pair.text)
@@ -329,7 +438,7 @@ def run():
                 select_pair(pair)
                 # Get periods to test
                 tools.log("[ℹ] Get periods to test...", True)
-                periods = get_periods(backtest_config)
+                periods = get_periods(backtest_config, my_strats or "periods" in user.config_file)
                 # For each period
                 for period in periods:
                     backtest_config.setPeriod(period["period"])
@@ -346,25 +455,58 @@ def run():
                     tools.log(f"[ℹ] * From : {backtest_config.getStart()} to {backtest_config.getEnd()}")
                     tools.log("[ℹ] ***************************************")
                     # Run backtest
-                    run_backtest(backtest_config)
+                    run_backtest(backtest_config, my_strats)
         # strategy backtested, next
         tools.log("[ℹ] strategy backtested !")
     return True
 
 
+def command(command):
+    headers = {'x-access-token': auth_token, 'Content-Type': 'application/json'}
+    tools.log("[ℹ] COMMAND MODE: " + command)
+    if command == 'delete_strats':
+        response = requests.get(url = 'https://platform.kryll.io/api/users/me/strategies', headers = headers)
+        res = response.json()
+        for strat in res['data']:
+            if strat['name'].lower().startswith(user.config_file['delete_strats'].lower()):
+                response = requests.delete(url = 'https://platform.kryll.io/api/users/me/strategies/' + strat['id'], headers = headers)
+                if response.status_code == 200:
+                    tools.log("[ℹ] Strategy deleted: " + strat['name'])
+
 # ----------------------
 # Start of the program
 # ----------------------
-configFile = "config.yaml"
-if len(sys.argv) > 1:
-    configFile = sys.argv[1] + ".yaml"
-    # print("Use config file " + configFile)
-user = UserConfig(configFile)
-tools = UtilityTools(user_config_file=user.config_file)
-if configFile != "config.yaml":
-    tools.log("[ℹ] Config File: " + configFile)
-css = CssConst()
 
+# Toutes les options booleenne doivent être à False par défaut donc certaines options d'origines sont inversées
+parser = argparse.ArgumentParser(description='Commande line arguments override options set in config file')
+parser.add_argument('-2', '--disable_2fa', help='Disable Google Authenticator Code (2FA)', action="store_true")
+parser.add_argument('-a', '--accu', help='Asset to accumulate to backtest, ex: USDT')
+parser.add_argument('-B', '--browser', help="Browser : chrome or firefox")
+parser.add_argument('-c', '--config', help='Name of the yaml config file (default: config.yaml)')
+parser.add_argument('-d', '--periods', help='Periods to backtest, period name followed by colon followed by 2 dates separated by two dots, ex: year2020:2020-01-01..2020-12-31, many periods can be separated by coma')
+parser.add_argument('-D', '--delete_strats', help='Use carefully: delete all strategies that start with the given name')
+parser.add_argument('-e', '--every_pairs', help='Backtest every pairs and not only recommanded pairs', action="store_true")
+parser.add_argument('-E', '--email', help='E-mail of Kryll account to use')
+parser.add_argument('-H', '--history', help='Append to a csv specified file each backtest processed')
+parser.add_argument('-m', '--disable_marketplace', help='Disable pick strategies from marketplace randomly', action="store_true")
+parser.add_argument('-o', '--open_browser', help="Open browser", action="store_true")
+parser.add_argument('-p', '--pairs', help='Pairs to backtest separated by comas')
+parser.add_argument('-P', '--password', help='Password of Kryll account to use')
+parser.add_argument('-r', '--save_results', help='Save results to json file', action="store_true")
+parser.add_argument('-s', '--strat_ids', help='Strategy ids to backtest separated by coma')
+parser.add_argument('-S', '--my_strats', help='Strategy names to backtest separated by two comas, if value end with .kryll, load the kryll file from strategies directory')
+parser.add_argument('-T', '--token', help='Backplus Token')
+parser.add_argument('-u', '--upgrade_strat', help='Upgrade a strategy if needed', action="store_true")
+parser.add_argument('-v', '--verbose', help='Display debug information', action="store_true")
+parser.add_argument('-V', '--version', help='Version of BackPlus Script', action='version', version='BackPlusScript 2.0')
+parser.add_argument('-x', '--exchanges', help='Exchanges to backtest separated by comas')
+
+user = UserConfig(parser.parse_args())
+tools = UtilityTools(user_config_file=user.config_file)
+if user.config_filename != "config.yaml":
+    tools.log("[ℹ] Config File: " + user.config_filename)
+
+css = CssConst()
 if "browser" in user.config_file:
     config_browser = user.config_file["browser"].lower()
 else:
@@ -373,7 +515,7 @@ client_driver = tools.detect_browsers(user.config_file["headless"], config_brows
 api = Api(user_config_file=user.config_file, driver=client_driver)
 sel_tools = SeleniumUtilities(user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
-tools.log("[ℹ] Login using account :" + user.login["email"])
+tools.log("[ℹ] Login using account: " + user.login["email"])
 if user.login:
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
@@ -390,20 +532,36 @@ else:
 
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
 
-if user.config_file["get_strategies_from_marketplace"] == "y":
-    tools.log("[ℹ] Getting strategies from the marketplace...")
-    sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
-    ids = sel_tools.get_elements(
-        "div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)"
-    )
-    strat_ids = []
-    for strategy_id in ids:
-        strat_ids.append(strategy_id.get_attribute("href").split("/")[4])
+try:
+    time.sleep(1)
+    response = json.loads(sel_tools.get_response_body('/users/me'))
+    auth_token = response['data']['auth_token']
+except Exception as error:
+    tools.log("[❌] Can't retrieve Auth Token")
+
+if ('command' in user.config_file) and user.config_file['command']:
+    command(user.config_file['command'])
+    sys.exit()
+
+my_strats = False
+if "my_strats" in user.config_file:
+    strat_ids = user.config_file["my_strats"]
+    my_strats = True
 else:
-    if "strat_ids" in user.config_file:
-        strat_ids = user.config_file["strat_ids"]
+    if user.config_file["get_strategies_from_marketplace"] == "y":
+        tools.log("[ℹ] Getting strategies from the marketplace...")
+        sel_tools.driver.get("https://platform.kryll.io/marketplace/top")
+        ids = sel_tools.get_elements(
+            "div.col-sm-12 > app-card-strategy-user:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > h3:nth-child(1) > a:nth-child(1)"
+        )
+        strat_ids = []
+        for strategy_id in ids:
+            strat_ids.append(strategy_id.get_attribute("href").split("/")[4])
     else:
-        strat_ids = tools.ask_strat()
+        if "strat_ids" in user.config_file:
+            strat_ids = user.config_file["strat_ids"]
+        else:
+            strat_ids = tools.ask_strat()
 
 COUNT_QUICK_FAIL = 0
 EXECUTION_ID = 0
@@ -412,7 +570,7 @@ while COUNT_QUICK_FAIL < 3:
     start = time.time()
     try:
         random.shuffle(strat_ids)
-        run()
+        run(my_strats)
     except Exception as error:
         SCREENSHOT_NAME = "screen_fail_" + str(EXECUTION_ID) + ".png"
         sel_tools.save_screenshot(SCREENSHOT_NAME)

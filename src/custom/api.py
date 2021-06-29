@@ -2,6 +2,8 @@ import datetime
 import sys
 import time
 import requests
+import json
+from pprint import pprint
 from yaml import tokens
 from custom.selenium_utilities import SeleniumUtilities
 from custom.utilities import UtilityTools
@@ -70,7 +72,7 @@ class Api:
             self.tools.log("[❌] Unable to send the request")
         return response
 
-    def send_result(self, backtest_config, send_result):
+    def  send_result(self, backtest_config, send_result):
         """
         Takes a token, a pair, if strategy is recommended, a strategy id, a strategy name, a strategy version, the hold value,
         the backtest period, the backtest start date, the backtest end date
@@ -79,10 +81,26 @@ class Api:
         advanced_analyse_link = self.sel_tools.driver.current_url
         result = self.get_advanced_result(backtest_config, advanced_analyse_link, send_result["hold"])
         if result:
-            url = self.config.API_SEND_URL
-            self.tools.log(f"[ℹ] Sending result to the Database, result = {result}", True)
-            response = self.send_request("POST", url, data=result)
-            if response is not False and response.status_code == 200:
+            self.user_config_file
+            if ("my_strats" in self.user_config_file) or (("save_results" in self.user_config_file) and (self.user_config_file["save_results"] == "y")):
+                filename = result['strat_id']+'_v'+result['strat_version']+'_'+(result["pair"].replace('/', '-'))+'@'+result["exchange"]+'_'+result["start"]+'_'+result["end"];
+                dirname = "results"
+                if "my_strats" in self.user_config_file:
+                    dirname = "my_results"
+                with open(dirname + '/'+ filename +'.json', 'w') as fp:
+                    dump_result = result
+                    del dump_result['token']
+                    json.dump(dump_result, fp)
+                    self.tools.log("[ℹ] Results saved to file: results/" + filename, True)
+            #if ("disable_send" not in self.user_config_file) or (self.user_config_file["disable_send"] != "y"):
+            if not ("my_strats" in self.user_config_file) and not ("periods" in self.user_config_file) :
+                url = self.config.API_SEND_URL
+                self.tools.log(f"[ℹ] Sending result to the Database, result = {result}", True)
+                response = self.send_request("POST", url, data=result)
+                if response is not False and response.status_code == 200:
+                    return True
+            else:
+                self.tools.log(f"[❌] Sending result to the Database disabled in config, result = {result}", True)
                 return True
         return False
 
