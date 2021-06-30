@@ -83,7 +83,7 @@ class Api:
         if result:
             self.user_config_file
             if ("my_strats" in self.user_config_file) or (("save_results" in self.user_config_file) and (self.user_config_file["save_results"] == "y")):
-                filename = result['strat_id']+'_v'+result['strat_version']+'_'+(result["pair"].replace('/', '-'))+'@'+result["exchange"]+'_'+result["start"]+'_'+result["end"];
+                filename = result['strat_name']+'_v'+result['strat_version']+'_'+(result["pair"].replace('/', '-'))+'@'+result["exchange"]+'_'+result["start"]+'_'+result["end"];
                 dirname = "results"
                 if "my_strats" in self.user_config_file:
                     dirname = "my_results"

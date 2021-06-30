@@ -2,7 +2,7 @@
 Script automating backtest on kryll.io and sending results to an API
 Made by Thomas with the help of torkium
 """
-from pprint import pprint
+from pprint import pp, pprint
 import time
 import random
 import sys
@@ -37,12 +37,12 @@ def set_input_date(start_input_date, end_input_date):
     end_input.send_keys(end_input_date)
 
 
-def exec_backtest(backtest_config, my_strats = False):
+def exec_backtest(backtest_config, blocks_md5 = False):
     """
     Takes a strategy name, a strategy id, a pair, and a backtest date
     return True if no errors else return False
     """
-    if my_strats or ("periods" in user.config_file) or (not api.backtest_has_failed(backtest_config) and not api.backtest_already_did(backtest_config)):
+    if blocks_md5 or ("periods" in user.config_file) or (not api.backtest_has_failed(backtest_config) and not api.backtest_already_did(backtest_config)):
         tools.log("[ℹ] Test in progress, Please Wait...")
         bt_start = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # set date into input
@@ -58,32 +58,8 @@ def exec_backtest(backtest_config, my_strats = False):
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
         gain = sel_tools.get_element_double(css.ANALYSE_TAB_GAIN)
         bt_end = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        tools.log("[ℹ] Test finished (hold: "+ str(hold) + ", gain: " + str(gain) + "), waiting depth analysis Please Wait...")
-        if "history" in user.config_file:
-            try:
-                csv_data = [
-                    backtest_config.getStratId(),
-                    backtest_config.getStratName(),
-                    backtest_config.getStratVersion(),
-                    backtest_config.getPair(),
-                    backtest_config.getExchange(),
-                    backtest_config.getPeriod(),
-                    backtest_config.getStart(),
-                    backtest_config.getEnd(),
-                    hold.replace(',',''),
-                    gain.replace(',',''),
-                    user.config_file['email'],
-                    '', #todo : deep analyse id if available
-                    bt_start,
-                    bt_end
-                ]
-                with open(user.config_file['history'], 'a') as csv_file:
-                    csv_writer = csv.writer(csv_file)
-                    csv_writer.writerow(csv_data)
-                    csv_file.close()
-                tools.log("[ℹ] Backtest data added to history CSV file: " + user.config_file['history'])
-            except Exception as error:
-                tools.log("[❌] Fail saving data to history CSV file: "+ user.config_file['history'] + "\n" + str(error))
+        tools.log("[ℹ] Test finished, waiting depth analysis Please Wait...")
+
         # click on depth analysis button
         sel_tools.click_on_element(sel_tools.get_element(css.ANALYSE_TAB_DEEP_ANALYSE_LINK))
         windows_handle = sel_tools.wait_for_windows_handle(300)
@@ -102,6 +78,53 @@ def exec_backtest(backtest_config, my_strats = False):
                 depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
             if depth_analysis_page_loaded:
                 send_ok = api.send_result(backtest_config, {"hold": hold})
+                if blocks_md5:
+                    try:
+                        csv_data = [
+                            blocks_md5,
+                            backtest_config.getStratId(),
+                            backtest_config.getStratName(),
+                            backtest_config.getStratVersion(),
+                            backtest_config.getPair(),
+                            backtest_config.getExchange(),
+                            backtest_config.getPeriod(),
+                            backtest_config.getStart(),
+                            backtest_config.getEnd(),
+                            user.config_file['email'],
+                            bt_start,
+                            bt_end
+                        ]
+                        with open('my_strats_done.csv', 'a') as csv_file:
+                            csv_writer = csv.writer(csv_file)
+                            csv_writer.writerow(csv_data)
+                            csv_file.close()
+                        tools.log("[ℹ] Backtest data added to my_strats_done CSV file: " + user.config_file['history'], True)
+                    except Exception as error:
+                        tools.log("[❌] Fail saving data to my_strats_done CSV file: "+ user.config_file['history'] + "\n" + str(error), True)
+
+                if "history" in user.config_file:
+                    try:
+                        csv_data = [
+                            backtest_config.getStratId(),
+                            backtest_config.getStratName(),
+                            backtest_config.getStratVersion(),
+                            backtest_config.getPair(),
+                            backtest_config.getExchange(),
+                            backtest_config.getPeriod(),
+                            backtest_config.getStart(),
+                            backtest_config.getEnd(),
+                            hold.replace(',',''),
+                            gain.replace(',',''),
+                            '', #todo : deep analyse id if available
+                        ]
+                        with open(user.config_file['history'], 'a') as csv_file:
+                            csv_writer = csv.writer(csv_file)
+                            csv_writer.writerow(csv_data)
+                            csv_file.close()
+                        tools.log("[ℹ] Backtest data added to history CSV file: " + user.config_file['history'])
+                    except Exception as error:
+                        tools.log("[❌] Fail saving data to history CSV file: "+ user.config_file['history'] + "\n" + str(error))
+
 
         except Exception as error:
             tools.log("[❌] Sending backtest : Exception occured : " + str(error))
@@ -279,7 +302,7 @@ def is_recommended_pair(pair):
     return pair in recommended_pairs_list
 
 
-def run_backtest(backtest_config, my_strats = False):
+def run_backtest(backtest_config, blocks_md5):
     backtest_done = False
     backtest_failed = False
     backtest_failed_screenshot = True
@@ -287,7 +310,7 @@ def run_backtest(backtest_config, my_strats = False):
     while True not in (backtest_done, backtest_failed):
         # Try to exec the backtest
         try:
-            exec_backtest(backtest_config, my_strats)
+            exec_backtest(backtest_config, blocks_md5)
             backtest_done = True
         # If backtest failed, check if order too small or too many order skipped. If yes, retry x3 with more start wallet
         except:
@@ -343,34 +366,56 @@ def run_backtest(backtest_config, my_strats = False):
 def run(my_strats = False):
     # If more 1 tab open, closed useless tabs
     sel_tools.close_unused_tabs()
+
+    if(my_strats != False):
+        my_strats_done = []
+        try:
+            with open('my_strats_done.csv', newline='') as f:
+                my_strats_done = list(csv.reader(f))
+                f.close()
+        except:
+            tools.log("[❌] Fail to load my_strats_done.csv", True)
+
     for strat_id in strat_ids:
         backtest_config = BacktestConfig()
-        strat_file = None
-        strat_found = False
-        if strat_id.endswith('.kryll'):
-            strat_file = strat_id
-            file = open('my_strats/' + strat_file,'r')
-            strat_data = json.loads(file.read())
-            file.close()
-            strat_id = strat_data['name']
-
         backtest_config.setStratId(strat_id)
+
         if(my_strats != False):
+            strat_file = None
+            strat_found = False
             recommended_pairs = []
-            sel_tools.driver.get("https://platform.kryll.io/strategies")
-            my_strats_cards = sel_tools.get_elements(css.MY_STRATS)
-            #we browse "my strategies" section and try to find the strategy name
-            tools.log('[ℹ] Looking for strategy "' + strat_id + '" in My Strategies', True)
-            for my_strat_card in my_strats_cards:
-                strat_name = my_strat_card.find_elements_by_tag_name('h3')[0].text
-                if strat_name.lower().startswith(strat_id.lower()):
-                    backtest_config.setStratName(strat_name)
-                    backtest_config.setStratVersion(1)
-                    bt_button = my_strat_card.find_elements_by_class_name('d-none')[0]
-                    tools.log("[ℹ] Strategy found, click on backtest button of " + strat_name, True)
-                    strat_found = True
-                    click_on_backtest_button(bt_button)
+            if strat_id.endswith('.kryll'):
+                strat_file = strat_id
+                try:
+                    file = open('my_strats/' + strat_file,'r')
+                    strat_data = json.loads(file.read())
+                    file.close()
+                    strat_name = strat_data['name']
+                    tools.log("[ℹ] Strategy file found, strategy name: " + strat_name, True)
+                except:
+                    tools.log("[❌] Fail to open strategy file: " + strat_file)
                     break
+
+            sel_tools.driver.get("https://platform.kryll.io/strategies")
+            try:
+                my_strats_cards = sel_tools.get_elements(css.MY_STRATS)
+                if(my_strats_cards):
+                    #we browse "my strategies" section and try to find the strategy name
+                    tools.log('[ℹ] Looking for strategy "' + strat_name + '" in My Strategies', True)
+                    for my_strat_card in my_strats_cards:
+                        strat_card_name = my_strat_card.find_elements_by_tag_name('h3')[0].text
+                        if strat_card_name.lower().startswith(strat_name.lower()):
+                            backtest_config.setStratName(strat_name)
+                            backtest_config.setStratVersion(1)
+                            bt_button = my_strat_card.find_elements_by_class_name('d-none')[0]
+                            tools.log("[ℹ] Strategy found, click on backtest button of " + strat_name, True)
+                            strat_found = True
+                            click_on_backtest_button(bt_button)
+                            response = json.loads(sel_tools.get_response_body('/users/me/strategies/'))
+                            strat_data = response['data']
+                            break
+            except:
+                tools.log("[ℹ] Mine Strategies seems to be empty", True)
             #don't found, if there is a file, we import it
             if not strat_found:
                 try:
@@ -378,22 +423,30 @@ def run(my_strats = False):
                     headers = {'x-access-token': auth_token, 'Content-Type': 'application/json'}
                     response = requests.post(url = 'https://platform.kryll.io/api/users/me/strategies', json = strat_data, headers = headers)
                     if response.status_code == 200:
-                        tools.log("[ℹ] Strategy imported successfully: " + strat_id, True)
+                        strat_data = response.json()['data']
+                        strat_id = strat_data['id']
+                        tools.log("[ℹ] Strategy imported successfully: " + strat_name, True)
                         sel_tools.driver.get("https://platform.kryll.io/strategies")
                         my_strats_cards = sel_tools.get_elements(css.MY_STRATS)
                         #we browse "my strategies" section and try to find the strategy name
-                        tools.log('[ℹ] Looking for strategy "' + strat_id + '" in My Strategies', True)
+                        tools.log('[ℹ] Looking for strategy "' + strat_name + '" in My Strategies', True)
                         for my_strat_card in my_strats_cards:
-                            strat_name = my_strat_card.find_elements_by_tag_name('h3')[0].text
-                            if strat_name.lower().startswith(strat_id.lower()):
+                            strat_card_name = my_strat_card.find_elements_by_tag_name('h3')[0].text
+                            if strat_card_name.lower().startswith(strat_name.lower()):
                                 backtest_config.setStratName(strat_name)
                                 backtest_config.setStratVersion(1)
                                 bt_button = my_strat_card.find_elements_by_class_name('d-none')[0]
                                 tools.log("[ℹ] Strategy found, click on backtest button of " + strat_name, True)
                                 click_on_backtest_button(bt_button)
                                 break
+                    else:
+                        tools.log("[❌] Fail to import strategy file: " + strat_file)
+                        break
                 except:
                     tools.log("[❌] Fail to import strategy: " + strat_file)
+                    break
+            backtest_config.setStratId(strat_data['id'])
+            blocks_md5 = hashlib.md5(json.dumps(strat_data['blocks']).encode()).hexdigest()
         else:
             # Go to strategy page
             tools.log("[ℹ] Go to strategy page...")
@@ -455,7 +508,18 @@ def run(my_strats = False):
                     tools.log(f"[ℹ] * From : {backtest_config.getStart()} to {backtest_config.getEnd()}")
                     tools.log("[ℹ] ***************************************")
                     # Run backtest
-                    run_backtest(backtest_config, my_strats)
+                    if(my_strats != False):
+                        backtest_already_done = False
+                        for strat_done in my_strats_done:
+                            if (strat_done[0] == blocks_md5) and (strat_done[2] == strat_name) and (strat_done[4] == backtest_config.getPair()) and (strat_done[5] == backtest_config.getExchange()) and (strat_done[7] == backtest_config.getStart()) and (strat_done[8] == backtest_config.getEnd()):
+                                backtest_already_done = True
+                                break
+                        if not backtest_already_done:
+                            run_backtest(backtest_config, blocks_md5)
+                        else:
+                            tools.log("[ℹ] Backtest already done")
+                    else:
+                        run_backtest(backtest_config, my_strats)
         # strategy backtested, next
         tools.log("[ℹ] strategy backtested !")
     return True
@@ -529,24 +593,26 @@ else:
     twofa = input("2FA :").lower()
     sel_tools.get_element(css.TWO_FA_INPUT).send_keys(twofa)
 
-
 sel_tools.wait_for_element(css.USER_DROPDOWN, 100000)
 
 try:
-    time.sleep(1)
-    response = json.loads(sel_tools.get_response_body('/users/me'))
+    response = json.loads(sel_tools.get_response_body('/users/auth'))
     auth_token = response['data']['auth_token']
+    tools.log("[ℹ] Auth Token OK", True)
 except Exception as error:
-    tools.log("[❌] Can't retrieve Auth Token")
+    tools.log("[❌] Can't retrieve Auth Token, please relaunch script.")
+    sys.exit()
 
 if ('command' in user.config_file) and user.config_file['command']:
     command(user.config_file['command'])
+    tools.log("[ℹ] Command done :)")
     sys.exit()
 
-my_strats = False
 if "my_strats" in user.config_file:
     strat_ids = user.config_file["my_strats"]
-    my_strats = True
+    run(True)
+    tools.log("[ℹ] Job done :)")
+    sys.exit()
 else:
     if user.config_file["get_strategies_from_marketplace"] == "y":
         tools.log("[ℹ] Getting strategies from the marketplace...")
@@ -563,24 +629,24 @@ else:
         else:
             strat_ids = tools.ask_strat()
 
-COUNT_QUICK_FAIL = 0
-EXECUTION_ID = 0
-while COUNT_QUICK_FAIL < 3:
-    EXECUTION_ID = EXECUTION_ID + 1
-    start = time.time()
-    try:
-        random.shuffle(strat_ids)
-        run(my_strats)
-    except Exception as error:
-        SCREENSHOT_NAME = "screen_fail_" + str(EXECUTION_ID) + ".png"
-        sel_tools.save_screenshot(SCREENSHOT_NAME)
-        tools.log("[❌] Exception occured on execution " + str(EXECUTION_ID) + " : " + str(error))
-        tools.log("[❌] You can see the screenshot on this file : " + SCREENSHOT_NAME)
-        tools.log("[❌] Retry...")
-    end = time.time()
-    elapsed = end - start
-    if elapsed < 30:
-        COUNT_QUICK_FAIL = COUNT_QUICK_FAIL + 1
-        tools.log("[❌] Quick fail : " + str(COUNT_QUICK_FAIL) + "/3")
-    else:
-        COUNT_QUICK_FAIL = 0
+    COUNT_QUICK_FAIL = 0
+    EXECUTION_ID = 0
+    while COUNT_QUICK_FAIL < 3:
+        EXECUTION_ID = EXECUTION_ID + 1
+        start = time.time()
+        try:
+            random.shuffle(strat_ids)
+            run()
+        except Exception as error:
+            SCREENSHOT_NAME = "screen_fail_" + str(EXECUTION_ID) + ".png"
+            sel_tools.save_screenshot(SCREENSHOT_NAME)
+            tools.log("[❌] Exception occured on execution " + str(EXECUTION_ID) + " : " + str(error))
+            tools.log("[❌] You can see the screenshot on this file : " + SCREENSHOT_NAME)
+            tools.log("[❌] Retry...")
+        end = time.time()
+        elapsed = end - start
+        if elapsed < 30:
+            COUNT_QUICK_FAIL = COUNT_QUICK_FAIL + 1
+            tools.log("[❌] Quick fail : " + str(COUNT_QUICK_FAIL) + "/3")
+        else:
+            COUNT_QUICK_FAIL = 0

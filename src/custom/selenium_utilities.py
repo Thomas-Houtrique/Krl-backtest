@@ -264,8 +264,8 @@ class SeleniumUtilities:
         self.driver.get(url)
         self.clean_network_calls()
 
-    def get_response_body(self, url_suffix):
+    def get_response_body(self, url_part):
         for request in self.driver.requests:
-            if request.response and request.url.endswith(url_suffix):
+            if request.response and (url_part in request.url):
                 return brotli.decompress(request.response.body)
                 #return brotli.decompress(request.response.body).decode('utf8')
