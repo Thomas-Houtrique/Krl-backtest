@@ -47,12 +47,42 @@ def exec_backtest(backtest_config, blocks_md5 = False):
         bt_start = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # set date into input
         set_input_date(backtest_config.getStart(), backtest_config.getEnd())
+
+
+        if blocks_md5:
+            try:
+                csv_data = [
+                    blocks_md5,
+                    backtest_config.getStratId(),
+                    backtest_config.getStratName(),
+                    backtest_config.getStratVersion(),
+                    backtest_config.getPair(),
+                    backtest_config.getExchange(),
+                    backtest_config.getPeriod(),
+                    backtest_config.getStart(),
+                    backtest_config.getEnd(),
+                    user.config_file['email'],
+                    bt_start,
+                    '' 
+                    #bt_end
+                ]
+                with open('my_strats_done.csv', 'a') as f:
+                    csv_writer = csv.writer(f)
+                    csv_writer.writerow(csv_data)
+                tools.log("[ℹ] Backtest data added to my_strats_done CSV file.", True)
+            except Exception as error:
+                tools.log("[❌] Fail saving data to my_strats_done CSV file:\n" + str(error), True)
+
+
+
         test_btn = sel_tools.get_element(css.BACKTEST_START_BTN)
         sel_tools.clean_network_calls()
         sel_tools.click_on_element(test_btn)
 
         error_during_backtest = sel_tools.check_error_during_backtest()
         if error_during_backtest:
+            if blocks_md5:
+                update_my_strat_done(backtest_config, blocks_md5, bt_start, 'FAIL')
             raise Exception("Error during backtest")
         sel_tools.clean_network_calls()
         hold = sel_tools.get_element_double(css.ANALYSE_TAB_HOLD)
@@ -64,6 +94,8 @@ def exec_backtest(backtest_config, blocks_md5 = False):
         sel_tools.click_on_element(sel_tools.get_element(css.ANALYSE_TAB_DEEP_ANALYSE_LINK))
         windows_handle = sel_tools.wait_for_windows_handle(300)
         if not windows_handle:
+            if blocks_md5:
+                update_my_strat_done(backtest_config, blocks_md5, bt_start, 'FAIL')
             tools.log("[❌] depth analysis button is break on kryll side, period canceled")
             raise Exception("depth analysis button is break on kryll side, period canceled")
         send_ok = False
@@ -78,29 +110,9 @@ def exec_backtest(backtest_config, blocks_md5 = False):
                 depth_analysis_page_loaded = sel_tools.wait_for_element(css.ADVANCED_ANALYSE_TRADE, 120)
             if depth_analysis_page_loaded:
                 send_ok = api.send_result(backtest_config, {"hold": hold})
-                if blocks_md5:
-                    try:
-                        csv_data = [
-                            blocks_md5,
-                            backtest_config.getStratId(),
-                            backtest_config.getStratName(),
-                            backtest_config.getStratVersion(),
-                            backtest_config.getPair(),
-                            backtest_config.getExchange(),
-                            backtest_config.getPeriod(),
-                            backtest_config.getStart(),
-                            backtest_config.getEnd(),
-                            user.config_file['email'],
-                            bt_start,
-                            bt_end
-                        ]
-                        with open('my_strats_done.csv', 'a') as csv_file:
-                            csv_writer = csv.writer(csv_file)
-                            csv_writer.writerow(csv_data)
-                            csv_file.close()
-                        tools.log("[ℹ] Backtest data added to my_strats_done CSV file: " + user.config_file['history'], True)
-                    except Exception as error:
-                        tools.log("[❌] Fail saving data to my_strats_done CSV file: "+ user.config_file['history'] + "\n" + str(error), True)
+
+                if blocks_md5:                    
+                    update_my_strat_done(backtest_config, blocks_md5, bt_start, bt_end)
 
                 if "history" in user.config_file:
                     try:
@@ -117,10 +129,9 @@ def exec_backtest(backtest_config, blocks_md5 = False):
                             gain.replace(',',''),
                             '', #todo : deep analyse id if available
                         ]
-                        with open(user.config_file['history'], 'a') as csv_file:
-                            csv_writer = csv.writer(csv_file)
+                        with open(user.config_file['history'], 'a') as f:
+                            csv_writer = csv.writer(f)
                             csv_writer.writerow(csv_data)
-                            csv_file.close()
                         tools.log("[ℹ] Backtest data added to history CSV file: " + user.config_file['history'])
                     except Exception as error:
                         tools.log("[❌] Fail saving data to history CSV file: "+ user.config_file['history'] + "\n" + str(error))
@@ -130,6 +141,8 @@ def exec_backtest(backtest_config, blocks_md5 = False):
             tools.log("[❌] Sending backtest : Exception occured : " + str(error))
 
         if not send_ok:
+            if blocks_md5:
+                update_my_strat_done(backtest_config, blocks_md5, bt_start, 'FAIL')
             screenshot_name = "backtest_fail_deep_analysis_" + str(backtest_config.getId()) + ".png"
             sel_tools.save_screenshot(screenshot_name)
             tools.log("[❌] You can see the screenshot on this file : " + screenshot_name)
@@ -141,6 +154,36 @@ def exec_backtest(backtest_config, blocks_md5 = False):
         raise Exception("Error during backtest")
     return False
 
+def update_my_strat_done(backtest_config, blocks_md5, bt_start, finish_date):
+    tools.log("[ℹ] Update my_strats_done.csv Finish date: " + finish_date, True)
+    csv_data = None
+    try:
+        with open('my_strats_done.csv', 'r') as f:
+            csv_data = list(csv.reader(f))
+    except Exception as error:
+        pprint(error)
+        tools.log("[❌] Fail to open my_strats log file", True)
+        csv_data = None
+
+    if csv_data is not None:
+        try:
+            for i,strat_done in enumerate(csv_data):
+                if (strat_done[0] == blocks_md5) and (strat_done[2] == backtest_config.getStratName()) and (strat_done[4] == backtest_config.getPair()) and (strat_done[5] == backtest_config.getExchange()) and (strat_done[7] == backtest_config.getStart()) and (strat_done[8] == backtest_config.getEnd()) and (strat_done[10] == bt_start):
+                    strat_done[11] = finish_date
+                    csv_data[i] = strat_done
+                    break;
+        except Exception as error:
+            pprint(error)
+            tools.log("[❌] Fail to read my_strats log file", True)
+            csv_data = None
+
+    if csv_data is not None:
+        try:
+            with open('my_strats_done.csv', 'w') as f:
+                csv_writer = csv.writer(f)
+                csv_writer.writerows(csv_data)
+        except:
+            tools.log("[❌] Fail to write my_strats log file", True)    
 
 def install_strat_if_needed():
     try:
@@ -367,15 +410,6 @@ def run(my_strats = False):
     # If more 1 tab open, closed useless tabs
     sel_tools.close_unused_tabs()
 
-    if(my_strats != False):
-        my_strats_done = []
-        try:
-            with open('my_strats_done.csv', newline='') as f:
-                my_strats_done = list(csv.reader(f))
-                f.close()
-        except:
-            tools.log("[❌] Fail to load my_strats_done.csv", True)
-
     for strat_id in strat_ids:
         backtest_config = BacktestConfig()
         backtest_config.setStratId(strat_id)
@@ -387,9 +421,8 @@ def run(my_strats = False):
             if strat_id.endswith('.kryll'):
                 strat_file = strat_id
                 try:
-                    file = open('my_strats/' + strat_file,'r')
-                    strat_data = json.loads(file.read())
-                    file.close()
+                    with open('my_strats/' + strat_file,'r') as f:
+                        strat_data = json.loads(f.read())
                     strat_name = strat_data['name']
                     tools.log("[ℹ] Strategy file found, strategy name: " + strat_name, True)
                 except:
@@ -417,7 +450,7 @@ def run(my_strats = False):
             except:
                 tools.log("[ℹ] Mine Strategies seems to be empty", True)
             #don't found, if there is a file, we import it
-            if not strat_found:
+            if strat_file and (not strat_found):
                 try:
                     tools.log("[ℹ] strategy not found, try to import: " + strat_file, True)
                     headers = {'x-access-token': auth_token, 'Content-Type': 'application/json'}
@@ -509,11 +542,34 @@ def run(my_strats = False):
                     tools.log("[ℹ] ***************************************")
                     # Run backtest
                     if(my_strats != False):
+                        my_strats_done = []
+                        try:
+                            with open('my_strats_done.csv', 'r') as f:
+                                my_strats_done = list(csv.reader(f))
+                        except Exception as error:
+                            tools.log("[❌] Fail to load my_strats_done.csv", True)
+                            
                         backtest_already_done = False
-                        for strat_done in my_strats_done:
-                            if (strat_done[0] == blocks_md5) and (strat_done[2] == strat_name) and (strat_done[4] == backtest_config.getPair()) and (strat_done[5] == backtest_config.getExchange()) and (strat_done[7] == backtest_config.getStart()) and (strat_done[8] == backtest_config.getEnd()):
-                                backtest_already_done = True
-                                break
+                        if 'force' in user.config_file and user.config_file['force'] == 'y':
+                            tools.log("[ℹ] Skip already done verification")
+                        else:
+                            for strat_done in my_strats_done:
+                                if (strat_done[0] == blocks_md5) and (strat_done[2] == backtest_config.getStratName()) and (strat_done[4] == backtest_config.getPair()) and (strat_done[5] == backtest_config.getExchange()) and (strat_done[7] == backtest_config.getStart()) and (strat_done[8] == backtest_config.getEnd()):
+                                    finish_date = strat_done[11]
+                                    if finish_date == '':
+                                        begin_date = strat_done[10]
+                                        if strat_done[10]:
+                                            begin_date = datetime.datetime.strptime(strat_done[10], "%Y-%m-%d %H:%M:%S")
+                                        else:
+                                            begin_date = None
+                                        if (begin_date is not None) and ((datetime.datetime.now() - begin_date).total_seconds() < 3600):
+                                            tools.log("[ℹ] Backtest in progress (not finished for an hour)", True)
+                                            backtest_already_done = True
+                                            break
+                                    elif finish_date!='FAIL':
+                                        backtest_already_done = True
+                                        tools.log("[ℹ] Backtest already done: " + finish_date, True)
+                                        break
                         if not backtest_already_done:
                             run_backtest(backtest_config, blocks_md5)
                         else:
@@ -552,6 +608,7 @@ parser.add_argument('-D', '--delete_strats', help='Use carefully: delete all str
 parser.add_argument('-e', '--every_pairs', help='Backtest every pairs and not only recommanded pairs', action="store_true")
 parser.add_argument('-E', '--email', help='E-mail of Kryll account to use')
 parser.add_argument('-H', '--history', help='Append to a csv specified file each backtest processed')
+parser.add_argument('-f', '--force', help='Force backtest even if it is already done', action="store_true")
 parser.add_argument('-m', '--disable_marketplace', help='Disable pick strategies from marketplace randomly', action="store_true")
 parser.add_argument('-o', '--open_browser', help="Open browser", action="store_true")
 parser.add_argument('-p', '--pairs', help='Pairs to backtest separated by comas')
@@ -580,7 +637,7 @@ api = Api(user_config_file=user.config_file, driver=client_driver)
 sel_tools = SeleniumUtilities(user_config_file=user.config_file, driver=client_driver)
 sel_tools.driver.get("https://platform.kryll.io/login")
 if user.login:
-    tools.log("[ℹ] Login using account :" + user.login["email"])
+    tools.log("[ℹ] Login using account: " + user.login["email"])
     sel_tools.get_element(css.EMAIL_INPUT).send_keys(user.login["email"])
     sel_tools.get_element(css.PASSWORD_INPUT).send_keys(user.login["password"])
 else:

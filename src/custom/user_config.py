@@ -75,6 +75,8 @@ class UserConfig:
             config_file['update_strat'] = 'y'
         if args.verbose:
             config_file['verbose'] = 'y'
+        if args.force:
+            config_file['force'] = 'y'
         if args.open_browser:
             config_file['headless'] = 'n'
         if args.disable_marketplace:
@@ -88,9 +90,9 @@ class UserConfig:
         if args.exchanges is not None:
             config_file['exchanges'] = args.exchanges.split(',')
         if args.accu is not None:
-            config_file['accu'] = args.accu.split(',')
+            config_file['accu'] = args.accu.upper().split(',')
         if args.pairs is not None:
-            config_file['pair'] = args.pairs.split(',')
+            config_file['pair'] = args.pairs.upper().split(',')
         if args.strat_ids is not None:
             config_file['strat_ids'] = args.strat_ids.split(',')
         if args.my_strats is not None:

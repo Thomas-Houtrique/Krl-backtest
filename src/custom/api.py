@@ -83,15 +83,21 @@ class Api:
         if result:
             self.user_config_file
             if ("my_strats" in self.user_config_file) or (("save_results" in self.user_config_file) and (self.user_config_file["save_results"] == "y")):
-                filename = result['strat_name']+'_v'+result['strat_version']+'_'+(result["pair"].replace('/', '-'))+'@'+result["exchange"]+'_'+result["start"]+'_'+result["end"];
-                dirname = "results"
+                filename = result['strat']+'_v'+result['strat_version']+'_'+(result["pair"].replace('/', '-'))+'@'+result["exchange"]+'_'+result["start"]+'_'+result["end"] + '.json';
                 if "my_strats" in self.user_config_file:
-                    dirname = "my_results"
-                with open(dirname + '/'+ filename +'.json', 'w') as fp:
-                    dump_result = result
-                    del dump_result['token']
-                    json.dump(dump_result, fp)
-                    self.tools.log("[ℹ] Results saved to file: results/" + filename, True)
+                    filename = "my_results" + '/' + filename
+                else:
+                    filename = "results" + '/' + filename
+                self.tools.log("[ℹ] Saving results to file: " + filename, True)
+                try:
+                    with open(filename, 'w') as fp:
+                        dump_result = result
+                        del dump_result['token']
+                        json.dump(dump_result, fp)
+                        self.tools.log("[ℹ] Results saved to file: " + filename, True)
+                except Exception as error:
+                    self.tools.log("[❌] Fail saving results to file")
+                    self.tools.log("[❌] " + str(error), True)
             #if ("disable_send" not in self.user_config_file) or (self.user_config_file["disable_send"] != "y"):
             if not ("my_strats" in self.user_config_file) and not ("periods" in self.user_config_file) :
                 url = self.config.API_SEND_URL
