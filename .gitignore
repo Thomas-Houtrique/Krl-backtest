@@ -10,6 +10,8 @@ src/my_strats/*
 src/results/*
 src/logs/*
 src/screenshots/*
+src/history/*
+src/my_logs/*
 
 src/*.csv
 src/*.yaml

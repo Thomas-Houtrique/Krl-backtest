@@ -12,6 +12,8 @@ import json
 import csv
 import hashlib
 import requests
+import os
+import shutil
 from selenium.webdriver.support.ui import Select
 from custom.user_config import UserConfig
 from custom.utilities import UtilityTools
@@ -66,12 +68,12 @@ def exec_backtest(backtest_config, blocks_md5 = False):
                     '' 
                     #bt_end
                 ]
-                with open('my_strats_done.csv', 'a') as f:
+                with open('my_strats.log', 'a') as f:
                     csv_writer = csv.writer(f)
                     csv_writer.writerow(csv_data)
-                tools.log("[ℹ] Backtest data added to my_strats_done CSV file.", True)
+                tools.log("[ℹ] Backtest data added to my_strats.log file.", True)
             except Exception as error:
-                tools.log("[❌] Fail saving data to my_strats_done CSV file:\n" + str(error), True)
+                tools.log("[❌] Fail saving data to my_strats.log file:\n" + str(error), True)
 
 
 
@@ -89,6 +91,19 @@ def exec_backtest(backtest_config, blocks_md5 = False):
         gain = sel_tools.get_element_double(css.ANALYSE_TAB_GAIN)
         bt_end = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         tools.log("[ℹ] Test finished, waiting depth analysis Please Wait...")
+
+        # click on download logs button
+        if blocks_md5 and ('save_logs' in user.config_file):
+            try:
+                sel_tools.click_on_element(sel_tools.get_element(css.TAB_BTN_LOGS))
+                sel_tools.click_on_element(sel_tools.get_element(css.save_logs_LINK))
+                sel_tools.click_on_element(sel_tools.get_element(css.TAB_BTN_ANALYSE))
+                filename = max([user.config_file['save_logs'] + f for f in os.listdir(user.config_file['save_logs'])],key=os.path.getctime)
+                newfilename = backtest_config.getStratName() + '_v' + str(backtest_config.getStratVersion())+'_'+(backtest_config.getPair().replace('/', '-'))+'@'+backtest_config.getExchange()+'_'+backtest_config.getStart()+'_'+backtest_config.getEnd() + '.txt';
+                #shutil.move(filename,os.path.join(user.config_file['save_logs'],r"newfilename.txt"))
+                shutil.move(filename,os.path.join(user.config_file['save_logs'],r"{}".format(newfilename)))
+            except Exception as error:
+                tools.log("[❌] Fail to download logs\n" + str(error))
 
         # click on depth analysis button
         sel_tools.click_on_element(sel_tools.get_element(css.ANALYSE_TAB_DEEP_ANALYSE_LINK))
@@ -155,10 +170,10 @@ def exec_backtest(backtest_config, blocks_md5 = False):
     return False
 
 def update_my_strat_done(backtest_config, blocks_md5, bt_start, finish_date):
-    tools.log("[ℹ] Update my_strats_done.csv Finish date: " + finish_date, True)
+    tools.log("[ℹ] Update my_strats.log Finish date: " + finish_date, True)
     csv_data = None
     try:
-        with open('my_strats_done.csv', 'r') as f:
+        with open('my_strats.log', 'r') as f:
             csv_data = list(csv.reader(f))
     except Exception as error:
         pprint(error)
@@ -179,7 +194,7 @@ def update_my_strat_done(backtest_config, blocks_md5, bt_start, finish_date):
 
     if csv_data is not None:
         try:
-            with open('my_strats_done.csv', 'w') as f:
+            with open('my_strats.log', 'w') as f:
                 csv_writer = csv.writer(f)
                 csv_writer.writerows(csv_data)
         except:
@@ -544,10 +559,10 @@ def run(my_strats = False):
                     if(my_strats != False):
                         my_strats_done = []
                         try:
-                            with open('my_strats_done.csv', 'r') as f:
+                            with open('my_strats.log', 'r') as f:
                                 my_strats_done = list(csv.reader(f))
                         except Exception as error:
-                            tools.log("[❌] Fail to load my_strats_done.csv", True)
+                            tools.log("[❌] Fail to load my_strats.log", True)
                             
                         backtest_already_done = False
                         if 'force' in user.config_file and user.config_file['force'] == 'y':
@@ -566,7 +581,7 @@ def run(my_strats = False):
                                             tools.log("[ℹ] Backtest in progress (not finished for an hour)", True)
                                             backtest_already_done = True
                                             break
-                                    elif finish_date!='FAIL':
+                                    elif finish_date.upper()!='FAIL':
                                         backtest_already_done = True
                                         tools.log("[ℹ] Backtest already done: " + finish_date, True)
                                         break
@@ -609,11 +624,12 @@ parser.add_argument('-e', '--every_pairs', help='Backtest every pairs and not on
 parser.add_argument('-E', '--email', help='E-mail of Kryll account to use')
 parser.add_argument('-H', '--history', help='Append to a csv specified file each backtest processed')
 parser.add_argument('-f', '--force', help='Force backtest even if it is already done', action="store_true")
+parser.add_argument('-l', '--save_logs', help='Save logs to specified (absolute) directory')
 parser.add_argument('-m', '--disable_marketplace', help='Disable pick strategies from marketplace randomly', action="store_true")
 parser.add_argument('-o', '--open_browser', help="Open browser", action="store_true")
 parser.add_argument('-p', '--pairs', help='Pairs to backtest separated by comas')
 parser.add_argument('-P', '--password', help='Password of Kryll account to use')
-parser.add_argument('-r', '--save_results', help='Save results to json file', action="store_true")
+parser.add_argument('-r', '--save_results', help='Save results to json file')
 parser.add_argument('-s', '--strat_ids', help='Strategy ids to backtest separated by coma')
 parser.add_argument('-S', '--my_strats', help='Strategy names to backtest separated by two comas, if value end with .kryll, load the kryll file from strategies directory')
 parser.add_argument('-T', '--token', help='Backplus Token')

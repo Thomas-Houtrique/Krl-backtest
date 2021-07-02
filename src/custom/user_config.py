@@ -1,8 +1,8 @@
 import os
 import yaml
-import sys
 import datetime
 from pprint import pprint
+from common import ROOT_DIR
 
 class UserConfig:
 
@@ -67,10 +67,43 @@ class UserConfig:
         if args.history is not None:
             config_file['history'] = args.history
 
+        if args.save_logs is not None:
+            config_file['save_logs'] = args.save_logs
+        if ('save_logs' in config_file) and config_file['save_logs'] == '':
+            if "my_strats" in self.user_config_file:
+                config_file['save_logs'] = 'my_results'
+            else:
+                config_file['save_logs'] = 'results'
+        if ('save_logs' in config_file) and (not config_file['save_logs'].endswith(os.sep)):
+            config_file['save_logs'] = config_file['save_logs'] + os.sep
+        if ('save_logs' in config_file) and (not config_file['save_logs'].startswith(os.sep)):
+            config_file['save_logs'] = ROOT_DIR + os.sep + config_file['save_logs']
+        try:
+            if not os.path.isdir(config_file['save_logs']):
+                os.makedirs(config_file['save_logs'])
+        except Exception as error:
+            raise Exception("[❌] Can't create save_logs directory: " + config_file['save_logs'] + "\n" + str(error), True)
+
+        if args.save_results is not None:
+            config_file['save_results'] = args.save_results
+        if ('save_results' in config_file) and config_file['save_results'] == '':
+            if "my_strats" in self.user_config_file:
+                config_file['save_results'] = 'my_results'
+            else:
+                config_file['save_results'] = 'results'
+        if ('save_results' in config_file) and (not config_file['save_results'].endswith(os.sep)):
+            config_file['save_results'] = config_file['save_results'] + os.sep
+        if ('save_results' in config_file) and (not config_file['save_results'].startswith(os.sep)):
+            config_file['save_results'] = ROOT_DIR + os.sep + config_file['save_results']
+        try:
+            if not os.path.isdir(config_file['save_results']):
+                os.makedirs(config_file['save_results'])
+        except Exception as error:
+            raise Exception("[❌] Can't create save_results directory: " + config_file['save_results'] + "\n" + str(error), True)
+
+
         if args.every_pairs:
             config_file['every_pairs'] = 'y'
-        if args.save_results:
-            config_file['save_results'] = 'y'
         if args.upgrade_strat:
             config_file['update_strat'] = 'y'
         if args.verbose:

@@ -82,12 +82,8 @@ class Api:
         result = self.get_advanced_result(backtest_config, advanced_analyse_link, send_result["hold"])
         if result:
             self.user_config_file
-            if ("my_strats" in self.user_config_file) or (("save_results" in self.user_config_file) and (self.user_config_file["save_results"] == "y")):
-                filename = result['strat']+'_v'+result['strat_version']+'_'+(result["pair"].replace('/', '-'))+'@'+result["exchange"]+'_'+result["start"]+'_'+result["end"] + '.json';
-                if "my_strats" in self.user_config_file:
-                    filename = "my_results" + '/' + filename
-                else:
-                    filename = "results" + '/' + filename
+            if ("my_strats" in self.user_config_file) or ("save_results" in self.user_config_file):
+                filename = self.user_config_file['save_results'] + result['strat']+'_v'+result['strat_version']+'_'+(result["pair"].replace('/', '-'))+'@'+result["exchange"]+'_'+result["start"]+'_'+result["end"] + '.json';
                 self.tools.log("[ℹ] Saving results to file: " + filename, True)
                 try:
                     with open(filename, 'w') as fp:

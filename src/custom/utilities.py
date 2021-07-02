@@ -90,6 +90,9 @@ class UtilityTools:
             if client_browser == "Google Chrome":
                 options = webdriver.ChromeOptions()
                 options.add_experimental_option("excludeSwitches", ["enable-logging"])
+                if('save_logs' in self.user_config_file):
+                    prefs = {'download.default_directory' : self.user_config_file['save_logs'] }
+                    options.add_experimental_option('prefs', prefs)
                 options.add_argument("--no-sandbox")
                 options.add_argument("--disable-dev-shm-usage")
                 options.add_argument("--mute-audio")
@@ -112,6 +115,9 @@ class UtilityTools:
             self.log("[⚠] Please make sure to have Chromium installed")
             options = webdriver.ChromeOptions()
             options.add_experimental_option("excludeSwitches", ["enable-logging"])
+            if('save_logs' in self.user_config_file):
+                prefs = {'download.default_directory' : self.user_config_file['save_logs'] }
+                options.add_experimental_option('prefs', prefs)
             options.add_argument("--no-sandbox")
             options.add_argument("--disable-dev-shm-usage")
             options.add_argument("--mute-audio")
